@@ -23,8 +23,18 @@ namespace ProductionSchedule.Views
         public MainWindow()
         {
             InitializeComponent();
+            //Uri uri = new Uri("WebWindow.xaml", UriKind.Relative);
+            //frame.Source = uri;
         }
 
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+            WebWindow ww = new WebWindow();
+            ww.TaregetURL = new Uri("https://www.yahoo.co.jp/?fr=top_ga1_ext1_bookmark");
+            ww.Show();
+
+        }
 
         ////////////////////////////////////////////////////////////////
         public static void MyLog(string TAG, string dbMsg)

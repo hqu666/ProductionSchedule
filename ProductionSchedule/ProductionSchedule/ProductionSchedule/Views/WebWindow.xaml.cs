@@ -40,7 +40,7 @@ namespace ProductionSchedule.Views
         {
             //    VM.MyView = this;
             //	((ViewModels.MainViewModel)this.DataContext).MyView =this;
-            TaregetURL = new Uri("https://www.yahoo.co.jp/?fr=top_ga1_ext1_bookmark");
+          //  TaregetURL = new Uri("https://www.yahoo.co.jp/?fr=top_ga1_ext1_bookmark");
 
             SetMyURL(TaregetURL);
         }
