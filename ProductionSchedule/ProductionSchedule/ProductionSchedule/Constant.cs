@@ -12,8 +12,11 @@ namespace ProductionSchedule
 		public static bool errorCheckNow = true;
 		public static int MyFontSize = 12;
 
-		//認証情報/API キー
-		public static string ApplicationName = "kyokuto4";                                        //	アプリケーション名
+        public static string WebStratUrl = "https://www.yahoo.co.jp/?fr=top_ga1_ext1_bookmark";         //webViewのデフォルト表示ページ
+
+
+        //認証情報/API キー
+        public static string ApplicationName = "kyokuto4";                                        //	アプリケーション名
 		public static string APIKey = "AIzaSyAnJ-QXa9dqQr644u7jn_3-sxSr3XL_z60";
 		//OAuth 2.0 クライアント ID
 		public static string CliantId = "912719822179-n9hvcs7tr9pqgn8mns7pdl5njo54gpe1.apps.googleusercontent.com";    //クライアント ID
