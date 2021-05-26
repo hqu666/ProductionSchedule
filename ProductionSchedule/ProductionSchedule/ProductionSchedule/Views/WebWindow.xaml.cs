@@ -31,7 +31,7 @@ namespace ProductionSchedule.Views
     public partial class WebWindow : Window
     {
 
-        ViewModels.WsbViewModel VM;
+        public ViewModels.WsbViewModel VM;
 
         public static RoutedCommand InjectScriptCommand = new RoutedCommand();
         public static RoutedCommand NavigateWithWebResourceRequestCommand = new RoutedCommand();
@@ -53,7 +53,10 @@ namespace ProductionSchedule.Views
             InitializeComponent();
             InitializeAsync();
             webView.NavigationStarting += EnsureHttps;
-            VM = new ViewModels.WsbViewModel();
+            if (VM ==null)
+            {
+                VM = new ViewModels.WsbViewModel();
+            }
             this.DataContext = VM;
             this.Loaded += WebViewloaded;
         }

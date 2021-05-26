@@ -35,7 +35,7 @@ namespace ProductionSchedule.Views
         }
       
         /// <summary>
-        /// 
+        /// 読込み終了
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -43,7 +43,6 @@ namespace ProductionSchedule.Views
         {
             //ViewとViewModelの紐付け
             VM.MyView = this;
-            //	((ViewModels.MainViewModel)this.DataContext).MyView =this;
             // ウィンドウのサイズを復元
             RecoverWindowBounds();
 
@@ -118,14 +117,14 @@ namespace ProductionSchedule.Views
         }
 
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
+     //   private void Button_Click(object sender, RoutedEventArgs e)
+     //   {
 
-            WebWindow ww = new WebWindow();
-     //       ww.TaregetURL = new Uri("https://www.yahoo.co.jp/?fr=top_ga1_ext1_bookmark");
-            ww.Show();
+     //       WebWindow ww = new WebWindow();
+     ////       ww.TaregetURL = new Uri("https://www.yahoo.co.jp/?fr=top_ga1_ext1_bookmark");
+     //       ww.Show();
 
-        }
+     //   }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {

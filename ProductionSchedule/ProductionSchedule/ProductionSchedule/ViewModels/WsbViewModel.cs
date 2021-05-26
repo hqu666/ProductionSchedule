@@ -127,7 +127,7 @@ namespace ProductionSchedule.ViewModels {
 			string dbMsg = "";
 			try {
 				RedirectUrl = "";
-				TargetURLStr = Constant.WebStratUrl;
+	//			TargetURLStr = Constant.WebStratUrl;
 				RaisePropertyChanged("TargetURLStr");
 				MyLog(TAG, dbMsg);
 			} catch (Exception er) {

@@ -13,6 +13,7 @@ using ProductionSchedule.Views;
 using ProductionSchedule.Models;
 //using ProductionSchedule.Enums;
 using System.ComponentModel;
+using System.Reflection;
 //using Infragistics.Windows.Controls;
 
 namespace ProductionSchedule.ViewModels
@@ -48,7 +49,7 @@ namespace ProductionSchedule.ViewModels
 
 			Initialize();
 		}
-		private int AddCount;
+	//	private int AddCount;
 
 		//	Authorizer authorizer = new Authorizer();
 		public void Initialize()
@@ -58,70 +59,70 @@ namespace ProductionSchedule.ViewModels
 				Messenger.Raise(message);
 			//	}
 
-			_MyMenu = new List<MyMenu>()
-			   {
-				new MyMenu()
-				{
-					Name = "MVVMテスト",
-					Child = new List<MyMenu>()
-					{
-						new MyMenu() { Name = "MySQL",Value="MySQL" },
-						new MyMenu() { Name = "Googleドライブ",Value="W-1" },
-						new MyMenu()
-						{
-							Name = "スケジュール",
-							Child = new List<MyMenu>()
-							{
-								new MyMenu() { Name = "日別表示",Value="X-1-1" },
-								new MyMenu() { Name = "週別表示",Value="X-1-2" },
-								new MyMenu() { Name = "月別表示",Value="X-1-3" },
-								new MyMenu() { Name = "スケジュール",Value="X-1-4" },
-							}
-						},
-						new MyMenu()
-						{
-							Name = "システム管理",
-							Child = new List<MyMenu>()
-							{
-								new MyMenu() { Name = "Googleアカウント認証",Value="Z-1-4" },
-							}
-						},
-					}
-				},
-				new MyMenu() { Name = "パーツテスト",Value="ParrtsTest" },
-				new MyMenu()
-				{
-					Name = "簡易テスト",
-					Child = new List<Models.MyMenu>()
-					{
-						new MyMenu() {
-							Name = "TabConから操作",
-							Child = new List<Models.MyMenu>()
-							{
-								new MyMenu() { Name = "ViewをTabConに読み込む",Value="TabCon_AddTab" },
-								new MyMenu() { Name = "Viewを読み込んだTabを削除",Value="TabCon_DrelTabItem" },
-								new MyMenu() { Name = "ViewをNavigationWindowで開く",Value="TabCon_ShowNaniWindow" },
-								new MyMenu() { Name = "ViewをWindowで開く",Value="TabCon_OpenWindow" },
-								new MyMenu() { Name = "Windowクラスをダイアログ表示",Value="TabCon_OpenDialog" },
-							}
-					},
-						new MyMenu()
-						{
-							Name = "このViewから操作",
-							Child = new List<Models.MyMenu>()
-							{
-								new MyMenu() { Name = "ViewをWindowで開く",Value="GotoCommand2" },
-								new MyMenu() { Name = "Windowクラスをダイアログ表示",Value="OpenDialogCommand" },
-								new MyMenu() { Name = "閉じる",Value="CloseCommand" },
-							}
-						}
+			//_MyMenu = new List<MyMenu>()
+			//   {
+			//	new MyMenu()
+			//	{
+			//		Name = "MVVMテスト",
+			//		Child = new List<MyMenu>()
+			//		{
+			//			new MyMenu() { Name = "MySQL",Value="MySQL" },
+			//			new MyMenu() { Name = "Googleドライブ",Value="W-1" },
+			//			new MyMenu()
+			//			{
+			//				Name = "スケジュール",
+			//				Child = new List<MyMenu>()
+			//				{
+			//					new MyMenu() { Name = "日別表示",Value="X-1-1" },
+			//					new MyMenu() { Name = "週別表示",Value="X-1-2" },
+			//					new MyMenu() { Name = "月別表示",Value="X-1-3" },
+			//					new MyMenu() { Name = "スケジュール",Value="X-1-4" },
+			//				}
+			//			},
+			//			new MyMenu()
+			//			{
+			//				Name = "システム管理",
+			//				Child = new List<MyMenu>()
+			//				{
+			//					new MyMenu() { Name = "Googleアカウント認証",Value="Z-1-4" },
+			//				}
+			//			},
+			//		}
+			//	},
+			//	new MyMenu() { Name = "パーツテスト",Value="ParrtsTest" },
+			//	new MyMenu()
+			//	{
+			//		Name = "簡易テスト",
+			//		Child = new List<Models.MyMenu>()
+			//		{
+			//			new MyMenu() {
+			//				Name = "TabConから操作",
+			//				Child = new List<Models.MyMenu>()
+			//				{
+			//					new MyMenu() { Name = "ViewをTabConに読み込む",Value="TabCon_AddTab" },
+			//					new MyMenu() { Name = "Viewを読み込んだTabを削除",Value="TabCon_DrelTabItem" },
+			//					new MyMenu() { Name = "ViewをNavigationWindowで開く",Value="TabCon_ShowNaniWindow" },
+			//					new MyMenu() { Name = "ViewをWindowで開く",Value="TabCon_OpenWindow" },
+			//					new MyMenu() { Name = "Windowクラスをダイアログ表示",Value="TabCon_OpenDialog" },
+			//				}
+			//		},
+			//			new MyMenu()
+			//			{
+			//				Name = "このViewから操作",
+			//				Child = new List<Models.MyMenu>()
+			//				{
+			//					new MyMenu() { Name = "ViewをWindowで開く",Value="GotoCommand2" },
+			//					new MyMenu() { Name = "Windowクラスをダイアログ表示",Value="OpenDialogCommand" },
+			//					new MyMenu() { Name = "閉じる",Value="CloseCommand" },
+			//				}
+			//			}
 
 
 
-					}
-				}
+			//		}
+			//	}
 
-			};
+			//};
 
 		}
 /*
@@ -312,10 +313,42 @@ namespace ProductionSchedule.ViewModels
 			//rContent.Show();
 		}
 
-		/// <summary>
-		/// このウィンドウを閉じる
-		/// </summary>
-		public void Close()
+        private ViewModelCommand _ConnectCommand;
+
+        public ViewModelCommand ConnectCommand {
+            get {
+                if (_ConnectCommand == null)
+                {
+                    _ConnectCommand = new ViewModelCommand(Connect);
+                }
+                return _ConnectCommand;
+            }
+        }
+
+        /// <summary>
+        /// 接続前の状況確認
+        /// </summary>
+        public void Connect()
+        {
+            string TAG = "Connect";
+            string dbMsg = "";
+            try
+            {
+                WebWindow ww = new WebWindow();
+                ww.VM.TargetURLStr = Constant.WebStratUrl;
+                ww.Show();
+                MyLog(TAG, dbMsg);
+            }
+            catch (Exception er)
+            {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        /// <summary>
+        /// このウィンドウを閉じる
+        /// </summary>
+        public void Close()
 		{
 //			MyView.Info_lv.Content = "お疲れさまでした";
 			var window = Application.Current.Windows.OfType<Window>().SingleOrDefault((w) =>w.IsActive);
@@ -330,6 +363,38 @@ namespace ProductionSchedule.ViewModels
 			CS_Util Util = new CS_Util();
 			return Util.MessageShowWPF(msgStr, titolStr, buttns, icon);
 		}
+        //Livet Messenger用///////////////////////
+        new public void Dispose()
+        {
+            // 基本クラスのDispose()でCompositeDisposableに登録されたイベントを解放する。
+            base.Dispose();
+            Dispose(true);
+        }
+        ///////////////////////Livet Messenger用//
+        public static void MyLog(string TAG, string dbMsg)
+        {
+            dbMsg = "[" + MethodBase.GetCurrentMethod().Module.Name + "]" + dbMsg;
+            //dbMsg = "[" + MethodBase.GetCurrentMethod().Name + "]" + dbMsg;
+            CS_Util Util = new CS_Util();
+            Util.MyLog(TAG, dbMsg);
+        }
 
-	}
+        public static void MyErrorLog(string TAG, string dbMsg, Exception err)
+        {
+            dbMsg = "[" + MethodBase.GetCurrentMethod().Name + "]" + dbMsg;
+            CS_Util Util = new CS_Util();
+            Util.MyErrorLog(TAG, dbMsg, err);
+        }
+
+        //public MessageBoxResult MessageShowWPF(String titolStr, String msgStr,
+        //                                                                MessageBoxButton buttns,
+        //                                                                MessageBoxImage icon
+        //                                                                )
+        //{
+        //    CS_Util Util = new CS_Util();
+        //    return Util.MessageShowWPF(msgStr, titolStr, buttns, icon);
+        //}
+
+
+    }
 }
