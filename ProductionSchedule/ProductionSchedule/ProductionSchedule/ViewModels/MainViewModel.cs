@@ -345,6 +345,36 @@ namespace ProductionSchedule.ViewModels
             }
         }
 
+        private ViewModelCommand _WebStartCommand;
+
+        public ViewModelCommand WebStartCommand {
+            get {
+                if (_WebStartCommand == null)
+                {
+                    _WebStartCommand = new ViewModelCommand(WebStart);
+                }
+                return _WebStartCommand;
+            }
+        }
+
+
+        public void WebStart()
+        {
+            string TAG = "WebStart";
+            string dbMsg = "";
+            try
+            {
+                WebWindow ww = new WebWindow();
+                ww.VM.TargetURLStr = Constant.WebStratUrl;
+                ww.Show();
+                MyLog(TAG, dbMsg);
+            }
+            catch (Exception er)
+            {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
         /// <summary>
         /// このウィンドウを閉じる
         /// </summary>
