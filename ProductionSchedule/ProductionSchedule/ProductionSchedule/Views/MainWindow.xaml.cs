@@ -116,16 +116,6 @@ namespace ProductionSchedule.Views
             }
         }
 
-
-     //   private void Button_Click(object sender, RoutedEventArgs e)
-     //   {
-
-     //       WebWindow ww = new WebWindow();
-     ////       ww.TaregetURL = new Uri("https://www.yahoo.co.jp/?fr=top_ga1_ext1_bookmark");
-     //       ww.Show();
-
-     //   }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             // ウィンドウのサイズを保存
