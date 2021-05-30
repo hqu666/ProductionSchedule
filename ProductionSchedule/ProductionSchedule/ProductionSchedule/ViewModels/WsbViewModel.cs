@@ -112,7 +112,7 @@ namespace ProductionSchedule.ViewModels {
 	public WsbViewModel()
 		{
 			TopPanelVisibility = "Hidden";
-			RaisePropertyChanged("TopPanelVisibility");
+	//		RaisePropertyChanged("TopPanelVisibility");
 			Initialize();
 		}
 
@@ -141,7 +141,7 @@ namespace ProductionSchedule.ViewModels {
 			string dbMsg = "";
 			try {
 				TopPanelVisibility = "Visible";
-				RaisePropertyChanged("TopPanelVisibility");
+	//			RaisePropertyChanged("TopPanelVisibility");
 				MyLog(TAG, dbMsg);
 			} catch (Exception er) {
 				MyErrorLog(TAG, dbMsg, er);
