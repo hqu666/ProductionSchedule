@@ -63,6 +63,7 @@
     </ApplicationDefinition>
     <Compile Include="Constant.cs" />
     <Compile Include="CS_Util.cs" />
+    <Compile Include="DelegateCommand.cs" />
     <Compile Include="Models\Attachments.cs" />
     <Compile Include="Models\GAttachFile.cs" />
     <Compile Include="Models\GOAuthModel.cs" />

@@ -138,51 +138,5 @@ namespace ProductionSchedule.ViewModels
         }
         //////////////////////////////////////
 
-        private class DelegateCommand : ICommand
-        {
-            private Action MyAction;
-            private Action webStart;
-
-            public DelegateCommand(Action _action)
-            {
-                this.MyAction = _action;
-            }
-
-            event EventHandler ICommand.CanExecuteChanged {
-                add {
-                    //          throw new NotImplementedException();
-                }
-
-                remove {
-                    //          throw new NotImplementedException();
-                }
-            }
-
-            bool ICommand.CanExecute(object parameter)
-            {
-                return true;
-//                throw new NotImplementedException();
-            }
-
-            void ICommand.Execute(object parameter)
-            {
-                //if (MyAction.Method.Name.Equals("WebStart"))
-                //{
-                MyAction();
-                //}
-            }
-        }
-
-
-        //public MessageBoxResult MessageShowWPF(String titolStr, String msgStr,
-        //                                                                MessageBoxButton buttns,
-        //                                                                MessageBoxImage icon
-        //                                                                )
-        //{
-        //    CS_Util Util = new CS_Util();
-        //    return Util.MessageShowWPF(msgStr, titolStr, buttns, icon);
-        //}
-
-
     }
 }

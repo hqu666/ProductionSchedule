@@ -286,16 +286,19 @@ namespace ProductionSchedule.ViewModels {
 		#endregion
 
 		#region Goボタンクリック
-		private ViewModelCommand _GoBTCommand;
-		public ViewModelCommand GoBTCommand {
-			get {
-				if (_GoBTCommand == null) {
-					_GoBTCommand = new ViewModelCommand(GoBTClick);
-				}
-				return _GoBTCommand;
-			}
-		}
-		private void GoBTClick()
+		//private ViewModelCommand _GoBTCommand;
+		//public ViewModelCommand GoBTCommand {
+		//	get {
+		//		if (_GoBTCommand == null) {
+		//			_GoBTCommand = new ViewModelCommand(GoBTClick);
+		//		}
+		//		return _GoBTCommand;
+		//	}
+		//}
+
+        public ICommand GoBTCommand => new DelegateCommand(GoBTClick);
+
+        private void GoBTClick()
 		{
 			string TAG = "ButtonGo_Click";
 			string dbMsg = "";
@@ -319,17 +322,18 @@ namespace ProductionSchedule.ViewModels {
 		#endregion
 
 		#region ホームボタンクリック
-		private ViewModelCommand _HomeBTCommand;
-		public ViewModelCommand HomeBTCommand {
-			get {
-				if (_HomeBTCommand == null) {
-					_HomeBTCommand = new ViewModelCommand(HomeBTClick);
-				}
-				return _HomeBTCommand;
-			}
-		}
+		//private ViewModelCommand _HomeBTCommand;
+		//public ViewModelCommand HomeBTCommand {
+		//	get {
+		//		if (_HomeBTCommand == null) {
+		//			_HomeBTCommand = new ViewModelCommand(HomeBTClick);
+		//		}
+		//		return _HomeBTCommand;
+		//	}
+		//}
 
-		private void HomeBTClick()
+        public ICommand HomeBTCommand => new DelegateCommand(HomeBTClick);
+        private void HomeBTClick()
 		{
 			string TAG = "HomeBTClick";
 			string dbMsg = "";
