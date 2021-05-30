@@ -23,7 +23,6 @@ using System.Windows.Shapes;
 using Microsoft.Web.WebView2.Core;
 
 using Google.Apis.Drive.v3.Data;
-//using Infragistics.Controls.Schedules;
 using Livet;
 using Livet.Commands;
 using Livet.Messaging.Windows;
@@ -38,9 +37,6 @@ using Google.Apis.Services;
 
 using ProductionSchedule.Views;
 using ProductionSchedule.Models;
-//using ProductionSchedule.Enums;
-//using System.Windows.Forms;
-//using MySql.Data.MySqlClient;
 using System.Threading;
 
 namespace ProductionSchedule.ViewModels {
@@ -65,7 +61,6 @@ namespace ProductionSchedule.ViewModels {
 					if (value == _TargetURI)
 						return;
 					_TargetURI = value;
-		//			RaisePropertyChanged("TargetURI");
 					MyLog(TAG, dbMsg);
 				} catch (Exception er) {
 					MyErrorLog(TAG, dbMsg, er);
@@ -135,21 +130,12 @@ namespace ProductionSchedule.ViewModels {
 			}
 		}
 
-		#region Webエレメントの読み込み終了
-		//private ViewModelCommand _WebLoaded;
-		//public ViewModelCommand WebLoaded {
-		//	get {
-		//		if (_WebLoaded == null) {
-		//			_WebLoaded = new ViewModelCommand(LoadedWebView);
-		//		}
-		//		return _WebLoaded;
-		//	}
-		//}
-
-		/// <summary>
-		/// エレメントの読み込み終了
-		/// </summary>
-		public void LoadedWebView()
+        #region Webエレメントの読み込み終了
+        public ICommand WebLoaded => new DelegateCommand(LoadedWebView);
+        /// <summary>
+        /// エレメントの読み込み終了
+        /// </summary>
+        public void LoadedWebView()
 		{
 			string TAG = "LoadedWebView";
 			string dbMsg = "";
@@ -161,20 +147,11 @@ namespace ProductionSchedule.ViewModels {
 				MyErrorLog(TAG, dbMsg, er);
 			}
 		}
-		#endregion
+        #endregion
 
-		#region 接続先変更イベント
-		//private ViewModelCommand _ChangedSource;
-		//public ViewModelCommand ChangedSource {
-		//	get {
-		//		if (_ChangedSource == null) {
-		//			_ChangedSource = new ViewModelCommand(SourceChanged);
-		//		}
-		//		return _ChangedSource;
-		//	}
-		//}
-
-		public void SourceChanged()
+        #region 接続先変更イベント
+        public ICommand ChangedSource => new DelegateCommand(SourceChanged);
+        public void SourceChanged()
 		{
 			string TAG = "SourceChanged";
 			string dbMsg = "";
@@ -250,25 +227,16 @@ namespace ProductionSchedule.ViewModels {
 			}
 			return retBool;
 		}
-		#endregion
+        #endregion
 
-		#region コンテンツ読込み終了イベント
-		//private ViewModelCommand _CompletedNavigation;
-		//public ViewModelCommand CompletedNavigation {
-		//	get {
-		//		if (_CompletedNavigation == null) {
-		//			_CompletedNavigation = new ViewModelCommand(NavigationCompleted);
-		//		}
-		//		return _CompletedNavigation;
-		//	}
-		//}
-
-		/// <summary>
-		/// リダイレクト先を設定する
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		public void NavigationCompleted()
+        #region コンテンツ読込み終了イベント
+        public ICommand CompletedNavigation => new DelegateCommand(NavigationCompleted);
+        /// <summary>
+        /// リダイレクト先を設定する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void NavigationCompleted()
 		{
 			string TAG = "NavigationCompleted";
 			string dbMsg = "";
@@ -286,16 +254,6 @@ namespace ProductionSchedule.ViewModels {
 		#endregion
 
 		#region Goボタンクリック
-		//private ViewModelCommand _GoBTCommand;
-		//public ViewModelCommand GoBTCommand {
-		//	get {
-		//		if (_GoBTCommand == null) {
-		//			_GoBTCommand = new ViewModelCommand(GoBTClick);
-		//		}
-		//		return _GoBTCommand;
-		//	}
-		//}
-
         public ICommand GoBTCommand => new DelegateCommand(GoBTClick);
 
         private void GoBTClick()
@@ -306,7 +264,7 @@ namespace ProductionSchedule.ViewModels {
 				dbMsg += ",TargetURLStr= " + TargetURLStr;
 				if (TargetURLStr.StartsWith("http://") || TargetURLStr.StartsWith("https://")) {
 					TargetURI = new Uri(TargetURLStr);
-					RaisePropertyChanged("TargetURI");
+		//			RaisePropertyChanged("TargetURI");
 				} else {
 					String titolStr = "URLを入力して下さい";
 					String msgStr = "アドレスバーにはhttp://もしくはhttps://で始るURLを入力して下さい";
@@ -322,16 +280,6 @@ namespace ProductionSchedule.ViewModels {
 		#endregion
 
 		#region ホームボタンクリック
-		//private ViewModelCommand _HomeBTCommand;
-		//public ViewModelCommand HomeBTCommand {
-		//	get {
-		//		if (_HomeBTCommand == null) {
-		//			_HomeBTCommand = new ViewModelCommand(HomeBTClick);
-		//		}
-		//		return _HomeBTCommand;
-		//	}
-		//}
-
         public ICommand HomeBTCommand => new DelegateCommand(HomeBTClick);
         private void HomeBTClick()
 		{
@@ -339,21 +287,21 @@ namespace ProductionSchedule.ViewModels {
 			string dbMsg = "";
 			try {
 				dbMsg += ",TargetURLStr=" + TargetURLStr;
-				TargetURLStr = @"https://www.yahoo.co.jp/";
-				RaisePropertyChanged("TargetURLStr");
+                TargetURLStr = @"https://www.google.com/";
+        //        RaisePropertyChanged("TargetURLStr");
 				dbMsg += ">>" + TargetURLStr;
-				RequeryCommands();
-				MyLog(TAG, dbMsg);
-				RaisePropertyChanged();
+                RequeryCommands();
+                MyLog(TAG, dbMsg);
+		//		RaisePropertyChanged();
 
 			} catch (Exception er) {
 				MyErrorLog(TAG, dbMsg, er);
 			}
 		}
-		#endregion
+        #endregion
 
-		//Livet Messenger用///////////////////////
-		void RequeryCommands()
+        //System.Windows.Input; Livet Messengerでも使う///////////////////////
+        void RequeryCommands()
 		{
 			// Seems like there should be a way to bind CanExecute directly to a bool property
 			// so that the binding can take care keeping CanExecute up-to-date when the property's
