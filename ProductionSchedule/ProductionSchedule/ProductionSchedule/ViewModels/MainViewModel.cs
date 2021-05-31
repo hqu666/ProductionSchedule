@@ -33,9 +33,6 @@ namespace ProductionSchedule.ViewModels
         {
         }
 
-
-
-
 		/// <summary>
 		///  Windowクラスをダイアログ表示する
 		///  private void OpenDialog_Click
@@ -58,14 +55,11 @@ namespace ProductionSchedule.ViewModels
 			//rContent.ShowDialog();
 		}
 
-		//public ViewModelCommand GotoCommand2 {
-		//	get { return new Livet.Commands.ViewModelCommand(Goto2); }
-		//}
-
-		/// <summary>
-		/// Windowクラスを別ウインドウで開く
-		/// </summary>
-		public void Goto2()
+        public ICommand GotoCommand2 => new DelegateCommand(Goto2);
+        /// <summary>
+        /// Windowクラスを別ウインドウで開く
+        /// </summary>
+        public void Goto2()
 		{
 			string dbMsg = "";
 			//Views.ChildView rContent = new Views.ChildView();
@@ -79,8 +73,6 @@ namespace ProductionSchedule.ViewModels
 			//rContent.DataContext = VM;
 			//rContent.Show();
 		}
-
-
 
         //Livet.ViewModelCommand と置き換え
         public ICommand WebStartCommand => new DelegateCommand(WebStart);

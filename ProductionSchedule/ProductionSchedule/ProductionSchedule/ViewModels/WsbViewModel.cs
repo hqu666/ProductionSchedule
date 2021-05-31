@@ -23,10 +23,10 @@ using System.Windows.Shapes;
 using Microsoft.Web.WebView2.Core;
 
 using Google.Apis.Drive.v3.Data;
-using Livet;
-using Livet.Commands;
-using Livet.Messaging.Windows;
-using Livet.EventListeners;
+//using Livet;
+//using Livet.Commands;
+//using Livet.Messaging.Windows;
+//using Livet.EventListeners;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Calendar.v3;
@@ -38,10 +38,13 @@ using Google.Apis.Services;
 using ProductionSchedule.Views;
 using ProductionSchedule.Models;
 using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace ProductionSchedule.ViewModels {
-	public class WsbViewModel : ViewModel {
-		public string titolStr = "【WsbViewModel】";
+	public class WsbViewModel : INotifyPropertyChanged
+    {
+        //ViewMode
+        public string titolStr = "【WsbViewModel】";
 
         public Views.WebWindow MyView { get; set; }
 
@@ -83,9 +86,12 @@ namespace ProductionSchedule.ViewModels {
 					if (value == _TargetURLStr)
 						return;
 						_TargetURLStr = value;
-						TargetURI = new Uri(value);
-						RaisePropertyChanged("TargetURI");
-					MyLog(TAG, dbMsg);
+                    if(value !=null)
+                    {
+                        TargetURI = new Uri(value);
+                        NotifyPropertyChanged("TargetURI");
+                    }
+                    MyLog(TAG, dbMsg);
 				} catch (Exception er) {
 					MyErrorLog(TAG, dbMsg, er);
 				}
@@ -112,8 +118,8 @@ namespace ProductionSchedule.ViewModels {
 	public WsbViewModel()
 		{
 			TopPanelVisibility = "Hidden";
-	//		RaisePropertyChanged("TopPanelVisibility");
-			Initialize();
+            NotifyPropertyChanged("TopPanelVisibility");
+            Initialize();
 		}
 
 		public void Initialize()
@@ -122,8 +128,8 @@ namespace ProductionSchedule.ViewModels {
 			string dbMsg = "";
 			try {
 				RedirectUrl = "";
-	//			TargetURLStr = Constant.WebStratUrl;
-				RaisePropertyChanged("TargetURLStr");
+                //			TargetURLStr = Constant.WebStratUrl;
+                NotifyPropertyChanged("TargetURLStr");
 				MyLog(TAG, dbMsg);
 			} catch (Exception er) {
 				MyErrorLog(TAG, dbMsg, er);
@@ -141,8 +147,8 @@ namespace ProductionSchedule.ViewModels {
 			string dbMsg = "";
 			try {
 				TopPanelVisibility = "Visible";
-	//			RaisePropertyChanged("TopPanelVisibility");
-				MyLog(TAG, dbMsg);
+                NotifyPropertyChanged("TopPanelVisibility");
+                MyLog(TAG, dbMsg);
 			} catch (Exception er) {
 				MyErrorLog(TAG, dbMsg, er);
 			}
@@ -159,7 +165,7 @@ namespace ProductionSchedule.ViewModels {
 				dbMsg += "RedirectUrl= " + RedirectUrl;
 				dbMsg += " >>TargetURI= " + TargetURI;
 				TargetURLStr = TargetURI.ToString();
-				RaisePropertyChanged("TargetURLStr");
+                NotifyPropertyChanged("TargetURLStr");
 				if (CanGoto(TargetURLStr)) {
 					_isNavigating = true;
 					RedirectUrl = TargetURI.ToString();
@@ -172,12 +178,15 @@ namespace ProductionSchedule.ViewModels {
 						dbMsg += " >Reset>  " + BaceUrl;
 						TargetURLStr = BaceUrl;
 					}
-					RaisePropertyChanged("TargetURLStr");
-					TargetURI = new Uri(TargetURLStr);
-					RaisePropertyChanged("TargetURI");
-				}
+                    NotifyPropertyChanged("TargetURLStr");
+                    if (TargetURLStr !=null)
+                    {
+                        TargetURI = new Uri(TargetURLStr);
+                        NotifyPropertyChanged("TargetURI");
+                    }
+                }
 				dbMsg += " >> " + TargetURLStr;
-				RaisePropertyChanged();
+                NotifyPropertyChanged();
 				MyLog(TAG, dbMsg);
 			} catch (Exception er) {
 				MyErrorLog(TAG, dbMsg, er);
@@ -300,6 +309,21 @@ namespace ProductionSchedule.ViewModels {
 		}
         #endregion
 
+
+        /// <summary>
+        /// 
+        /// ヘルパなしでRaisePropertyChangedの代り
+        /// </summary>
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void NotifyPropertyChanged([CallerMemberName] String propertyName = "")
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
         //System.Windows.Input; Livet Messengerでも使う///////////////////////
         void RequeryCommands()
 		{
@@ -318,12 +342,12 @@ namespace ProductionSchedule.ViewModels {
 			// signal the property value changes.
 			CommandManager.InvalidateRequerySuggested();
 		}  
-		new public void Dispose()
-		{
-			// 基本クラスのDispose()でCompositeDisposableに登録されたイベントを解放する。
-			base.Dispose();
-			Dispose(true);
-		}
+		//new public void Dispose()
+		//{
+		//	// 基本クラスのDispose()でCompositeDisposableに登録されたイベントを解放する。
+		//	base.Dispose();
+		//	Dispose(true);
+		//}
 		///////////////////////Livet Messenger用//
 		public static void MyLog(string TAG, string dbMsg)
 		{
