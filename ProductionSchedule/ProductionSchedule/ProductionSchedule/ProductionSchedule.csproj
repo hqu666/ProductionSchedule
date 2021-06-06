@@ -62,19 +62,38 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Constant.cs" />
+    <Compile Include="Controls\WaitingCircle.xaml.cs">
+      <DependentUpon>WaitingCircle.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\WaitingDLog.xaml.cs">
+      <DependentUpon>WaitingDLog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CS_Util.cs" />
     <Compile Include="DelegateCommand.cs" />
+    <Compile Include="GoogleAuthUtil.cs" />
+    <Compile Include="GoogleCalendarUtil.cs" />
+    <Compile Include="GoogleDriveUtil.cs" />
+    <Compile Include="LocalFileUtil.cs" />
     <Compile Include="Models\Attachments.cs" />
     <Compile Include="Models\GAttachFile.cs" />
     <Compile Include="Models\GOAuthModel.cs" />
     <Compile Include="Models\InputDialogModel.cs" />
     <Compile Include="Models\MyMenu.cs" />
+    <Compile Include="Models\t_events.cs" />
     <Compile Include="ViewModels\InputDialogViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\WsbViewModel.cs" />
     <Compile Include="Views\WebWindow.xaml.cs">
       <DependentUpon>WebWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\WaitingCircle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\WaitingDLog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

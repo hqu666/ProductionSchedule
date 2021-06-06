@@ -23,10 +23,6 @@ using System.Windows.Shapes;
 using Microsoft.Web.WebView2.Core;
 
 using Google.Apis.Drive.v3.Data;
-//using Livet;
-//using Livet.Commands;
-//using Livet.Messaging.Windows;
-//using Livet.EventListeners;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Calendar.v3;
@@ -254,8 +250,9 @@ namespace ProductionSchedule.ViewModels {
 	//			RedirectUrl = TargetURLStr;
 				_isNavigating = false;
 				RequeryCommands();
-	//			dbMsg += ">>" + RedirectUrl;
-				MyLog(TAG, dbMsg);
+                //			dbMsg += ">>" + RedirectUrl;
+                NotifyPropertyChanged("TargetURLStr");
+                MyLog(TAG, dbMsg);
 			} catch (Exception er) {
 				MyErrorLog(TAG, dbMsg, er);
 			}
@@ -311,8 +308,8 @@ namespace ProductionSchedule.ViewModels {
 
 
         /// <summary>
-        /// 
-        /// ヘルパなしでRaisePropertyChangedの代り
+        /// プロパティ変更通知を行うBindableBase
+        /// ；ヘルパなしでRaisePropertyChangedの代りにNotifyPropertyChangedを使う
         /// </summary>
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -341,15 +338,9 @@ namespace ProductionSchedule.ViewModels {
 			// worth it, especially given that the WebView API explicitly documents which events
 			// signal the property value changes.
 			CommandManager.InvalidateRequerySuggested();
-		}  
-		//new public void Dispose()
-		//{
-		//	// 基本クラスのDispose()でCompositeDisposableに登録されたイベントを解放する。
-		//	base.Dispose();
-		//	Dispose(true);
-		//}
-		///////////////////////Livet Messenger用//
-		public static void MyLog(string TAG, string dbMsg)
+		}
+
+        public static void MyLog(string TAG, string dbMsg)
 		{
 			dbMsg = "[WsbViewModel ]" + dbMsg;
 			//dbMsg = "[" + MethodBase.GetCurrentMethod().Name + "]" + dbMsg;

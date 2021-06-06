@@ -115,10 +115,6 @@
 								GotMouseCapture="WebView_GotMouseCapture" 
 								MouseLeftButtonDown="WebView_MouseLeftButtonDown" 
 							 >
-            <!--
-            controlzex:KeyboardNavigationEx.AlwaysShowFocusVisual="True" 
-
-                -->
 			<behaviors:Interaction.Triggers>
 				<behaviors:EventTrigger EventName="Loaded">
 					<l:LivetCallMethodAction MethodTarget="{Binding}" MethodName="LoadedWebView"/>

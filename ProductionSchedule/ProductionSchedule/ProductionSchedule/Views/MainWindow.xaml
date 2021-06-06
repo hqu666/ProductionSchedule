@@ -52,14 +52,11 @@ WindowStartupLocation="CenterScreen"
 			<b:CloseButtonBehavior IsWindowCloseEnable="{Binding ElementName=CloseCheck, Path=IsChecked}"/>
 		</i:Interaction.Behaviors>-->
 
-    <Grid Margin="0,0,0,0" >
+    <Grid Margin="8,8,8,8" >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition  Width="30"  />
-            <ColumnDefinition  Width="Auto"  />
-            <ColumnDefinition  Width="30"  />
-            <ColumnDefinition  Width="Auto"  />
-            <ColumnDefinition  Width="Auto"  />
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition  Width="*"  />
+            <ColumnDefinition  Width="90"  />
+            <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions >
             <RowDefinition Height="30"/>
@@ -70,12 +67,36 @@ WindowStartupLocation="CenterScreen"
             <RowDefinition x:Name="attach_row" Height="*"/>
         </Grid.RowDefinitions>
 
+        <TextBox x:Name="GoogleAcountTB" 
+            Grid.Row="2" Grid.Column="0"
+								Text="{Binding GoogleAcountStr, Mode=TwoWay}" 
+								/>
         <Button 
-			Command="{Binding WebStartCommand}"
+			Command="{Binding ConnectCommand}"
+            Grid.Row="1" Grid.Column="0"
+            Width="120"
+			Name="Connect_bt" Content="Googleログイン" HorizontalAlignment="Right"
+			/>
+        <Button 
+			Command="{Binding CancelCommand}"
             Grid.Row="1" Grid.Column="1"
-			Name="Connect_bt" Content="Web表示"
+			Name="Cancel_bt" Content="ログアウト" 
 			/>
 
+        <TextBox x:Name="TargetURLTB" 
+            Grid.Row="2" Grid.Column="0"
+								Text="{Binding TargetURLStr, Mode=TwoWay}" 
+								/>
+        <Button 
+			Command="{Binding WebStartCommand}"
+            Grid.Row="2" Grid.Column="1"
+			Name="webt_bt" Content="Web表示"
+			/>
+
+        <TextBox x:Name="ResultTB" 
+            Grid.Row="3" Grid.Column="0"
+								Text="{Binding ResultStr, Mode=TwoWay}" 
+								/>
         <!--
         
         			Visibility="{Binding ConnectVisibility}"
