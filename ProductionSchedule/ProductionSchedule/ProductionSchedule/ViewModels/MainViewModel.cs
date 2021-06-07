@@ -63,6 +63,59 @@ namespace ProductionSchedule.ViewModels
             }
         }
 
+        private string _ConnectVisibility;
+        /// <summary>
+        /// 接続ボタン表示
+        /// </summary>
+        public string ConnectVisibility {
+            get {
+                return _ConnectVisibility;
+            }
+            set {
+                string TAG = "ConnectVisibility.set";
+                string dbMsg = "";
+                try
+                {
+                    dbMsg += ">>接続ボタン表示=  " + value;
+                    if (value == _ConnectVisibility)
+                        return;
+                    _ConnectVisibility = value;
+                    MyLog(TAG, dbMsg);
+                }
+                catch (Exception er)
+                {
+                    MyErrorLog(TAG, dbMsg, er);
+                }
+            }
+        }
+
+        private string _CancelVisibility;
+        /// <summary>
+        /// 解除ボタン表示
+        /// </summary>
+        public string CancelVisibility {
+            get {
+                return _CancelVisibility;
+            }
+            set {
+                string TAG = "CancelVisibility.set";
+                string dbMsg = "";
+                try
+                {
+                    dbMsg += ">>解除ボタン表示=  " + value;
+                    if (value == _CancelVisibility)
+                        return;
+                    _CancelVisibility = value;
+                    MyLog(TAG, dbMsg);
+                }
+                catch (Exception er)
+                {
+                    MyErrorLog(TAG, dbMsg, er);
+                }
+            }
+        }
+
+
         private string _GoogleAcountStr;
         /// <summary>
         /// 接続先アカウント
@@ -112,8 +165,11 @@ namespace ProductionSchedule.ViewModels
             try
             {
                 this.TargetURLStr = Constant.WebStratUrl;
+                GoogleAcountStr = "YourGoogleAcount@gmail.com";
                 NotifyPropertyChanged("TargetURI");
                 dbMsg += ",遷移先URL=  " + TargetURLStr;
+                //起動時は接続側のみ
+                Cancel();
                 MyLog(TAG, dbMsg);
             }
             catch (Exception er)
@@ -268,14 +324,17 @@ namespace ProductionSchedule.ViewModels
                                 ApplicationName = Constant.ApplicationName,
                             });
                             dbMsg += ",MyCalendarService:ApiKey=" + Constant.MyCalendarService.ApiKey;
-                        }
+                    dbMsg += ">>UserId=" + userCredential.Result.UserId;
+                    GoogleAcountStr = userCredential.Result.UserId;
 
-                        //ConnectVisibility = "Hidden";
-                        //RaisePropertyChanged("ConnectVisibility");
-                        //CancelVisibility = "Visible";
-                        //RaisePropertyChanged("CancelVisibility");
-                        //Constant.RootFolderID = GDriveUtil.MakeAriadneGoogleFolder();
-                        if (Constant.RootFolderID.Equals(""))
+                }
+
+                ConnectVisibility = "Hidden";
+                //RaisePropertyChanged("ConnectVisibility");
+                CancelVisibility = "Visible";
+                //RaisePropertyChanged("CancelVisibility");
+                //Constant.RootFolderID = GDriveUtil.MakeAriadneGoogleFolder();
+                if (Constant.RootFolderID.Equals(""))
                         {
                             dbMsg += ">フォルダ作成>失敗";
                         }
@@ -412,10 +471,14 @@ namespace ProductionSchedule.ViewModels
                 clientSecrets.ClientId = Constant.CliantId;
                 dbMsg += ",clientSecret=" + Constant.CliantSeacret;
                 clientSecrets.ClientSecret = Constant.CliantSeacret;
-                //there are different scopes, which you can find here https://cloud.google.com/storage/docs/authentication
-                //	var scopes = new[] { @"https://www.googleapis.com/auth/devstorage.full_control" };
+                                //there are different scopes, which you can find here https://cloud.google.com/storage/docs/authentication
+                                //	var scopes = new[] { @"https://www.googleapis.com/auth/devstorage.full_control" };
                 CancellationTokenSource cts = new CancellationTokenSource();
-                userCedential = await GoogleWebAuthorizationBroker.AuthorizeAsync(clientSecrets, AllScopes, "yourGoogle@email", cts.Token);
+                dbMsg += ",メールアドレスt=" + GoogleAcountStr;
+                ///PCで標準にしているブラウザーでGoogleログインを開く
+                userCedential = await GoogleWebAuthorizationBroker.AuthorizeAsync(clientSecrets, AllScopes, GoogleAcountStr, cts.Token);
+                dbMsg += ">>Token=" + userCedential.Token;
+       //         dbMsg += ">>AccessToken=" + userCedential.AccessToken;
                 MyLog(TAG, dbMsg);
             }
             catch (Exception er)
@@ -437,9 +500,9 @@ namespace ProductionSchedule.ViewModels
                 Constant.MyCalendarService = null;
                 dbMsg += "\r\n>>" + Constant.MyDriveCredential.Token.ToString();
                 MyLog(TAG, dbMsg);
-                //ConnectVisibility = "Visible";
+                ConnectVisibility = "Visible";
                 //RaisePropertyChanged("ConnectVisibility");
-                //CancelVisibility = "Hidden";
+                CancelVisibility = "Hidden";
                 //RaisePropertyChanged("CancelVisibility");
                 //RaisePropertyChanged();
                 //		Messenger.Raise(new WindowActionMessage(WindowAction.Close, "Close"));

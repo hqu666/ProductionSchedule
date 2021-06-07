@@ -52,10 +52,63 @@ WindowStartupLocation="CenterScreen"
 			<b:CloseButtonBehavior IsWindowCloseEnable="{Binding ElementName=CloseCheck, Path=IsChecked}"/>
 		</i:Interaction.Behaviors>-->
 
+    <Window.Resources>
+        <Style TargetType="StackPanel">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,5,0,5"/>
+        </Style>
+
+        <Style TargetType="Label">
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0,5,0,5"/>
+            <Setter Property="VerticalContentAlignment"  Value="Center"/>
+        </Style>
+
+        <ControlTemplate x:Key="buttonTemplate"  TargetType="Button">
+            <Border Name="border"
+                BorderThickness="2"
+                BorderBrush="DarkGray"
+				 Padding="5"
+                Background="{TemplateBinding Background}"
+                CornerRadius="2">
+                <ContentPresenter VerticalAlignment="Center"
+                              HorizontalAlignment="Center" />
+            </Border>
+        </ControlTemplate>
+
+        <Style TargetType="Button">
+            <Setter Property="MinWidth" Value="95"/>
+
+            <Setter Property="Margin" Value="5,5,5,5"/>
+            <Setter Property="Template"  Value="{StaticResource buttonTemplate}"/>
+        </Style>
+
+        <!--添付ファイル-->
+        <Style x:Key="bt-attachment" TargetType="Button">
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Margin" Value="3,3,3,3" />
+            <Setter Property="Padding" Value="8,5,10,5" />
+            <Setter Property="Panel.ZIndex" Value="90" />
+        </Style>
+        <Style x:Key="bt-dell" TargetType="Button">
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,10,0" />
+            <Setter Property="Content" Value="×" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Panel.ZIndex" Value="90" />
+        </Style>
+
+    </Window.Resources>
     <Grid Margin="8,8,8,8" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition  Width="*"  />
-            <ColumnDefinition  Width="90"  />
+            <ColumnDefinition  Width="Auto"  />
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions >
@@ -71,17 +124,21 @@ WindowStartupLocation="CenterScreen"
             Grid.Row="2" Grid.Column="0"
 								Text="{Binding GoogleAcountStr, Mode=TwoWay}" 
 								/>
-        <Button 
+        <StackPanel Orientation="Horizontal"
+                        Grid.Row="1" Grid.Column="1"
+            >
+            <Button 
 			Command="{Binding ConnectCommand}"
-            Grid.Row="1" Grid.Column="0"
-            Width="120"
+            Visibility="{Binding ConnectVisibility}"
 			Name="Connect_bt" Content="Googleログイン" HorizontalAlignment="Right"
 			/>
-        <Button 
+            <Button 
 			Command="{Binding CancelCommand}"
-            Grid.Row="1" Grid.Column="1"
+            Visibility="{Binding CancelVisibility}"
 			Name="Cancel_bt" Content="ログアウト" 
 			/>
+
+        </StackPanel>
 
         <TextBox x:Name="TargetURLTB" 
             Grid.Row="2" Grid.Column="0"
