@@ -193,6 +193,13 @@ WindowStartupLocation="CenterScreen"
 						VerticalAlignment="Stretch" 
 						HorizontalAlignment="Stretch" 
 						/>-->
+        <DataGrid 
+            Name="CalenderDG"
+            Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+
+            >
+            
+        </DataGrid>
     </Grid>
     <!--</ScrollViewer>-->
 </Window>
