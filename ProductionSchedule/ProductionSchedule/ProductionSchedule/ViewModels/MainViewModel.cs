@@ -110,6 +110,8 @@ namespace ProductionSchedule.ViewModels
                                                                     CalendarService.Scope.CalendarEvents
                                                             };
 
+
+
         /// <summary>
         /// ローディングダイアログクラス
         /// </summary>
@@ -511,6 +513,9 @@ namespace ProductionSchedule.ViewModels
         /// 開始日順の対象イベント配列
         /// </summary>
         public ObservableCollection<t_events> OrderedByStart { get; set; }
+
+        public ObservableCollection<MyListItem> ListItems { get; set; }
+
         public int selectedDateIndex { set; get; }
 
         public int selectedIndex { set; get; }
@@ -574,16 +579,18 @@ namespace ProductionSchedule.ViewModels
             //
             string TAG = MethodBase.GetCurrentMethod().Name;
             string dbMsg = "";
-            EDays = new ObservableCollection<ADay>();
             try
             {
+                /*
                 DateTime cStart = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, 1);
                 DateTime cEnd = cStart.AddMonths(1).AddSeconds(-1);
                 string msgStr = cStart + "～" + cEnd + "の予定を読み出しています"; ;
                 dbMsg += msgStr;
                 waitingDLog.SetMes(msgStr);
                 //Application.Current.Dispatcher.Invoke(new System.Action(() => this.waitingDLog.SetMes(msgStr)));
+             */   
                 ObservableCollection<t_events> Events = WriteEvent();
+              /*
                 msgStr = Events.Count + "件の予定が有りました";
 
                 //	Application.Current.Dispatcher.Invoke(new System.Action(() => waitingDLog.SetMes(msgStr)));
@@ -627,6 +634,7 @@ namespace ProductionSchedule.ViewModels
                 aDay = new ADay(tDate, summarys, dEvents, this);
                 EDays.Add(aDay);
                 dbMsg += ",DateColWidth=" + DateColWidth;
+                */
           //      RaisePropertyChanged(); //	"dataManager"
                 MyLog(TAG, dbMsg);
             }
@@ -654,13 +662,39 @@ namespace ProductionSchedule.ViewModels
                 GoogleCalendarUtil GCU = new GoogleCalendarUtil();
                 //本日日付
                 DateTime today = DateTime.Today;
-
                 //月初め
                 DateTime timeMin = new DateTime(today.Year, today.Month, 1);
-
                 //月終わり
                 DateTime timeMax = new DateTime(today.Year, today.Month, 1).AddMonths(1).AddDays(-1);
-                IList<Google.Apis.Calendar.v3.Data.Event> SelectEvents = GCU.GEventsListUp(timeMin, timeMax);
+                dbMsg +="対象期間：" + timeMin+ "～" + today + "～" + timeMax;
+                IList<Google.Apis.Calendar.v3.Data.Event> ReadEvents = GCU.GEventsListUp(timeMin, timeMax);
+                dbMsg += "、イベント：" + ReadEvents.Count + "件";
+                if (0<ReadEvents.Count){
+                    ListItems = new ObservableCollection<MyListItem>();
+                    string format = "yyyy/MM/dd HH:mm:ss";
+                    ///    EDays = new ObservableCollection<ADay>();
+                    foreach (Google.Apis.Calendar.v3.Data.Event rEvent in ReadEvents) {
+                        dbMsg += "\r\n" + rEvent.Start + "～" + rEvent.End + ";" + rEvent.Description + ";" + rEvent.Summary;
+                        MyListItem MLI = new MyListItem();
+                        if (rEvent.Start.DateTime ==null) {
+                            dbMsg += "＜＜開始時刻指定なし";
+                            MLI.startDT = DateTime.Parse(rEvent.Start.Date);
+                        } else {
+                            MLI.startDT = DateTime.ParseExact(rEvent.Start.DateTime.ToString(), format, null);
+                        }
+                        if (rEvent.Start.DateTime == null) {
+                            dbMsg += "＜＜開始時刻指定なし";
+                            MLI.endDT = DateTime.Parse(rEvent.End.Date);
+                        } else {
+                            MLI.endDT = DateTime.ParseExact(rEvent.End.DateTime.ToString(), format, null);
+                        }
+                        MLI.description = rEvent.Description;
+                        MLI.summary = rEvent.Summary;
+                        ListItems.Add(MLI);
+                    }
+                    dbMsg += "\r\n" + ListItems.Count + "レコード";
+                }
+
 
                 //			ActivityCategoryCollection activityCategoryCollection = new ActivityCategoryCollection();
                 /*           MySQLUtil = new MySQL_Util();
@@ -949,9 +983,7 @@ namespace ProductionSchedule.ViewModels
            //     RaisePropertyChanged("CurrentDate");
                 CalenderWrite();
                 MyLog(TAG, dbMsg);
-            }
-            catch (Exception er)
-            {
+            } catch (Exception er){
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
@@ -1027,6 +1059,31 @@ namespace ProductionSchedule.ViewModels
             Util.MyErrorLog(TAG, dbMsg, err);
         }
         //////////////////////////////////////
+
+    }
+
+    /// <summary>
+    /// リスト表示のためのモデル
+    /// </summary>
+    public class MyListItem {
+        /// <summary>
+        /// 開始日時
+        /// </summary>
+        public DateTime startDT { get; set; }
+        /// <summary>
+        /// 終了日時
+        /// </summary>
+        public DateTime endDT { get; set; }
+
+        /// <summary>
+        /// タイトル
+        /// </summary>
+        public string description { get; set; }
+        
+        /// <summary>
+        /// 表示する要約
+        /// </summary>
+        public string summary { get; set; }
 
     }
 

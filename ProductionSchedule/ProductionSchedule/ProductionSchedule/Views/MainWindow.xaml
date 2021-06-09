@@ -196,7 +196,7 @@ WindowStartupLocation="CenterScreen"
         <DataGrid 
             Name="CalenderDG"
             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-
+            ItemsSource="{Binding Persons, Mode=OneWay}" 
             >
             
         </DataGrid>
