@@ -24,9 +24,9 @@ WindowStartupLocation="CenterScreen"
  		Loaded="Window_Loaded" Closing="Window_Closing" 
    -->
 
-    <!--<Window.DataContext>
+    <Window.DataContext>
         <vm:MainViewModel/>
-    </Window.DataContext>-->
+    </Window.DataContext>
 
     <!--<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">-->
     <!--<i:Interaction.Triggers>
@@ -112,7 +112,6 @@ WindowStartupLocation="CenterScreen"
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions >
-            <RowDefinition Height="30"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -121,7 +120,7 @@ WindowStartupLocation="CenterScreen"
         </Grid.RowDefinitions>
 
         <TextBox x:Name="GoogleAcountTB" 
-            Grid.Row="2" Grid.Column="0"
+            Grid.Row="1" Grid.Column="0"
 								Text="{Binding GoogleAcountStr, Mode=TwoWay}" 
 								/>
         <StackPanel Orientation="Horizontal"
@@ -192,13 +191,36 @@ WindowStartupLocation="CenterScreen"
 						Grid.Row="1" Grid.Column="1"
 						VerticalAlignment="Stretch" 
 						HorizontalAlignment="Stretch" 
-						/>-->
+						/>
+        
+                    AutoGenerateColumns="False" 
+             <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Path=startDT}"
+                    CanUserReorder="True" CanUserResize="True"
+                    CanUserSort="True" Header="開始" Width="Auto" />
+                <DataGridTextColumn Binding="{Binding Path=endDT}"
+                    CanUserReorder="True" CanUserResize="True"
+                    CanUserSort="True" Header="終了" Width="Auto" />
+                <DataGridTextColumn Binding="{Binding Path=description}"
+                    CanUserReorder="True" CanUserResize="True"
+                    CanUserSort="True" Header="タイトル" Width="Auto" />
+                <DataGridTextColumn Binding="{Binding Path=summary}"
+                    CanUserReorder="True" CanUserResize="True"
+                    CanUserSort="True" Header="内容" Width="Auto" />
+            </DataGrid.Columns>
+
+        
+                    Height="400"
+
+        
+        -->
         <DataGrid 
             Name="CalenderDG"
             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-            ItemsSource="{Binding Persons, Mode=OneWay}" 
+            MinRowHeight="18" 
+           IsReadOnly="True"
+            ItemsSource="{Binding MyListItems}"
             >
-            
         </DataGrid>
     </Grid>
     <!--</ScrollViewer>-->

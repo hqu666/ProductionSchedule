@@ -514,7 +514,7 @@ namespace ProductionSchedule.ViewModels
         /// </summary>
         public ObservableCollection<t_events> OrderedByStart { get; set; }
 
-        public ObservableCollection<MyListItem> ListItems { get; set; }
+        public ObservableCollection<MyListItem> MyListItems { get; set; }
 
         public int selectedDateIndex { set; get; }
 
@@ -670,29 +670,34 @@ namespace ProductionSchedule.ViewModels
                 IList<Google.Apis.Calendar.v3.Data.Event> ReadEvents = GCU.GEventsListUp(timeMin, timeMax);
                 dbMsg += "、イベント：" + ReadEvents.Count + "件";
                 if (0<ReadEvents.Count){
-                    ListItems = new ObservableCollection<MyListItem>();
+                    MyListItems = new ObservableCollection<MyListItem>();
                     string format = "yyyy/MM/dd HH:mm:ss";
                     ///    EDays = new ObservableCollection<ADay>();
-                    foreach (Google.Apis.Calendar.v3.Data.Event rEvent in ReadEvents) {
-                        dbMsg += "\r\n" + rEvent.Start + "～" + rEvent.End + ";" + rEvent.Description + ";" + rEvent.Summary;
+                    foreach (var rEvent in ReadEvents) {
                         MyListItem MLI = new MyListItem();
-                        if (rEvent.Start.DateTime ==null) {
-                            dbMsg += "＜＜開始時刻指定なし";
-                            MLI.startDT = DateTime.Parse(rEvent.Start.Date);
-                        } else {
-                            MLI.startDT = DateTime.ParseExact(rEvent.Start.DateTime.ToString(), format, null);
+                        MLI.startDT = rEvent.Start.DateTime.ToString();
+                        dbMsg += "\r\n" + MLI.startDT;
+                        if (String.IsNullOrEmpty(MLI.startDT)) {
+                            MLI.startDT = rEvent.Start.Date;
+                            dbMsg += ">>" + MLI.startDT;
                         }
-                        if (rEvent.Start.DateTime == null) {
-                            dbMsg += "＜＜開始時刻指定なし";
-                            MLI.endDT = DateTime.Parse(rEvent.End.Date);
-                        } else {
-                            MLI.endDT = DateTime.ParseExact(rEvent.End.DateTime.ToString(), format, null);
+                        MLI.endDT = rEvent.End.DateTime.ToString();
+                        dbMsg += "～" + MLI.endDT;
+                        if (String.IsNullOrEmpty(MLI.endDT)) {
+                            MLI.endDT = rEvent.End.Date;
+                            dbMsg += ">>" + MLI.endDT;
                         }
+                        dbMsg += ";" + rEvent.Description + ";" + rEvent.Summary;
                         MLI.description = rEvent.Description;
                         MLI.summary = rEvent.Summary;
-                        ListItems.Add(MLI);
+                        if (String.IsNullOrEmpty(MLI.summary)) {
+                            MLI.summary = " - ";
+                        }
+                        MyListItems.Add(MLI);
                     }
-                    dbMsg += "\r\n" + ListItems.Count + "レコード";
+                    //ItemsSourceを強制的に更新；無いと更新されない
+                    NotifyPropertyChanged("MyListItems");
+                    dbMsg += "\r\n" + MyListItems.Count + "レコード";
                 }
 
 
@@ -1069,11 +1074,11 @@ namespace ProductionSchedule.ViewModels
         /// <summary>
         /// 開始日時
         /// </summary>
-        public DateTime startDT { get; set; }
+        public string startDT { get; set; }
         /// <summary>
         /// 終了日時
         /// </summary>
-        public DateTime endDT { get; set; }
+        public string endDT { get; set; }
 
         /// <summary>
         /// タイトル
