@@ -142,5 +142,29 @@ namespace ProductionSchedule.Properties {
                 this["WsbViewMaximized"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string MyGoogleAcount {
+            get {
+                return ((string)(this["MyGoogleAcount"]));
+            }
+            set {
+                this["MyGoogleAcount"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string MyAcounts {
+            get {
+                return ((string)(this["MyAcounts"]));
+            }
+            set {
+                this["MyAcounts"] = value;
+            }
+        }
     }
 }

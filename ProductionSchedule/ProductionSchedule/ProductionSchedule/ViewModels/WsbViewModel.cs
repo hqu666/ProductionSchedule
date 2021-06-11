@@ -162,25 +162,24 @@ namespace ProductionSchedule.ViewModels {
 				dbMsg += " >>TargetURI= " + TargetURI;
 				TargetURLStr = TargetURI.ToString();
                 NotifyPropertyChanged("TargetURLStr");
-				if (CanGoto(TargetURLStr)) {
-					_isNavigating = true;
-					RedirectUrl = TargetURI.ToString();
-					RequeryCommands();
-				} else {
-					if (!RedirectUrl.Equals("")) {
-						dbMsg += " >Redirect>  " + RedirectUrl;
-						TargetURLStr = RedirectUrl;
-					} else {
-						dbMsg += " >Reset>  " + BaceUrl;
-						TargetURLStr = BaceUrl;
-					}
+				//if (CanGoto(TargetURLStr)) {
+				//	_isNavigating = true;
+				//	RedirectUrl = TargetURI.ToString();
+				//	RequeryCommands();
+				//} else {
+					//if (!RedirectUrl.Equals("")) {
+					//	dbMsg += " >Redirect>  " + RedirectUrl;
+					//	TargetURLStr = RedirectUrl;
+					//} else {
+					//	dbMsg += " >Reset>  " + BaceUrl;
+					//	TargetURLStr = BaceUrl;
+					//}
                     NotifyPropertyChanged("TargetURLStr");
-                    if (TargetURLStr !=null)
-                    {
+                    if (TargetURLStr !=null){
                         TargetURI = new Uri(TargetURLStr);
                         NotifyPropertyChanged("TargetURI");
                     }
-                }
+                //}
 				dbMsg += " >> " + TargetURLStr;
                 NotifyPropertyChanged();
 				MyLog(TAG, dbMsg);

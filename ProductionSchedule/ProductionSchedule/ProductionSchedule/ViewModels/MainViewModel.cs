@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using ProductionSchedule.Properties;                //Settings
 
 using ProductionSchedule.Views;
 using ProductionSchedule.Models;
@@ -100,6 +101,8 @@ namespace ProductionSchedule.ViewModels
             }
         }
 
+        public List<string> AcounntList = new List<string>();
+
         /// <summary>
         /// 使用許諾を受けるAPIのリスト
         /// </summary>
@@ -130,9 +133,20 @@ namespace ProductionSchedule.ViewModels
             try
             {
                 this.TargetURLStr = Constant.WebStratUrl;
-                GoogleAcountStr = "hkuwauama@gmail.com";
-            //    GoogleAcountStr = "YourGoogleAcount@gmail.com";
                 NotifyPropertyChanged("TargetURI");
+                //    GoogleAcountStr = "hkuwauama@gmail.com";
+                var settings = Settings.Default;
+                GoogleAcountStr = Constant.GoogleAcountMSG;
+                dbMsg += ",前回使用したアカウント=  " + settings.MyGoogleAcount;
+                if (!String.IsNullOrEmpty(settings.MyGoogleAcount)) {
+                    GoogleAcountStr = settings.MyGoogleAcount;
+                    dbMsg += "、これまでに使用したアカウント=  " + settings.MyAcounts;
+                    if (!String.IsNullOrEmpty(settings.MyAcounts)) {
+                        string[] acounntList = settings.MyAcounts.Split(',');
+                        AcounntList = new List<string>(acounntList);
+                    }
+                }
+
                 dbMsg += ",遷移先URL=  " + TargetURLStr;
                 //起動時は接続側のみ
                 Cancel();
@@ -197,7 +211,8 @@ namespace ProductionSchedule.ViewModels
             try
             {
                 WebWindow ww = new WebWindow();
-                ww.VM.TargetURLStr = Constant.WebStratUrl;
+                dbMsg += ",初期表示=" + this.TargetURLStr;
+                ww.VM.TargetURLStr = this.TargetURLStr;
                 ww.Show();
                 MyLog(TAG, dbMsg);
             }
@@ -219,26 +234,42 @@ namespace ProductionSchedule.ViewModels
             string dbMsg = "";
             try
             {
-                dbMsg += ",CliantId=" + Constant.CliantId;
-                //if (OneAccount.CliantId == null || OneAccount.CliantId.Equals(""))
-                //{
-                //    dbMsg += ",JsonReadへ";
-                //    JsonRead();
-                //}
-                //else
-                //{
-                dbMsg += ",接続へ";
-                ConnectBody();
-                //}
-                //Constant.RootFolderID = GDriveUtil.MakeAriadneGoogleFolder();
-                //if (Constant.RootFolderID.Equals(""))
-                //{
-                //    dbMsg += ">フォルダ作成>失敗";
-                //}
-                //else
-                //{
-                //    dbMsg += "[" + Constant.RootFolderID + "]" + Constant.RootFolderName;
-                //}
+                dbMsg += ",アカウント=" + GoogleAcountStr;
+                if (String.IsNullOrEmpty(GoogleAcountStr) ||
+                    GoogleAcountStr.Equals(Constant.GoogleAcountMSG) ||
+                    !GoogleAcountStr.EndsWith("@gmail.com")) {
+                    //メッセージボックスを表示する
+                    String titolStr = Constant.ApplicationName;
+                    String msgStr = "カレンダーを使うGoogleアカウントを入力してください。";
+                    MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    //webでアカウントを拾えるなら　　 MessageBoxButton.YesNoCancel    \r\nwebでアカウントを選択しますか？
+                    dbMsg += ",result=" + result;
+                    if (result== MessageBoxResult.Yes) {
+                        this.TargetURLStr=Constant.GoogleLogInPage;
+                        WebStart();
+                    }
+                } else {
+                    dbMsg += ",CliantId=" + Constant.CliantId;
+                    //if (OneAccount.CliantId == null || OneAccount.CliantId.Equals(""))
+                    //{
+                    //    dbMsg += ",JsonReadへ";
+                    //    JsonRead();
+                    //}
+                    //else
+                    //{
+                    dbMsg += ",接続へ";
+                    ConnectBody();
+                    //}
+                    //Constant.RootFolderID = GDriveUtil.MakeAriadneGoogleFolder();
+                    //if (Constant.RootFolderID.Equals(""))
+                    //{
+                    //    dbMsg += ">フォルダ作成>失敗";
+                    //}
+                    //else
+                    //{
+                    //    dbMsg += "[" + Constant.RootFolderID + "]" + Constant.RootFolderName;
+                    //}
+                }
                 MyLog(TAG, dbMsg);
     //            Messenger.Raise(new WindowActionMessage(WindowAction.Close, "Close"));
             }
@@ -295,6 +326,13 @@ namespace ProductionSchedule.ViewModels
                             dbMsg += ",MyCalendarService:ApiKey=" + Constant.MyCalendarService.ApiKey;
                     dbMsg += ">>UserId=" + userCredential.Result.UserId;
                     GoogleAcountStr = userCredential.Result.UserId;
+                    var settings = Settings.Default;
+                    settings.MyGoogleAcount = GoogleAcountStr;
+                    dbMsg += "接続できたアカウント=" + GoogleAcountStr;
+                    AcounntList.Add(GoogleAcountStr);
+                    string[] acounntList = AcounntList.ToArray();
+                    settings.MyAcounts = acounntList.ToString();
+                    settings.Save();
 
                 }
 

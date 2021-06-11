@@ -23,8 +23,8 @@ namespace ProductionSchedule
 		public static string CliantSeacret = "aGVZ_mfTKJq8WFf5spDOOiHi";    //クライアント シークレット
         public static string DriveId;
         public static string RootFolderURL;
-
-        
+        public static string GoogleLogInPage =@"https://accounts.google.com/signin/v2/identifier?service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin";
+        public static string GoogleAcountMSG = "YourGoogleAcount@gmail.com";
 
         public static UserCredential MyCalendarCredential;
 		public static CalendarService MyCalendarService;
