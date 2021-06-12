@@ -15,9 +15,9 @@
         Height="1000" Width="1800"
 		Title="画面遷移確認" 
         Closing="Window_Closing"
+    	Topmost="true" 
 		>
     <!--
-    		Topmost="true" 
 
 			SizeToContent="WidthAndHeight"
 WindowStartupLocation="CenterScreen" 
@@ -119,10 +119,17 @@ WindowStartupLocation="CenterScreen"
             <RowDefinition x:Name="attach_row" Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBox x:Name="GoogleAcountTB" 
+        <ComboBox x:Name="GoogleAcountCB" 
+            Grid.Row="1" Grid.Column="0"
+  			Text="{Binding GoogleAcountStr, Mode=TwoWay}" 
+            ItemsSource="{Binding AcounntList}" 
+            IsEditable="true" Height="32" >
+        </ComboBox>
+
+        <!--<TextBox x:Name="GoogleAcountTB" 
             Grid.Row="1" Grid.Column="0"
 								Text="{Binding GoogleAcountStr, Mode=TwoWay}" 
-								/>
+								/>-->
         <StackPanel Orientation="Horizontal"
                         Grid.Row="1" Grid.Column="1"
             >

@@ -101,12 +101,12 @@ namespace ProductionSchedule.ViewModels
             }
         }
 
-        public List<string> AcounntList = new List<string>();
+        public List<string> AcounntList { set; get; }
 
-        /// <summary>
-        /// 使用許諾を受けるAPIのリスト
-        /// </summary>
-        public static string[] AllScopes = { DriveService.Scope.DriveFile,
+    /// <summary>
+    /// 使用許諾を受けるAPIのリスト
+    /// </summary>
+    public static string[] AllScopes = { DriveService.Scope.DriveFile,
                                                                     DriveService.Scope.DriveAppdata,			//追加
 																	DriveService.Scope.Drive,
                                                                     CalendarService.Scope.Calendar,
@@ -133,21 +133,28 @@ namespace ProductionSchedule.ViewModels
             try
             {
                 this.TargetURLStr = Constant.WebStratUrl;
+                dbMsg += ",遷移先URL=  " + TargetURLStr;
                 NotifyPropertyChanged("TargetURI");
                 //    GoogleAcountStr = "hkuwauama@gmail.com";
                 var settings = Settings.Default;
                 GoogleAcountStr = Constant.GoogleAcountMSG;
-                dbMsg += ",前回使用したアカウント=  " + settings.MyGoogleAcount;
+                dbMsg += " ,前回使用したアカウント=  " + settings.MyGoogleAcount;
                 if (!String.IsNullOrEmpty(settings.MyGoogleAcount)) {
                     GoogleAcountStr = settings.MyGoogleAcount;
                     dbMsg += "、これまでに使用したアカウント=  " + settings.MyAcounts;
                     if (!String.IsNullOrEmpty(settings.MyAcounts)) {
-                        string[] acounntList = settings.MyAcounts.Split(',');
+                        string rStr = settings.MyAcounts.Replace("System.String[],","");//誤記入対策
+                        string[] acounntList = rStr.Split(',');
                         AcounntList = new List<string>(acounntList);
+                        dbMsg += "[  " + AcounntList.Count +"件]" ;
+                        NotifyPropertyChanged("AcounntList");
+                        //foreach (string lItem in AcounntList) {
+                        //    // 項目を追加する
+                        //    MyView.GoogleAcountCB.Items.Add(lItem);
+                        //}
                     }
                 }
 
-                dbMsg += ",遷移先URL=  " + TargetURLStr;
                 //起動時は接続側のみ
                 Cancel();
       //          ToDaySet();
@@ -287,69 +294,79 @@ namespace ProductionSchedule.ViewModels
             string dbMsg = "";
             try
             {
-                        dbMsg += ",CliantId=" + Constant.CliantId;
-                  Controls.WaitingDLog progressWindow = new Controls.WaitingDLog();
-                        progressWindow.Show();
-                        progressWindow.SetMes("Googleサービス接続中...");
-                        Task<UserCredential> userCredential = Task.Run(() => {
-                            return MakeAllCredentialAsync();
-                        });
-                        userCredential.Wait();
+                dbMsg += ",CliantId=" + Constant.CliantId;
+                Controls.WaitingDLog progressWindow = new Controls.WaitingDLog();
+                progressWindow.Show();
+                progressWindow.SetMes("Googleサービス接続中...");
+                Task<UserCredential> userCredential = Task.Run(() => {
+                    return MakeAllCredentialAsync();
+                });
+                userCredential.Wait();
 
-                        progressWindow.Close();
+                progressWindow.Close();
 
-                        Constant.MyDriveCredential = userCredential.Result;                           //作成結果が格納され戻される
-                        if (Constant.MyDriveCredential == null)
-                        {
-                            //メッセージボックスを表示する
-                            String titolStr = Constant.ApplicationName;
-                            String msgStr = "認証されませんでした。\r\n更新ボタンをクリックして下さい";
-                            MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                            dbMsg += ",result=" + result;
-                        }
-                        else
-                        {
-                            dbMsg += "\r\nAccessToken=" + Constant.MyDriveCredential.Token.AccessToken;
-                            dbMsg += "\r\nRefreshToken=" + Constant.MyDriveCredential.Token.RefreshToken;
-                            Constant.MyDriveService = new DriveService(new BaseClientService.Initializer()
-                            {
-                                HttpClientInitializer = Constant.MyDriveCredential,
-                                ApplicationName = Constant.ApplicationName,
-                            });
-                            dbMsg += ",MyDriveService:ApiKey=" + Constant.MyDriveService.ApiKey;
-                            Constant.MyCalendarCredential = Constant.MyDriveCredential;
-                            Constant.MyCalendarService = new CalendarService(new BaseClientService.Initializer()
-                            {
-                                HttpClientInitializer = Constant.MyCalendarCredential,
-                                ApplicationName = Constant.ApplicationName,
-                            });
-                            dbMsg += ",MyCalendarService:ApiKey=" + Constant.MyCalendarService.ApiKey;
+                Constant.MyDriveCredential = userCredential.Result;                           //作成結果が格納され戻される
+                if (Constant.MyDriveCredential == null) {
+                    //メッセージボックスを表示する
+                    String titolStr = Constant.ApplicationName;
+                    String msgStr = "認証されませんでした。\r\n更新ボタンをクリックして下さい";
+                    MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    dbMsg += ",result=" + result;
+                } else{
+                    dbMsg += "\r\nAccessToken=" + Constant.MyDriveCredential.Token.AccessToken;
+                    dbMsg += "\r\nRefreshToken=" + Constant.MyDriveCredential.Token.RefreshToken;
+                    Constant.MyDriveService = new DriveService(new BaseClientService.Initializer(){
+                        HttpClientInitializer = Constant.MyDriveCredential,
+                        ApplicationName = Constant.ApplicationName,
+                    });
+                    dbMsg += ",MyDriveService:ApiKey=" + Constant.MyDriveService.ApiKey;
+                    Constant.MyCalendarCredential = Constant.MyDriveCredential;
+                    Constant.MyCalendarService = new CalendarService(new BaseClientService.Initializer(){
+                        HttpClientInitializer = Constant.MyCalendarCredential,
+                        ApplicationName = Constant.ApplicationName,
+                    });
+                    dbMsg += ",MyCalendarService:ApiKey=" + Constant.MyCalendarService.ApiKey;
                     dbMsg += ">>UserId=" + userCredential.Result.UserId;
                     GoogleAcountStr = userCredential.Result.UserId;
                     var settings = Settings.Default;
                     settings.MyGoogleAcount = GoogleAcountStr;
                     dbMsg += "接続できたアカウント=" + GoogleAcountStr;
-                    AcounntList.Add(GoogleAcountStr);
-                    string[] acounntList = AcounntList.ToArray();
-                    settings.MyAcounts = acounntList.ToString();
-                    settings.Save();
-
+                    bool isCont = true;
+                    foreach (string chStr in AcounntList) {
+                        if (chStr.Equals(GoogleAcountStr)) {
+                            isCont = false;
+                            dbMsg += "::リストアップ済" ;
+                        }
+                    }
+                    if (isCont) {
+                        AcounntList.Add(GoogleAcountStr);
+                        dbMsg += "[  " + AcounntList.Count + "件]";
+                        string rStrs = "";
+                        foreach (string rStr in AcounntList) {
+                            if (String.IsNullOrEmpty(rStrs)) {
+                                rStrs = rStr;
+                            } else {
+                                rStrs += ',' + rStr;
+                            }
+                        }
+                        dbMsg += "," + rStrs + "を書込み";
+                        settings.MyAcounts = rStrs;
+                        settings.Save();
+                    }
                 }
 
                 ConnectVisibility = "Hidden";
-                //RaisePropertyChanged("ConnectVisibility");
                 CancelVisibility = "Visible";
-                //RaisePropertyChanged("CancelVisibility");
                 //Constant.RootFolderID = GDriveUtil.MakeAriadneGoogleFolder();
-                if (Constant.RootFolderID.Equals(""))
-                        {
-                            dbMsg += ">フォルダ作成>失敗";
-                        }
-                        else
-                        {
-                            dbMsg += "[" + Constant.RootFolderID + "]" + Constant.RootFolderName;
-                        }
-                        MyLog(TAG, dbMsg);
+                //if (Constant.RootFolderID.Equals("")){
+                //            dbMsg += ">フォルダ作成>失敗";
+                //        }
+                //        else
+                //        {
+                //            dbMsg += "[" + Constant.RootFolderID + "]" + Constant.RootFolderName;
+                //        }
+                NotifyPropertyChanged();
+                MyLog(TAG, dbMsg);
                 ToDaySet();
 
                 //                Messenger.Raise(new WindowActionMessage(WindowAction.Close, "Close"));*/
@@ -597,10 +614,14 @@ namespace ProductionSchedule.ViewModels
                     return CalenderWriteBody(waitingDLog);
                 });
                 EDays.Wait();
-
-                //waitingDLog.Close();
+                waitingDLog.Close();
                 waitingDLog.QuitMe();
                 waitingDLog = null;
+                if (0==MyListItems.Count) {
+                    String titolStr = Constant.ApplicationName;
+                    String msgStr = GoogleAcountStr + "のカレンダに登録がありません。\r\nアカウントか年月を変えてみて下さい";
+                    MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
                 MyLog(TAG, dbMsg);
             }
             catch (Exception er)
@@ -707,8 +728,8 @@ namespace ProductionSchedule.ViewModels
                 dbMsg +="対象期間：" + timeMin+ "～" + today + "～" + timeMax;
                 IList<Google.Apis.Calendar.v3.Data.Event> ReadEvents = GCU.GEventsListUp(timeMin, timeMax);
                 dbMsg += "、イベント：" + ReadEvents.Count + "件";
+                MyListItems = new ObservableCollection<MyListItem>();
                 if (0<ReadEvents.Count){
-                    MyListItems = new ObservableCollection<MyListItem>();
                     string format = "yyyy/MM/dd HH:mm:ss";
                     ///    EDays = new ObservableCollection<ADay>();
                     foreach (var rEvent in ReadEvents) {
@@ -734,10 +755,9 @@ namespace ProductionSchedule.ViewModels
                         MyListItems.Add(MLI);
                     }
                     //ItemsSourceを強制的に更新；無いと更新されない
-                    NotifyPropertyChanged("MyListItems");
-                    dbMsg += "\r\n" + MyListItems.Count + "レコード";
                 }
-
+                NotifyPropertyChanged("MyListItems");
+                dbMsg += "\r\n" + MyListItems.Count + "レコード";
 
                 //			ActivityCategoryCollection activityCategoryCollection = new ActivityCategoryCollection();
                 /*           MySQLUtil = new MySQL_Util();
