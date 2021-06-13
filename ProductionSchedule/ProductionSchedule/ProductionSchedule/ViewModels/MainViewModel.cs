@@ -20,6 +20,8 @@ using Google.Apis.Services;
 using ProductionSchedule.Controls;
 using Google.Apis.Auth.OAuth2;
 using System.Collections.ObjectModel;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace ProductionSchedule.ViewModels
 {
@@ -113,6 +115,7 @@ namespace ProductionSchedule.ViewModels
         /// 表示対象年月
         /// </summary>
         public string CurrentDateStr { get; set; }
+        public Grid CalenderGR { get; set; }
 
 
         /// <summary>
@@ -615,6 +618,35 @@ namespace ProductionSchedule.ViewModels
             string dbMsg = "";
             try
             {
+                DateTime cStart = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, 1);
+                DateTime cEnd = cStart.AddMonths(1).AddSeconds(-1);
+                dbMsg += cStart + "～" + cEnd + "の予定を読み出しています"; ;
+
+                int lEnd = cEnd.Day;
+                for (int wDay = 1; wDay <= 31; wDay++) {
+                    DateTime cDay = cStart.AddDays(wDay - 1);
+                    DayOfWeek dow = cDay.DayOfWeek;
+                    Label nLabel = new Label();
+                    nLabel.Content = wDay;
+                    nLabel.HorizontalContentAlignment= HorizontalAlignment.Right;
+                    nLabel.Foreground = Brushes.White;
+                    if (lEnd < wDay) {
+                        nLabel.Background = Brushes.DarkGray;
+                    } else if (dow == DayOfWeek.Sunday) {
+                        nLabel.Background = Brushes.Red;
+                    } else if (dow == DayOfWeek.Saturday) {
+                        nLabel.Background = Brushes.Blue;
+                    } else {
+                        nLabel.Foreground = Brushes.Black;
+                        nLabel.Background = Brushes.White;
+                    }
+
+                    nLabel.SetValue(Grid.RowProperty, 0);
+                    nLabel.SetValue(Grid.ColumnProperty, wDay);
+                    CalenderGR.Children.Add(nLabel);
+
+                }
+
                 waitingDLog = new Controls.WaitingDLog();
                 waitingDLog.Show(); //.ShowDialog(); だとこのオブジェクトは別のスレッドに所有されているため、呼び出しスレッドはこのオブジェクトにアクセスできません。
                                     //waitingDLog=wDLog.Result;  だと　呼び出しスレッドは、多数の UI コンポーネントが必要としているため、STA である必要があります。
@@ -655,61 +687,61 @@ namespace ProductionSchedule.ViewModels
             string dbMsg = "";
             try
             {
-                /*
                 DateTime cStart = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, 1);
                 DateTime cEnd = cStart.AddMonths(1).AddSeconds(-1);
                 string msgStr = cStart + "～" + cEnd + "の予定を読み出しています"; ;
                 dbMsg += msgStr;
                 waitingDLog.SetMes(msgStr);
-                //Application.Current.Dispatcher.Invoke(new System.Action(() => this.waitingDLog.SetMes(msgStr)));
-             */   
                 ObservableCollection<t_events> Events = WriteEvent();
-              /*
-                msgStr = Events.Count + "件の予定が有りました";
 
-                //	Application.Current.Dispatcher.Invoke(new System.Action(() => waitingDLog.SetMes(msgStr)));
-                //対象期間中の予定を開始日時が早いものから配列化
-                OrderedByStart =
-                    new ObservableCollection<t_events>(
-                             Events.OrderBy(rec => rec.event_date_start)
-                                        .ThenBy(rec => rec.event_time_start)
-                                        .ThenBy(rec => rec.event_date_end)
-                            );
-                //日毎にまとめる
-                DateTime tDate = OrderedByStart.First().event_date_start;
-                List<string> summarys = new List<string>();
-                ObservableCollection<t_events> dEvents = new ObservableCollection<t_events>();
-                ADay aDay = new ADay(tDate, summarys, dEvents, this);
-                int cIndex = 0;
 
-                foreach (t_events ev in OrderedByStart)
-                {
-                    if (tDate < ev.event_date_start)
-                    {          // && 0< dEvents.Count
-                        msgStr = ":開始" + tDate + ">>" + ev.event_date_start + ":" + EDays.Count + "件";
-                        //				Application.Current.Dispatcher.Invoke(new System.Action(() => waitingDLog.SetMes(msgStr)));
-                        dbMsg += "\r\n[" + ev.id + "]" + ev.event_title + "::" + msgStr;
-                        aDay = new ADay(tDate, summarys, dEvents, this);
-                        EDays.Add(aDay);
-                        summarys = new List<string>();
-                        dEvents = new ObservableCollection<t_events>();
-                        cIndex = 0;
-                        if (ev.event_type == 1)
-                        {
-                            dbMsg += "[案件；" + ev.t_project_base_id + "]";
-                        }
-                    }
-                    tDate = ev.event_date_start;
-                    ev.childIndex = cIndex;
-                    cIndex++;
-                    dEvents.Add(ev);
-                    summarys.Add(ev.summary);
-                }
-                aDay = new ADay(tDate, summarys, dEvents, this);
-                EDays.Add(aDay);
-                dbMsg += ",DateColWidth=" + DateColWidth;
-                */
-          //      RaisePropertyChanged(); //	"dataManager"
+                //Application.Current.Dispatcher.Invoke(new System.Action(() => this.waitingDLog.SetMes(msgStr)));
+                /*
+                  msgStr = Events.Count + "件の予定が有りました";
+
+                  //	Application.Current.Dispatcher.Invoke(new System.Action(() => waitingDLog.SetMes(msgStr)));
+                  //対象期間中の予定を開始日時が早いものから配列化
+                  OrderedByStart =
+                      new ObservableCollection<t_events>(
+                               Events.OrderBy(rec => rec.event_date_start)
+                                          .ThenBy(rec => rec.event_time_start)
+                                          .ThenBy(rec => rec.event_date_end)
+                              );
+                  //日毎にまとめる
+                  DateTime tDate = OrderedByStart.First().event_date_start;
+                  List<string> summarys = new List<string>();
+                  ObservableCollection<t_events> dEvents = new ObservableCollection<t_events>();
+                  ADay aDay = new ADay(tDate, summarys, dEvents, this);
+                  int cIndex = 0;
+
+                  foreach (t_events ev in OrderedByStart)
+                  {
+                      if (tDate < ev.event_date_start)
+                      {          // && 0< dEvents.Count
+                          msgStr = ":開始" + tDate + ">>" + ev.event_date_start + ":" + EDays.Count + "件";
+                          //				Application.Current.Dispatcher.Invoke(new System.Action(() => waitingDLog.SetMes(msgStr)));
+                          dbMsg += "\r\n[" + ev.id + "]" + ev.event_title + "::" + msgStr;
+                          aDay = new ADay(tDate, summarys, dEvents, this);
+                          EDays.Add(aDay);
+                          summarys = new List<string>();
+                          dEvents = new ObservableCollection<t_events>();
+                          cIndex = 0;
+                          if (ev.event_type == 1)
+                          {
+                              dbMsg += "[案件；" + ev.t_project_base_id + "]";
+                          }
+                      }
+                      tDate = ev.event_date_start;
+                      ev.childIndex = cIndex;
+                      cIndex++;
+                      dEvents.Add(ev);
+                      summarys.Add(ev.summary);
+                  }
+                  aDay = new ADay(tDate, summarys, dEvents, this);
+                  EDays.Add(aDay);
+                  dbMsg += ",DateColWidth=" + DateColWidth;
+                  */
+                //      RaisePropertyChanged(); //	"dataManager"
                 MyLog(TAG, dbMsg);
             }
             catch (Exception er)
@@ -1055,7 +1087,7 @@ namespace ProductionSchedule.ViewModels
                 CurrentDateStr = String.Format("{0:yyyy年MM月}", SelectedDateTime);
                 dbMsg += ">>" + CurrentDateStr;
                 NotifyPropertyChanged("CurrentDateStr");
-                //        CalenderWrite();
+                CalenderWrite();
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
@@ -1078,7 +1110,7 @@ namespace ProductionSchedule.ViewModels
                 CurrentDateStr = String.Format("{0:yyyy年MM月}", SelectedDateTime);
                 dbMsg += ">>" + CurrentDateStr;
                 NotifyPropertyChanged("CurrentDateStr");
-                //      CalenderWrite();
+                CalenderWrite();
                 MyLog(TAG, dbMsg);
             } catch (Exception er){
                 MyErrorLog(TAG, dbMsg, er);
@@ -1099,7 +1131,7 @@ namespace ProductionSchedule.ViewModels
                 CurrentDateStr = String.Format("{0:yyyy年MM月}", SelectedDateTime);
                 dbMsg += ">>" + CurrentDateStr;
                 NotifyPropertyChanged("CurrentDateStr");
-                //           CalenderWrite();
+                CalenderWrite();
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);

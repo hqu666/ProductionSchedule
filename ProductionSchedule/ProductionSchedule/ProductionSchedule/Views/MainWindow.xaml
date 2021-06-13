@@ -253,9 +253,9 @@ WindowStartupLocation="CenterScreen"
         <Grid
             Name="CalenderGR"
             Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
-            Margin="-5"
+            Margin="-8" 
             >
-            <Grid.ColumnDefinitions>
+           <Grid.ColumnDefinitions>
                 <ColumnDefinition  x:Name="titiolCol" Width="*"  />
                 <ColumnDefinition  x:Name="c01" Width="*"  />
                 <ColumnDefinition  x:Name="c02" Width="*"  />
@@ -297,7 +297,7 @@ WindowStartupLocation="CenterScreen"
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Label Grid.Row="0" Grid.Column="0" />
+            <!--   <Label Grid.Row="0" Grid.Column="0" />
             <Label Grid.Row="0" Grid.Column="1" HorizontalContentAlignment="Right" Content="1" />
             <Label Grid.Row="0" Grid.Column="2" HorizontalContentAlignment="Right" Content="2" />
             <Label Grid.Row="0" Grid.Column="3" HorizontalContentAlignment="Right" Content="3" />
@@ -330,7 +330,7 @@ WindowStartupLocation="CenterScreen"
             <Label Grid.Row="0" Grid.Column="30" HorizontalContentAlignment="Right" Content="30" />
             <Label Grid.Row="0" Grid.Column="31" HorizontalContentAlignment="Right" Content="31" />
 
-            <Label Grid.Row="1" Grid.Column="0" HorizontalContentAlignment="Right" Content="その他" />
+            <Label Grid.Row="1" Grid.Column="0" HorizontalContentAlignment="Right" Content="その他" />-->
         </Grid>
     </Grid>
     <!--</ScrollViewer>-->

@@ -25,7 +25,6 @@ namespace ProductionSchedule.Views
     {
         ViewModels.MainViewModel VM;
 
-
         public MainWindow()
         {
             InitializeComponent();
@@ -43,6 +42,7 @@ namespace ProductionSchedule.Views
         {
             //ViewとViewModelの紐付け
             VM.MyView = this;
+            VM.CalenderGR = this.CalenderGR;
             // ウィンドウのサイズを復元
             RecoverWindowBounds();
 
