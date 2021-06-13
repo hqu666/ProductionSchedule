@@ -11,9 +11,12 @@
 		xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
 		xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
 		FontSize="14" 
+        MinWidth="1800"
+        MinHeight="600"
 		WindowStartupLocation="CenterScreen"
-        Height="1000" Width="1800"
-		Title="画面遷移確認" 
+        Width="1800"
+        Height="600"
+		Title="Googleカレンダ活用" 
         Closing="Window_Closing"
     	Topmost="true" 
 		>
@@ -53,10 +56,10 @@ WindowStartupLocation="CenterScreen"
 		</i:Interaction.Behaviors>-->
 
     <Window.Resources>
-        <Style TargetType="StackPanel">
+        <!--<Style TargetType="StackPanel">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0,5,0,5"/>
-        </Style>
+        </Style>-->
 
         <Style TargetType="Label">
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -103,12 +106,20 @@ WindowStartupLocation="CenterScreen"
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Panel.ZIndex" Value="90" />
         </Style>
+        <!--BasedOn="{StaticResource Button}"-->
+        <Style x:Key="SquareButton" TargetType="Button" >
+            <Setter Property="MinWidth" Value="30"/>
+            <Setter Property="MinHeight" Value="30"/>
+            <Setter Property="Padding" Value="-5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Template"  Value="{StaticResource buttonTemplate}"/>
+        </Style>
 
     </Window.Resources>
     <Grid Margin="8,8,8,8" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition  Width="*"  />
-            <ColumnDefinition  Width="Auto"  />
+            <ColumnDefinition  Width="auto"  />
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions >
@@ -116,119 +127,211 @@ WindowStartupLocation="CenterScreen"
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition x:Name="attach_row" Height="*"/>
         </Grid.RowDefinitions>
 
-        <ComboBox x:Name="GoogleAcountCB" 
-            Grid.Row="1" Grid.Column="0"
-  			Text="{Binding GoogleAcountStr, Mode=TwoWay}" 
-            ItemsSource="{Binding AcounntList}" 
-            IsEditable="true" Height="32" >
-        </ComboBox>
 
-        <!--<TextBox x:Name="GoogleAcountTB" 
-            Grid.Row="1" Grid.Column="0"
-								Text="{Binding GoogleAcountStr, Mode=TwoWay}" 
-								/>-->
-        <StackPanel Orientation="Horizontal"
-                        Grid.Row="1" Grid.Column="1"
-            >
-            <Button 
-			Command="{Binding ConnectCommand}"
-            Visibility="{Binding ConnectVisibility}"
-			Name="Connect_bt" Content="Googleログイン" HorizontalAlignment="Right"
-			/>
-            <Button 
-			Command="{Binding CancelCommand}"
-            Visibility="{Binding CancelVisibility}"
-			Name="Cancel_bt" Content="ログアウト" 
-			/>
-
-        </StackPanel>
-
-        <TextBox x:Name="TargetURLTB" 
-            Grid.Row="2" Grid.Column="0"
-								Text="{Binding TargetURLStr, Mode=TwoWay}" 
-								/>
-        <Button 
-			Command="{Binding WebStartCommand}"
-            Grid.Row="2" Grid.Column="1"
-			Name="webt_bt" Content="Web表示"
-			/>
 
         <TextBox x:Name="ResultTB" 
-            Grid.Row="3" Grid.Column="0"
-								Text="{Binding ResultStr, Mode=TwoWay}" 
-								/>
+            Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+			Text="{Binding ResultStr, Mode=TwoWay}" 
+			/>
         <!--
         
         			Visibility="{Binding ConnectVisibility}"
-
-        <Button     Grid.Row="1" Grid.Column="1"
-                    Content="Button" HorizontalAlignment="Left" Height="29" VerticalAlignment="Top" Width="98" Click="Button_Click"/>-->
-
-        <!--<TreeView x:Name="Menu_tv"
-				Grid.Row="0" Grid.Column="0"
-				Grid.RowSpan="2"
-				Margin="10,0,5,0" Padding="5,5,5,5" MinHeight="710"   MinWidth="120"   Height="Auto" Width="Auto"
-				ItemsSource="{Binding _MyMenu}" >
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="MouseDoubleClick">
-                    <ei:CallMethodAction MethodName="MenuSelected" TargetObject="{Binding}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-            <TreeView.Resources>
-                <Style TargetType="TreeViewItem">
-                    <Setter Property="IsSelected" Value="{Binding Path=IsSelected,Mode=TwoWay}"/>
-                </Style>
-            </TreeView.Resources>
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType= "local:MyMenu" ItemsSource="{Binding Child}">
-                    <TextBlock Text="{Binding Name}">
-                    </TextBlock>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
-        <Label x:Name="Info_lv" Content="{Binding InfoLavel}"  
-							Grid.Row="0" Grid.Column="1" 
-							Height="Auto"  Width="Auto"
-							MinHeight="50" Margin="5,5,5,5"/>
-
-        <local:ViewTabControl x:Name="ViewTab" Height="Auto" Width="Auto"
-						Grid.Row="1" Grid.Column="1"
-						VerticalAlignment="Stretch" 
-						HorizontalAlignment="Stretch" 
-						/>
-        
-                    AutoGenerateColumns="False" 
-             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Path=startDT}"
-                    CanUserReorder="True" CanUserResize="True"
-                    CanUserSort="True" Header="開始" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding Path=endDT}"
-                    CanUserReorder="True" CanUserResize="True"
-                    CanUserSort="True" Header="終了" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding Path=description}"
-                    CanUserReorder="True" CanUserResize="True"
-                    CanUserSort="True" Header="タイトル" Width="Auto" />
-                <DataGridTextColumn Binding="{Binding Path=summary}"
-                    CanUserReorder="True" CanUserResize="True"
-                    CanUserSort="True" Header="内容" Width="Auto" />
-            </DataGrid.Columns>
-
-        
-                    Height="400"
-
         
         -->
+        <!--<Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">-->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+                        Grid.Row="0" Grid.Column="0">
+                <Button x:Name="UpDateBT"
+                         Style="{DynamicResource SquareButton}" Height="30"
+							>
+                    <Button.Background>
+                        <ImageBrush ImageSource="/ProductionSchedule;component/Resource/ReDrow.png"/>
+                    </Button.Background>
+                </Button>
+                <!--<Label Content="イベント種類" Margin="5,5,5,5" VerticalAlignment="Center"  />
+                <ComboBox x:Name="EventCombo" 
+								ItemsSource="{Binding EventComboSource}" 
+								SelectedValue="{Binding EventComboSelectedValue}"
+								SelectedIndex="{Binding EventComboSelectedIndex , Mode=TwoWay}" 
+								SelectedValuePath="Key" DisplayMemberPath="Value"
+								HorizontalAlignment="Left" Margin="5,5,5,5" VerticalAlignment="Center" Width="100" />-->
+
+                <Button x:Name="Back_bt" Content="▲" 
+                         Style="{DynamicResource SquareButton}"
+					Command="{Binding BackDate}"
+                    VerticalAlignment="Center"  
+					Width="30" Height="30" Margin="5,30,5,-30" 
+                        >
+                    <Button.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="270"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Button.RenderTransform>
+                </Button>
+            <Label x:Name="CurrentDate" FontSize="24" Content="{Binding CurrentDateStr}" 
+                   VerticalAlignment="Center"  MinWidth="100" />
+
+            <Button x:Name="today_bt" Content="本日" 
+							Command="{Binding SetToDay}"
+						Margin="5,5,5,5" 
+                        VerticalAlignment="Center"  
+							Width="50" RenderTransformOrigin="0.387,0.485"/>
+                <Button x:Name="Next_bt" Content="▼" 
+							Command="{Binding SendDate}"
+                         Style="{DynamicResource SquareButton}"
+                        VerticalAlignment="Center"  
+							Width="20" Height="20" Margin="5,30,5,-30">
+                    <Button.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="270"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </Button.RenderTransform>
+                </Button>
+                <ComboBox Height="30">
+                    <ComboBoxItem>工程表</ComboBoxItem>
+                    <ComboBoxItem>リスト</ComboBoxItem>
+                    <ComboBoxItem>日別</ComboBoxItem>
+                    <ComboBoxItem>週別</ComboBoxItem>
+                    <ComboBoxItem>月別</ComboBoxItem>
+                    <ComboBoxItem>ドライブ</ComboBoxItem>
+                    <ComboBoxItem>印刷</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
+        <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                        Grid.Row="0" Grid.Column="1"
+                    >
+            <TextBox x:Name="TargetURLTB" 
+								Text="{Binding TargetURLStr, Mode=TwoWay}" 
+								/>
+            <Button 
+			        Command="{Binding WebStartCommand}"
+			        Name="webt_bt" Content="Web表示"
+			        />
+            <ComboBox x:Name="GoogleAcountCB" 
+  			                Text="{Binding GoogleAcountStr, Mode=TwoWay}" 
+                            ItemsSource="{Binding AcounntList}" 
+                            IsEditable="true" Height="32" >
+            </ComboBox>
+            <ComboBox x:Name="CalenderNameCB" 
+  			                Text="{Binding CalenderNameStr, Mode=TwoWay}" 
+                            ItemsSource="{Binding CalenderNameList}" 
+                          Height="32" >
+            </ComboBox>
+            <Button 
+			            Command="{Binding ConnectCommand}"
+                        Visibility="{Binding ConnectVisibility}"
+			            Name="Connect_bt" Content="Googleログイン" HorizontalAlignment="Right"
+			            />
+            <Button 
+			            Command="{Binding CancelCommand}"
+                        Visibility="{Binding CancelVisibility}"
+			            Name="Cancel_bt" Content="ログアウト" 
+			            />
+
+        </StackPanel>
+        <!--</Grid>-->
         <DataGrid 
             Name="CalenderDG"
             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
             MinRowHeight="18" 
-           IsReadOnly="True"
+            IsReadOnly="True"
             ItemsSource="{Binding MyListItems}"
             >
         </DataGrid>
+        <Grid
+            Name="CalenderGR"
+            Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+            Margin="-5"
+            >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition  x:Name="titiolCol" Width="*"  />
+                <ColumnDefinition  x:Name="c01" Width="*"  />
+                <ColumnDefinition  x:Name="c02" Width="*"  />
+                <ColumnDefinition  x:Name="c03" Width="*"  />
+                <ColumnDefinition  x:Name="c04" Width="*"  />
+                <ColumnDefinition  x:Name="c05" Width="*"  />
+                <ColumnDefinition  x:Name="c06" Width="*"  />
+                <ColumnDefinition  x:Name="c07" Width="*"  />
+                <ColumnDefinition  x:Name="c08" Width="*"  />
+                <ColumnDefinition  x:Name="c09" Width="*"  />
+                <ColumnDefinition  x:Name="c10" Width="*"  />
+                <ColumnDefinition  x:Name="c11" Width="*"  />
+                <ColumnDefinition  x:Name="c12" Width="*"  />
+                <ColumnDefinition  x:Name="c13" Width="*"  />
+                <ColumnDefinition  x:Name="c14" Width="*"  />
+                <ColumnDefinition  x:Name="c15" Width="*"  />
+                <ColumnDefinition  x:Name="c16" Width="*"  />
+                <ColumnDefinition  x:Name="c17" Width="*"  />
+                <ColumnDefinition  x:Name="c18" Width="*"  />
+                <ColumnDefinition  x:Name="c19" Width="*"  />
+                <ColumnDefinition  x:Name="c20" Width="*"  />
+                <ColumnDefinition  x:Name="c21" Width="*"  />
+                <ColumnDefinition  x:Name="c22" Width="*"  />
+                <ColumnDefinition  x:Name="c23" Width="*"  />
+                <ColumnDefinition  x:Name="c24" Width="*"  />
+                <ColumnDefinition  x:Name="c25" Width="*"  />
+                <ColumnDefinition  x:Name="c26" Width="*"  />
+                <ColumnDefinition  x:Name="c27" Width="*"  />
+                <ColumnDefinition  x:Name="c28" Width="*"  />
+                <ColumnDefinition  x:Name="c29" Width="*"  />
+                <ColumnDefinition  x:Name="c30" Width="*"  />
+                <ColumnDefinition  x:Name="c31" Width="*"  />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions >
+                <RowDefinition x:Name="titolRow" Height="35"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" />
+            <Label Grid.Row="0" Grid.Column="1" HorizontalContentAlignment="Right" Content="1" />
+            <Label Grid.Row="0" Grid.Column="2" HorizontalContentAlignment="Right" Content="2" />
+            <Label Grid.Row="0" Grid.Column="3" HorizontalContentAlignment="Right" Content="3" />
+            <Label Grid.Row="0" Grid.Column="4" HorizontalContentAlignment="Right" Content="4" />
+            <Label Grid.Row="0" Grid.Column="5" HorizontalContentAlignment="Right" Content="5" />
+            <Label Grid.Row="0" Grid.Column="6" HorizontalContentAlignment="Right" Content="6" />
+            <Label Grid.Row="0" Grid.Column="7" HorizontalContentAlignment="Right" Content="7" />
+            <Label Grid.Row="0" Grid.Column="8" HorizontalContentAlignment="Right" Content="8" />
+            <Label Grid.Row="0" Grid.Column="9" HorizontalContentAlignment="Right" Content="9" />
+            <Label Grid.Row="0" Grid.Column="10" HorizontalContentAlignment="Right" Content="10" />
+            <Label Grid.Row="0" Grid.Column="11" HorizontalContentAlignment="Right" Content="11" />
+            <Label Grid.Row="0" Grid.Column="12" HorizontalContentAlignment="Right" Content="12" />
+            <Label Grid.Row="0" Grid.Column="13" HorizontalContentAlignment="Right" Content="13" />
+            <Label Grid.Row="0" Grid.Column="14" HorizontalContentAlignment="Right" Content="14" />
+            <Label Grid.Row="0" Grid.Column="15" HorizontalContentAlignment="Right" Content="15" />
+            <Label Grid.Row="0" Grid.Column="16" HorizontalContentAlignment="Right" Content="16" />
+            <Label Grid.Row="0" Grid.Column="17" HorizontalContentAlignment="Right" Content="17" />
+            <Label Grid.Row="0" Grid.Column="18" HorizontalContentAlignment="Right" Content="18" />
+            <Label Grid.Row="0" Grid.Column="19" HorizontalContentAlignment="Right" Content="19" />
+            <Label Grid.Row="0" Grid.Column="20" HorizontalContentAlignment="Right" Content="20" />
+            <Label Grid.Row="0" Grid.Column="21" HorizontalContentAlignment="Right" Content="21" />
+            <Label Grid.Row="0" Grid.Column="22" HorizontalContentAlignment="Right" Content="22" />
+            <Label Grid.Row="0" Grid.Column="23" HorizontalContentAlignment="Right" Content="23" />
+            <Label Grid.Row="0" Grid.Column="24" HorizontalContentAlignment="Right" Content="24" />
+            <Label Grid.Row="0" Grid.Column="25" HorizontalContentAlignment="Right" Content="25" />
+            <Label Grid.Row="0" Grid.Column="26" HorizontalContentAlignment="Right" Content="26" />
+            <Label Grid.Row="0" Grid.Column="27" HorizontalContentAlignment="Right" Content="27" />
+            <Label Grid.Row="0" Grid.Column="28" HorizontalContentAlignment="Right" Content="28" />
+            <Label Grid.Row="0" Grid.Column="29" HorizontalContentAlignment="Right" Content="29" />
+            <Label Grid.Row="0" Grid.Column="30" HorizontalContentAlignment="Right" Content="30" />
+            <Label Grid.Row="0" Grid.Column="31" HorizontalContentAlignment="Right" Content="31" />
+
+            <Label Grid.Row="1" Grid.Column="0" HorizontalContentAlignment="Right" Content="その他" />
+        </Grid>
     </Grid>
     <!--</ScrollViewer>-->
 </Window>

@@ -103,10 +103,22 @@ namespace ProductionSchedule.ViewModels
 
         public List<string> AcounntList { set; get; }
 
-    /// <summary>
-    /// 使用許諾を受けるAPIのリスト
-    /// </summary>
-    public static string[] AllScopes = { DriveService.Scope.DriveFile,
+        /// <summary>
+        /// 使用するカレンダ
+        /// </summary>
+        public string CalenderNameStr { set; get; }
+        public List<string> CalenderNameList { set; get; }
+        public DateTime SelectedDateTime;
+        /// <summary>
+        /// 表示対象年月
+        /// </summary>
+        public string CurrentDateStr { get; set; }
+
+
+        /// <summary>
+        /// 使用許諾を受けるAPIのリスト
+        /// </summary>
+        public static string[] AllScopes = { DriveService.Scope.DriveFile,
                                                                     DriveService.Scope.DriveAppdata,			//追加
 																	DriveService.Scope.Drive,
                                                                     CalendarService.Scope.Calendar,
@@ -132,6 +144,11 @@ namespace ProductionSchedule.ViewModels
             string dbMsg = "";
             try
             {
+                //本日日付
+                SelectedDateTime = DateTime.Today;
+                dbMsg += "今日は" + SelectedDateTime;
+                CurrentDateStr = String.Format("{0:yyyy年MM月}", SelectedDateTime);
+                dbMsg += ">>" + CurrentDateStr;
                 this.TargetURLStr = Constant.WebStratUrl;
                 dbMsg += ",遷移先URL=  " + TargetURLStr;
                 NotifyPropertyChanged("TargetURI");
@@ -354,9 +371,12 @@ namespace ProductionSchedule.ViewModels
                         settings.Save();
                     }
                 }
+                CalenderNameStr = "praimary";
+                CalenderNameList.Add(CalenderNameStr);
 
                 ConnectVisibility = "Hidden";
                 CancelVisibility = "Visible";
+
                 //Constant.RootFolderID = GDriveUtil.MakeAriadneGoogleFolder();
                 //if (Constant.RootFolderID.Equals("")){
                 //            dbMsg += ">フォルダ作成>失敗";
@@ -542,11 +562,6 @@ namespace ProductionSchedule.ViewModels
         //カレンダ作成///////////////////////////////////////////////////////////////////Google接続///
         //X_1_4ViewModel
         //表示対象年月
-        public DateTime SelectedDateTime;
-        /// <summary>
-        /// 表示対象年月
-        /// </summary>
-        public string CurrentDate { get; set; }
         /// <summary>
         /// Viewの高さ
         /// </summary>
@@ -719,13 +734,11 @@ namespace ProductionSchedule.ViewModels
                 CS_Util Util = new CS_Util();
                 //予定取得///////////////////////////////////////////
                 GoogleCalendarUtil GCU = new GoogleCalendarUtil();
-                //本日日付
-                DateTime today = DateTime.Today;
                 //月初め
-                DateTime timeMin = new DateTime(today.Year, today.Month, 1);
+                DateTime timeMin = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, 1);
                 //月終わり
-                DateTime timeMax = new DateTime(today.Year, today.Month, 1).AddMonths(1).AddDays(-1);
-                dbMsg +="対象期間：" + timeMin+ "～" + today + "～" + timeMax;
+                DateTime timeMax = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, 1).AddMonths(1).AddDays(-1);
+                dbMsg +="対象期間：" + timeMin+ "～" + SelectedDateTime + "～" + timeMax;
                 IList<Google.Apis.Calendar.v3.Data.Event> ReadEvents = GCU.GEventsListUp(timeMin, timeMax);
                 dbMsg += "、イベント：" + ReadEvents.Count + "件";
                 MyListItems = new ObservableCollection<MyListItem>();
@@ -1027,6 +1040,27 @@ namespace ProductionSchedule.ViewModels
             return Events;
         }
 
+        //戻し/////////////////////////////////////////////////////////////////////////
+        public ICommand BackDate => new DelegateCommand(DateBack);
+        /// <summary>
+        /// 戻る
+        /// </summary>
+        public void DateBack() {
+            string TAG = "DateBack";
+            string dbMsg = "";
+            try {
+                dbMsg += "対象年月=" + SelectedDateTime;
+                SelectedDateTime=SelectedDateTime.AddMonths(-1);
+                dbMsg += ">>" + SelectedDateTime;
+                CurrentDateStr = String.Format("{0:yyyy年MM月}", SelectedDateTime);
+                dbMsg += ">>" + CurrentDateStr;
+                NotifyPropertyChanged("CurrentDateStr");
+                //        CalenderWrite();
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
 
         //本日/////////////////////////////////////////////////////////////////////////
         public ICommand SetToDay => new DelegateCommand(ToDaySet);
@@ -1041,12 +1075,33 @@ namespace ProductionSchedule.ViewModels
             {
                 SelectedDateTime = DateTime.Now;
                 dbMsg += "今日は" + SelectedDateTime;
-                CurrentDate = String.Format("{0:yyyy年MM月dd日}", SelectedDateTime);
-                dbMsg += ">>" + CurrentDate;
-           //     RaisePropertyChanged("CurrentDate");
-                CalenderWrite();
+                CurrentDateStr = String.Format("{0:yyyy年MM月}", SelectedDateTime);
+                dbMsg += ">>" + CurrentDateStr;
+                NotifyPropertyChanged("CurrentDateStr");
+                //      CalenderWrite();
                 MyLog(TAG, dbMsg);
             } catch (Exception er){
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+        //進める/////////////////////////////////////////////////////////////////////////
+        public ICommand SendDate => new DelegateCommand(DateSend);
+        /// <summary>
+        /// 進める
+        /// </summary>
+        public void DateSend() {
+            string TAG = "DateSend";
+            string dbMsg = "";
+            try {
+                dbMsg += "対象年月=" + SelectedDateTime;
+                SelectedDateTime=SelectedDateTime.AddMonths(1);
+                dbMsg += ">>" + SelectedDateTime;
+                CurrentDateStr = String.Format("{0:yyyy年MM月}", SelectedDateTime);
+                dbMsg += ">>" + CurrentDateStr;
+                NotifyPropertyChanged("CurrentDateStr");
+                //           CalenderWrite();
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
