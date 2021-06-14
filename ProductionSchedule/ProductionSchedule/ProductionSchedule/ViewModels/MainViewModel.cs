@@ -593,6 +593,9 @@ namespace ProductionSchedule.ViewModels
 
         public int selectedIndex { set; get; }
 
+        public string[] GoogleColors={"#FFFFFF","#7986CB", "#33B679	", "#8E24AA", "#E67C73	", "#F6BF26",
+                                        "#F4511E", "#039BE5", "#616161","#3F51B5", "#0B8043", "#D50000" };
+
         #region TargetEvent変更通知プロパティ
         private t_events _TargetEvent;
         /// <summary>
@@ -621,7 +624,7 @@ namespace ProductionSchedule.ViewModels
                 DateTime cStart = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, 1);
                 DateTime cEnd = cStart.AddMonths(1).AddSeconds(-1);
                 dbMsg += cStart + "～" + cEnd + "の予定を読み出しています"; ;
-
+                double BtWidth = 0;
                 int lEnd = cEnd.Day;
                 for (int wDay = 1; wDay <= 31; wDay++) {
                     DateTime cDay = cStart.AddDays(wDay - 1);
@@ -634,6 +637,9 @@ namespace ProductionSchedule.ViewModels
                         nLabel.Background = Brushes.DarkGray;
                     } else if (dow == DayOfWeek.Sunday) {
                         nLabel.Background = Brushes.Red;
+                        if (0 == BtWidth) {
+                            BtWidth = nLabel.Width-2;
+                        }
                     } else if (dow == DayOfWeek.Saturday) {
                         nLabel.Background = Brushes.Blue;
                     } else {
@@ -653,21 +659,52 @@ namespace ProductionSchedule.ViewModels
                                     //	waitingDLog.ShowDialog();  // Show() にするとWaitingCircleが回らない
                                     //						///////////WindowにユーザーコントロールをWindowに読み込む方法//
                                     // this.EDays = CalenderWriteBody(waitingDLog);
-                Task<ObservableCollection<ADay>> EDays = Task.Run(() => {
+                Task<ObservableCollection<MyListItem>> retEvents = Task.Run(() => {
                     //waitingDLog.Dispatcher.Invoke((Action)(() => {
                     //	waitingDLog.ShowDialog();  // Show() にするとWaitingCircleが回らない
                     //}));　だと表示もされない
                     //waitingDLog.ShowDialog(); だとこのオブジェクトは別のスレッドに所有されているため、呼び出しスレッドはこのオブジェクトにアクセスできません。
-                    return CalenderWriteBody(waitingDLog);
+                    return GrtMyEvent(cStart, cEnd);
                 });
-                EDays.Wait();
+                retEvents.Wait();
                 waitingDLog.Close();
                 waitingDLog.QuitMe();
                 waitingDLog = null;
+                //Taskの戻り値が使えないのでグローバル変数から取得
                 if (0==MyListItems.Count) {
                     String titolStr = Constant.ApplicationName;
                     String msgStr = GoogleAcountStr + "のカレンダに登録がありません。\r\nアカウントか年月を変えてみて下さい";
                     MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }else{
+                    foreach (MyListItem MLI in MyListItems) {
+                        dbMsg += "\r\n" + MLI.startDTStr+ "～" + MLI.endDTStr;
+                        string ButtonFace = "";
+                        if (!String.IsNullOrEmpty(MLI.description)) {
+                            ButtonFace += MLI.description;
+                        }
+                        if (!String.IsNullOrEmpty(MLI.summary)) {
+                            ButtonFace += MLI.summary;
+                        }
+                        dbMsg += ";" + ButtonFace + "[" + MLI.googleEvent.ColorId + "]";
+                        int ColorId = 7;
+                        if (! String.IsNullOrEmpty(MLI.googleEvent.ColorId)) {
+                            ColorId = int.Parse(MLI.googleEvent.ColorId);
+                        }
+
+                        Button wBt = new Button();
+                        wBt.Content = ButtonFace;
+                        wBt.Width= BtWidth;
+                        string ColorIdStr = MLI.googleEvent.ColorId;
+                        object obj = System.Windows.Media.ColorConverter.ConvertFromString(GoogleColors[ColorId]);
+                        SolidColorBrush ret = new SolidColorBrush((System.Windows.Media.Color)obj);
+                        wBt.Background = ret;
+                        wBt.SetValue(Grid.RowProperty, 1);
+                        Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
+                        int startCol = startDT.DateTime.Value.Day;
+                        wBt.SetValue(Grid.ColumnProperty, startCol);
+                        CalenderGR.Children.Add(wBt);
+                    }
+
                 }
                 MyLog(TAG, dbMsg);
             }
@@ -693,7 +730,6 @@ namespace ProductionSchedule.ViewModels
                 dbMsg += msgStr;
                 waitingDLog.SetMes(msgStr);
                 ObservableCollection<t_events> Events = WriteEvent();
-
 
                 //Application.Current.Dispatcher.Invoke(new System.Action(() => this.waitingDLog.SetMes(msgStr)));
                 /*
@@ -752,6 +788,63 @@ namespace ProductionSchedule.ViewModels
         }
 
         /// <summary>
+        /// 対象期間内にGoogleカレンダに登録してあるイベントを取得する
+        /// </summary>
+        /// <returns></returns>
+        public ObservableCollection<MyListItem> GrtMyEvent(DateTime timeMin, DateTime timeMax) {
+            string TAG = "GrtMyEvent";
+            string dbMsg = "";
+            MyListItems = new ObservableCollection<MyListItem>();
+            try {
+                dbMsg += "" + SelectedDateTime;
+                CS_Util Util = new CS_Util();
+                //予定取得///////////////////////////////////////////
+                GoogleCalendarUtil GCU = new GoogleCalendarUtil();
+                ////月初め
+                //DateTime timeMin = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, 1);
+                ////月終わり
+                //DateTime timeMax = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, 1).AddMonths(1).AddDays(-1);
+                dbMsg += "対象期間：" + timeMin + "～" + SelectedDateTime + "～" + timeMax;
+                IList<Google.Apis.Calendar.v3.Data.Event> ReadEvents = GCU.GEventsListUp(timeMin, timeMax);
+                dbMsg += "、イベント：" + ReadEvents.Count + "件";
+                if (0 < ReadEvents.Count) {
+                    string format = "yyyy/MM/dd HH:mm:ss";
+                    ///    EDays = new ObservableCollection<ADay>();
+                    foreach (var rEvent in ReadEvents) {
+                        MyListItem MLI = new MyListItem();
+                        MLI.startDTStr = rEvent.Start.DateTime.ToString();
+                        dbMsg += "\r\n" + MLI.startDTStr;
+                        if (String.IsNullOrEmpty(MLI.startDTStr)) {
+                            MLI.startDTStr = rEvent.Start.Date;
+                            dbMsg += ">>" + MLI.startDTStr;
+                        }
+                        MLI.endDTStr = rEvent.End.DateTime.ToString();
+                        dbMsg += "～" + MLI.endDTStr;
+                        if (String.IsNullOrEmpty(MLI.endDTStr)) {
+                            MLI.endDTStr = rEvent.End.Date;
+                            dbMsg += ">>" + MLI.endDTStr;
+                        }
+                        dbMsg += ";" + rEvent.Description + ";" + rEvent.Summary;
+                        MLI.description = rEvent.Description;
+                        MLI.summary = rEvent.Summary;
+                        if (String.IsNullOrEmpty(MLI.summary)) {
+                            MLI.summary = " - ";
+                        }
+                        MLI.googleEvent = rEvent;
+                        MyListItems.Add(MLI);
+                    }
+                    //ItemsSourceを強制的に更新；無いと更新されない
+                }
+                NotifyPropertyChanged("MyListItems");
+                dbMsg += "\r\n" + MyListItems.Count + "レコード";
+                MyLog(TAG, dbMsg);
+            }catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+            return MyListItems;
+        }
+
+        /// <summary>
         /// 予定作成
         /// </summary>
         /// <returns></returns>
@@ -779,17 +872,17 @@ namespace ProductionSchedule.ViewModels
                     ///    EDays = new ObservableCollection<ADay>();
                     foreach (var rEvent in ReadEvents) {
                         MyListItem MLI = new MyListItem();
-                        MLI.startDT = rEvent.Start.DateTime.ToString();
-                        dbMsg += "\r\n" + MLI.startDT;
-                        if (String.IsNullOrEmpty(MLI.startDT)) {
-                            MLI.startDT = rEvent.Start.Date;
-                            dbMsg += ">>" + MLI.startDT;
+                        MLI.startDTStr = rEvent.Start.DateTime.ToString();
+                        dbMsg += "\r\n" + MLI.startDTStr;
+                        if (String.IsNullOrEmpty(MLI.startDTStr)) {
+                            MLI.startDTStr = rEvent.Start.Date;
+                            dbMsg += ">>" + MLI.startDTStr;
                         }
-                        MLI.endDT = rEvent.End.DateTime.ToString();
-                        dbMsg += "～" + MLI.endDT;
-                        if (String.IsNullOrEmpty(MLI.endDT)) {
-                            MLI.endDT = rEvent.End.Date;
-                            dbMsg += ">>" + MLI.endDT;
+                        MLI.endDTStr = rEvent.End.DateTime.ToString();
+                        dbMsg += "～" + MLI.endDTStr;
+                        if (String.IsNullOrEmpty(MLI.endDTStr)) {
+                            MLI.endDTStr = rEvent.End.Date;
+                            dbMsg += ">>" + MLI.endDTStr;
                         }
                         dbMsg += ";" + rEvent.Description + ";" + rEvent.Summary;
                         MLI.description = rEvent.Description;
@@ -797,6 +890,7 @@ namespace ProductionSchedule.ViewModels
                         if (String.IsNullOrEmpty(MLI.summary)) {
                             MLI.summary = " - ";
                         }
+                        MLI.googleEvent = rEvent;
                         MyListItems.Add(MLI);
                     }
                     //ItemsSourceを強制的に更新；無いと更新されない
@@ -953,19 +1047,19 @@ namespace ProductionSchedule.ViewModels
                                int endCount = EventCount + 10;
                                DateTime dt = DateTime.Now;
                                // タイムゾーンはこのスニペットで設定しないため、日付をグリニッジ標準時へ変換します
-                               DateTime StartDT = DateTime.Today.AddHours(SelectedDateTime.Hour).ToUniversalTime();
-                               DateTime EndDT = StartDT.AddHours(1).AddMinutes(30);
+                               DateTime startDTStr = DateTime.Today.AddHours(SelectedDateTime.Hour).ToUniversalTime();
+                               DateTime endDTStr = startDTStr.AddHours(1).AddMinutes(30);
                                // Infragistics.Controls.Schedules のメタデータ
                                for (EventCount = Events.Count + 1; EventCount < endCount; EventCount++)
                                {
-                                   dbMsg += "\r\n[" + EventCount + "]" + StartDT + "～" + EndDT;
+                                   dbMsg += "\r\n[" + EventCount + "]" + startDTStr + "～" + endDTStr;
                                    Models.t_events OneEvent = new Models.t_events();
                                    OneEvent.id = -1;
                                    OneEvent.event_title = "Test" + EventCount;         //タイトル
-                                   OneEvent.event_date_start = StartDT.Date;            //開始日
-                                   OneEvent.event_time_start = StartDT.Hour;           //開始時刻
-                                   OneEvent.event_date_end = EndDT.Date;               //終了日
-                                   OneEvent.event_time_end = EndDT.Hour;               //終了時刻
+                                   OneEvent.event_date_start = startDTStr.Date;            //開始日
+                                   OneEvent.event_time_start = startDTStr.Hour;           //開始時刻
+                                   OneEvent.event_date_end = endDTStr.Date;               //終了日
+                                   OneEvent.event_time_end = endDTStr.Hour;               //終了時刻
                                    OneEvent.event_is_daylong = false;                           //終日
                                    if (OneEvent.event_date_start < OneEvent.event_date_end)
                                    {
@@ -1041,23 +1135,23 @@ namespace ProductionSchedule.ViewModels
                                    //次の日時設定
                                    if (8 == EventCount)
                                    {
-                                       StartDT = SelectedDateTime.AddMonths(-1);
-                                       EndDT = StartDT.AddMonths(2);
+                                       startDTStr = SelectedDateTime.AddMonths(-1);
+                                       endDTStr = startDTStr.AddMonths(2);
                                    }
                                    else if (6 == EventCount)
                                    {
-                                       StartDT = SelectedDateTime.AddDays(-4);
-                                       EndDT = StartDT.AddDays(8);
+                                       startDTStr = SelectedDateTime.AddDays(-4);
+                                       endDTStr = startDTStr.AddDays(8);
                                    }
                                    else if (4 == EventCount)
                                    {
-                                       StartDT = SelectedDateTime.AddDays(-1);
-                                       EndDT = StartDT.AddDays(2);
+                                       startDTStr = SelectedDateTime.AddDays(-1);
+                                       endDTStr = startDTStr.AddDays(2);
                                    }
                                    else
                                    {
-                                       StartDT = StartDT.AddHours(1);
-                                       EndDT = StartDT.AddHours(1).AddMinutes(30);
+                                       startDTStr = startDTStr.AddHours(1);
+                                       endDTStr = startDTStr.AddHours(1).AddMinutes(30);
                                    }
                                }
                            }
@@ -1219,11 +1313,11 @@ namespace ProductionSchedule.ViewModels
         /// <summary>
         /// 開始日時
         /// </summary>
-        public string startDT { get; set; }
+        public string startDTStr { get; set; }
         /// <summary>
         /// 終了日時
         /// </summary>
-        public string endDT { get; set; }
+        public string endDTStr { get; set; }
 
         /// <summary>
         /// タイトル
@@ -1235,6 +1329,10 @@ namespace ProductionSchedule.ViewModels
         /// </summary>
         public string summary { get; set; }
 
+        /// <summary>
+        /// GoogleCalendarの登録済みEvent
+        /// </summary>
+        public Google.Apis.Calendar.v3.Data.Event googleEvent { get; set; }
     }
 
     /// <summary>
