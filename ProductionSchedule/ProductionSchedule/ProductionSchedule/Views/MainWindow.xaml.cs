@@ -43,6 +43,7 @@ namespace ProductionSchedule.Views
             //ViewとViewModelの紐付け
             VM.MyView = this;
             VM.CalenderGR = this.CalenderGR;
+            VM.CalenderDG = this.CalenderDG;
             // ウィンドウのサイズを復元
             RecoverWindowBounds();
 

@@ -22,6 +22,7 @@ using Google.Apis.Auth.OAuth2;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Controls.Primitives;
 
 namespace ProductionSchedule.ViewModels
 {
@@ -30,7 +31,9 @@ namespace ProductionSchedule.ViewModels
         // :ViewModel, INotifyPropertyChanged
 
         public Views.MainWindow MyView { get; set; }
-		public List<Models.MyMenu> _MyMenu { get; set; }
+        public Grid CalenderGR { get; set; }
+        public DataGrid CalenderDG { get; set; }
+        public List<Models.MyMenu> _MyMenu { get; set; }
 
 		public System.Collections.IEnumerable TabItems { get; set; }
 
@@ -115,7 +118,6 @@ namespace ProductionSchedule.ViewModels
         /// 表示対象年月
         /// </summary>
         public string CurrentDateStr { get; set; }
-        public Grid CalenderGR { get; set; }
 
 
         /// <summary>
@@ -589,6 +591,8 @@ namespace ProductionSchedule.ViewModels
 
         public ObservableCollection<MyListItem> MyListItems { get; set; }
 
+        public ObservableCollection<CalenderRecord> CalenderItems { get; set; }
+
         public int selectedDateIndex { set; get; }
 
         public int selectedIndex { set; get; }
@@ -693,6 +697,7 @@ namespace ProductionSchedule.ViewModels
 
                         Button wBt = new Button();
                         wBt.Content = ButtonFace;
+                //        wBt.Padding.Top = (dDouble)-5;
                         wBt.Width= BtWidth;
                         string ColorIdStr = MLI.googleEvent.ColorId;
                         object obj = System.Windows.Media.ColorConverter.ConvertFromString(GoogleColors[ColorId]);
@@ -706,12 +711,198 @@ namespace ProductionSchedule.ViewModels
                     }
 
                 }
+
+                CalenderItems = new ObservableCollection<CalenderRecord>();
+                CalenderRecord CalenderRowItem = new CalenderRecord();
+                //CalenderRowItem.d01 = "1";
+                //CalenderRowItem.d02 = "2";
+                //CalenderRowItem.d03 = "3";
+                //CalenderRowItem.d04 = "4";
+                //CalenderRowItem.d05 = "5";
+                //CalenderRowItem.d06 = "6";
+                //CalenderRowItem.d07 = "7";
+                //CalenderRowItem.d08 = "8";
+                //CalenderRowItem.d09 = "9";
+                //CalenderRowItem.d10 = "10";
+                //CalenderRowItem.d11 = "11";
+                //CalenderRowItem.d12 = "12";
+                //CalenderRowItem.d13 = "13";
+                //CalenderRowItem.d14 = "14";
+                //CalenderRowItem.d15 = "15";
+                //CalenderRowItem.d16 = "16";
+                //CalenderRowItem.d17 = "17";
+                //CalenderRowItem.d18 = "18";
+                //CalenderRowItem.d19 = "19";
+                //CalenderRowItem.d20 = "20";
+                //CalenderRowItem.d21 = "21";
+                //CalenderRowItem.d22 = "22";
+                //CalenderRowItem.d23 = "23";
+                //CalenderRowItem.d24 = "24";
+                //CalenderRowItem.d25 = "25";
+                //CalenderRowItem.d26 = "26";
+                //CalenderRowItem.d27 = "27";
+                //CalenderRowItem.d28 = "28";
+                //CalenderRowItem.d29 = "29";
+                //CalenderRowItem.d30 = "30";
+                //CalenderRowItem.d31 = "31";
+                CalenderItems.Add(CalenderRowItem);
+                CalenderRowItem = new CalenderRecord();
+                CalenderItems.Add(CalenderRowItem);
+                NotifyPropertyChanged("CalenderItems");
+                DataGridCell cell = GetDataGridCell(CalenderDG, 0, 0);
+                cell.Width = 200;
+                double myCellWidth = (CalenderDG.Width - 200) / 31;
+                for (int rowCount=0; rowCount < 2; rowCount++){
+                    if (0== rowCount) {
+                        for (int colCount = 1; colCount <= 31; colCount++) {
+                            DateTime cDay = cStart.AddDays(colCount - 1);
+                            DayOfWeek dow = cDay.DayOfWeek;
+                            cell = GetDataGridCell(CalenderDG, rowCount, colCount);
+                            cell.Width = myCellWidth;
+                            object content = cell.Content;
+                            TextBlock textBlock = content as TextBlock;
+                            textBlock.Text = colCount.ToString();
+                            textBlock.HorizontalAlignment = HorizontalAlignment.Right;
+                            textBlock.Foreground = Brushes.White;
+                            if (lEnd < colCount) {
+                                textBlock.Background = Brushes.DarkGray;
+                            } else if (dow == DayOfWeek.Sunday) {
+                                textBlock.Background = Brushes.Red;
+                                //if (0 == BtWidth) {
+                                //    BtWidth = nLabel.Width - 2;
+                                //}
+                            } else if (dow == DayOfWeek.Saturday) {
+                                textBlock.Background = Brushes.Blue;
+                            } else {
+                                textBlock.Foreground = Brushes.Black;
+                                textBlock.Background = Brushes.White;
+                            }
+                        }
+                    } else {
+                        for (int colCount = 1; colCount <= 31; colCount++) {
+                            DateTime cDay = cStart.AddDays(colCount - 1);
+                            DayOfWeek dow = cDay.DayOfWeek;
+                            cell = GetDataGridCell(CalenderDG, rowCount, colCount);
+                            object content = cell.Content;
+                            TextBlock textBlock = content as TextBlock;
+                        //    textBlock.Text = colCount.ToString();
+                        //    textBlock.HorizontalAlignment = HorizontalAlignment.Right;
+                        //    textBlock.Foreground = Brushes.White;
+                            if (lEnd < colCount) {
+                                textBlock.Background = Brushes.DarkGray;
+                            } else if (dow == DayOfWeek.Sunday) {
+                                textBlock.Background = Brushes.LightPink;
+                                //if (0 == BtWidth) {
+                                //    BtWidth = nLabel.Width - 2;
+                                //}
+                            } else if (dow == DayOfWeek.Saturday) {
+                                textBlock.Background = Brushes.LightCyan;
+                            } else {
+                     //           textBlock.Foreground = Brushes.Black;
+                                textBlock.Background = Brushes.White;
+                            }
+                        }
+                        foreach (MyListItem MLI in MyListItems) {
+                            dbMsg += "\r\n" + MLI.startDTStr + "～" + MLI.endDTStr;
+                            Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
+                            int startCol = startDT.DateTime.Value.Day;
+                            cell = GetDataGridCell(CalenderDG, rowCount, startCol);
+                            object content = cell.Content;
+                            TextBlock textBlock = content as TextBlock;
+                            string ButtonFace = "";
+                            if (!String.IsNullOrEmpty(MLI.description)) {
+                                ButtonFace += MLI.description;
+                            }
+                            if (!String.IsNullOrEmpty(MLI.summary)) {
+                                ButtonFace += MLI.summary;
+                            }
+                            dbMsg += ";" + ButtonFace + "[" + MLI.googleEvent.ColorId + "]";
+                            textBlock.Text = ButtonFace;
+                            int ColorId = 7;
+                            if (!String.IsNullOrEmpty(MLI.googleEvent.ColorId)) {
+                                ColorId = int.Parse(MLI.googleEvent.ColorId);
+                            }
+
+                            //Button wBt = new Button();
+                            //wBt.Content = ButtonFace;
+                            ////        wBt.Padding.Top = (dDouble)-5;
+                            //wBt.Width = BtWidth;
+                            string ColorIdStr = MLI.googleEvent.ColorId;
+                            object obj = System.Windows.Media.ColorConverter.ConvertFromString(GoogleColors[ColorId]);
+                            SolidColorBrush ret = new SolidColorBrush((System.Windows.Media.Color)obj);
+                            textBlock.Background = ret;
+                            //wBt.Background = ret;
+                            //wBt.SetValue(Grid.RowProperty, 1);
+                            //wBt.SetValue(Grid.ColumnProperty, startCol);
+                            //CalenderGR.Children.Add(wBt);
+                        }
+                    }
+                }
+
                 MyLog(TAG, dbMsg);
             }
             catch (Exception er)
             {
                 MyErrorLog(TAG, dbMsg, er);
             }
+        }
+
+        //https://www.paveway.info/entry/2019/05/27/wpf_datagridbackground から
+        public DataGridCell GetDataGridCell(DataGrid dataGrid, int rowIndex, int columnIndex) {
+            if (dataGrid.Items == null || dataGrid.Items.IsEmpty) {
+                return null;
+            }
+
+            var row = GetDataGridRow(dataGrid, rowIndex);
+            if (row == null) {
+                return null;
+            }
+
+            var presenter = GetVisualChild<DataGridCellsPresenter>(row);
+            if (presenter == null) {
+                return null;
+            }
+
+            var generator = presenter.ItemContainerGenerator;
+            var cell = generator.ContainerFromIndex(columnIndex) as DataGridCell;
+            if (cell == null) {
+                dataGrid.UpdateLayout();
+                var column = dataGrid.Columns[columnIndex];
+                dataGrid.ScrollIntoView(row, column);
+                cell = generator.ContainerFromIndex(columnIndex) as DataGridCell;
+            }
+            return cell;
+        }
+
+        public DataGridRow GetDataGridRow(DataGrid dataGrid, int index) {
+            if (dataGrid.Items == null || dataGrid.Items.IsEmpty) {
+                return null;
+            }
+
+            var generator = dataGrid.ItemContainerGenerator;
+            var row = generator.ContainerFromIndex(index) as DataGridRow;
+            if (row == null) {
+                dataGrid.UpdateLayout();
+                var item = dataGrid.Items[index];
+                dataGrid.ScrollIntoView(item);
+                row = generator.ContainerFromIndex(index) as DataGridRow;
+            }
+            return row;
+        }
+
+        private T GetVisualChild<T>(Visual parent) where T : Visual {
+            T result = default(T);
+            var count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; ++i) {
+                var child = VisualTreeHelper.GetChild(parent, i) as Visual;
+                result = child as T;
+                if (result != null) {
+                    break;
+                }
+
+                result = GetVisualChild<T>(child);
+            }
+            return result;
         }
 
         /// <summary>
@@ -1333,6 +1524,41 @@ namespace ProductionSchedule.ViewModels
         /// GoogleCalendarの登録済みEvent
         /// </summary>
         public Google.Apis.Calendar.v3.Data.Event googleEvent { get; set; }
+    }
+
+    public class CalenderRecord {
+        public string titol { get; set; }
+        public string d01 { get; set; }
+        public string d02 { get; set; }
+        public string d03 { get; set; }
+        public string d04 { get; set; }
+        public string d05 { get; set; }
+        public string d06 { get; set; }
+        public string d07 { get; set; }
+        public string d08 { get; set; }
+        public string d09 { get; set; }
+        public string d10 { get; set; }
+        public string d11 { get; set; }
+        public string d12 { get; set; }
+        public string d13 { get; set; }
+        public string d14 { get; set; }
+        public string d15 { get; set; }
+        public string d16 { get; set; }
+        public string d17 { get; set; }
+        public string d18 { get; set; }
+        public string d19 { get; set; }
+        public string d20 { get; set; }
+        public string d21 { get; set; }
+        public string d22 { get; set; }
+        public string d23 { get; set; }
+        public string d24 { get; set; }
+        public string d25 { get; set; }
+        public string d26 { get; set; }
+        public string d27 { get; set; }
+        public string d28 { get; set; }
+        public string d29 { get; set; }
+        public string d30 { get; set; }
+        public string d31 { get; set; }
     }
 
     /// <summary>

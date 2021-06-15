@@ -114,7 +114,13 @@ WindowStartupLocation="CenterScreen"
             <Setter Property="Margin" Value="5"/>
             <Setter Property="Template"  Value="{StaticResource buttonTemplate}"/>
         </Style>
-
+        <Style x:Key="EventButton" TargetType="Button" >
+            <Setter Property="Width" Value="Auto"/>
+            <Setter Property="MinHeight" Value="auto"/>
+            <Setter Property="Padding" Value="-5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Template"  Value="{StaticResource buttonTemplate}"/>
+        </Style>
     </Window.Resources>
     <Grid Margin="8,8,8,8" >
         <Grid.ColumnDefinitions>
@@ -132,12 +138,6 @@ WindowStartupLocation="CenterScreen"
             <RowDefinition x:Name="attach_row" Height="*"/>
         </Grid.RowDefinitions>
 
-
-
-        <TextBox x:Name="ResultTB" 
-            Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-			Text="{Binding ResultStr, Mode=TwoWay}" 
-			/>
         <!--
         
         			Visibility="{Binding ConnectVisibility}"
@@ -185,10 +185,10 @@ WindowStartupLocation="CenterScreen"
                         VerticalAlignment="Center"  
 							Width="50" RenderTransformOrigin="0.387,0.485"/>
                 <Button x:Name="Next_bt" Content="▼" 
-							Command="{Binding SendDate}"
-                         Style="{DynamicResource SquareButton}"
+						Command="{Binding SendDate}"
+                        Style="{DynamicResource SquareButton}"
                         VerticalAlignment="Center"  
-							Width="20" Height="20" Margin="5,30,5,-30">
+						Width="20" Height="20" Margin="5,30,5,-30">
                     <Button.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform/>
@@ -244,15 +244,16 @@ WindowStartupLocation="CenterScreen"
         <!--</Grid>-->
         <DataGrid 
             Name="CalenderDG"
-            Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+            Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
             MinRowHeight="18" 
             IsReadOnly="True"
-            ItemsSource="{Binding MyListItems}"
+            HeadersVisibility="None"
+            ItemsSource="{Binding CalenderItems}"
             >
         </DataGrid>
         <Grid
             Name="CalenderGR"
-            Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+            Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
             Margin="-8" 
             >
            <Grid.ColumnDefinitions>
@@ -297,41 +298,14 @@ WindowStartupLocation="CenterScreen"
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <!--   <Label Grid.Row="0" Grid.Column="0" />
-            <Label Grid.Row="0" Grid.Column="1" HorizontalContentAlignment="Right" Content="1" />
-            <Label Grid.Row="0" Grid.Column="2" HorizontalContentAlignment="Right" Content="2" />
-            <Label Grid.Row="0" Grid.Column="3" HorizontalContentAlignment="Right" Content="3" />
-            <Label Grid.Row="0" Grid.Column="4" HorizontalContentAlignment="Right" Content="4" />
-            <Label Grid.Row="0" Grid.Column="5" HorizontalContentAlignment="Right" Content="5" />
-            <Label Grid.Row="0" Grid.Column="6" HorizontalContentAlignment="Right" Content="6" />
-            <Label Grid.Row="0" Grid.Column="7" HorizontalContentAlignment="Right" Content="7" />
-            <Label Grid.Row="0" Grid.Column="8" HorizontalContentAlignment="Right" Content="8" />
-            <Label Grid.Row="0" Grid.Column="9" HorizontalContentAlignment="Right" Content="9" />
-            <Label Grid.Row="0" Grid.Column="10" HorizontalContentAlignment="Right" Content="10" />
-            <Label Grid.Row="0" Grid.Column="11" HorizontalContentAlignment="Right" Content="11" />
-            <Label Grid.Row="0" Grid.Column="12" HorizontalContentAlignment="Right" Content="12" />
-            <Label Grid.Row="0" Grid.Column="13" HorizontalContentAlignment="Right" Content="13" />
-            <Label Grid.Row="0" Grid.Column="14" HorizontalContentAlignment="Right" Content="14" />
-            <Label Grid.Row="0" Grid.Column="15" HorizontalContentAlignment="Right" Content="15" />
-            <Label Grid.Row="0" Grid.Column="16" HorizontalContentAlignment="Right" Content="16" />
-            <Label Grid.Row="0" Grid.Column="17" HorizontalContentAlignment="Right" Content="17" />
-            <Label Grid.Row="0" Grid.Column="18" HorizontalContentAlignment="Right" Content="18" />
-            <Label Grid.Row="0" Grid.Column="19" HorizontalContentAlignment="Right" Content="19" />
-            <Label Grid.Row="0" Grid.Column="20" HorizontalContentAlignment="Right" Content="20" />
-            <Label Grid.Row="0" Grid.Column="21" HorizontalContentAlignment="Right" Content="21" />
-            <Label Grid.Row="0" Grid.Column="22" HorizontalContentAlignment="Right" Content="22" />
-            <Label Grid.Row="0" Grid.Column="23" HorizontalContentAlignment="Right" Content="23" />
-            <Label Grid.Row="0" Grid.Column="24" HorizontalContentAlignment="Right" Content="24" />
-            <Label Grid.Row="0" Grid.Column="25" HorizontalContentAlignment="Right" Content="25" />
-            <Label Grid.Row="0" Grid.Column="26" HorizontalContentAlignment="Right" Content="26" />
-            <Label Grid.Row="0" Grid.Column="27" HorizontalContentAlignment="Right" Content="27" />
-            <Label Grid.Row="0" Grid.Column="28" HorizontalContentAlignment="Right" Content="28" />
-            <Label Grid.Row="0" Grid.Column="29" HorizontalContentAlignment="Right" Content="29" />
-            <Label Grid.Row="0" Grid.Column="30" HorizontalContentAlignment="Right" Content="30" />
-            <Label Grid.Row="0" Grid.Column="31" HorizontalContentAlignment="Right" Content="31" />
-
-            <Label Grid.Row="1" Grid.Column="0" HorizontalContentAlignment="Right" Content="その他" />-->
         </Grid>
+
+
+        <TextBox x:Name="ResultTB" 
+            Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+			Text="{Binding ResultStr, Mode=TwoWay}" 
+			/>
+
     </Grid>
     <!--</ScrollViewer>-->
 </Window>
