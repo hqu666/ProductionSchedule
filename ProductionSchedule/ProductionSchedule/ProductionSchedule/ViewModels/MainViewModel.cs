@@ -31,6 +31,7 @@ namespace ProductionSchedule.ViewModels
         // :ViewModel, INotifyPropertyChanged
 
         public Views.MainWindow MyView { get; set; }
+        public double MainWindowWidth { get; set; }
         public Grid CalenderGR { get; set; }
         public DataGrid CalenderDG { get; set; }
         public List<Models.MyMenu> _MyMenu { get; set; }
@@ -628,8 +629,10 @@ namespace ProductionSchedule.ViewModels
                 DateTime cStart = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, 1);
                 DateTime cEnd = cStart.AddMonths(1).AddSeconds(-1);
                 dbMsg += cStart + "～" + cEnd + "の予定を読み出しています"; ;
-                double BtWidth = 0;
+         //       double BtWidth = 0;
                 int lEnd = cEnd.Day;
+                /*
+                 *Gridにすると着色するエレメントのマージン分隙間ができる。再描画時のボタン消去の手間
                 for (int wDay = 1; wDay <= 31; wDay++) {
                     DateTime cDay = cStart.AddDays(wDay - 1);
                     DayOfWeek dow = cDay.DayOfWeek;
@@ -656,7 +659,7 @@ namespace ProductionSchedule.ViewModels
                     CalenderGR.Children.Add(nLabel);
 
                 }
-
+                */
                 waitingDLog = new Controls.WaitingDLog();
                 waitingDLog.Show(); //.ShowDialog(); だとこのオブジェクトは別のスレッドに所有されているため、呼び出しスレッドはこのオブジェクトにアクセスできません。
                                     //waitingDLog=wDLog.Result;  だと　呼び出しスレッドは、多数の UI コンポーネントが必要としているため、STA である必要があります。
@@ -680,6 +683,7 @@ namespace ProductionSchedule.ViewModels
                     String msgStr = GoogleAcountStr + "のカレンダに登録がありません。\r\nアカウントか年月を変えてみて下さい";
                     MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }else{
+/*
                     foreach (MyListItem MLI in MyListItems) {
                         dbMsg += "\r\n" + MLI.startDTStr+ "～" + MLI.endDTStr;
                         string ButtonFace = "";
@@ -709,73 +713,46 @@ namespace ProductionSchedule.ViewModels
                         wBt.SetValue(Grid.ColumnProperty, startCol);
                         CalenderGR.Children.Add(wBt);
                     }
-
+                    */
                 }
 
+                //最低限のレコード作成でDataGridのItemsSource作成
                 CalenderItems = new ObservableCollection<CalenderRecord>();
                 CalenderRecord CalenderRowItem = new CalenderRecord();
-                //CalenderRowItem.d01 = "1";
-                //CalenderRowItem.d02 = "2";
-                //CalenderRowItem.d03 = "3";
-                //CalenderRowItem.d04 = "4";
-                //CalenderRowItem.d05 = "5";
-                //CalenderRowItem.d06 = "6";
-                //CalenderRowItem.d07 = "7";
-                //CalenderRowItem.d08 = "8";
-                //CalenderRowItem.d09 = "9";
-                //CalenderRowItem.d10 = "10";
-                //CalenderRowItem.d11 = "11";
-                //CalenderRowItem.d12 = "12";
-                //CalenderRowItem.d13 = "13";
-                //CalenderRowItem.d14 = "14";
-                //CalenderRowItem.d15 = "15";
-                //CalenderRowItem.d16 = "16";
-                //CalenderRowItem.d17 = "17";
-                //CalenderRowItem.d18 = "18";
-                //CalenderRowItem.d19 = "19";
-                //CalenderRowItem.d20 = "20";
-                //CalenderRowItem.d21 = "21";
-                //CalenderRowItem.d22 = "22";
-                //CalenderRowItem.d23 = "23";
-                //CalenderRowItem.d24 = "24";
-                //CalenderRowItem.d25 = "25";
-                //CalenderRowItem.d26 = "26";
-                //CalenderRowItem.d27 = "27";
-                //CalenderRowItem.d28 = "28";
-                //CalenderRowItem.d29 = "29";
-                //CalenderRowItem.d30 = "30";
-                //CalenderRowItem.d31 = "31";
                 CalenderItems.Add(CalenderRowItem);
                 CalenderRowItem = new CalenderRecord();
                 CalenderItems.Add(CalenderRowItem);
                 NotifyPropertyChanged("CalenderItems");
                 DataGridCell cell = GetDataGridCell(CalenderDG, 0, 0);
-                cell.Width = 200;
-                double myCellWidth = (CalenderDG.Width - 200) / 31;
+                cell.MinWidth = 150;
+                dbMsg += ",ウインドウ＝;" + MainWindowWidth;
+                double gridLeft = CalenderDG.Margin.Left;
+                dbMsg += ",グリッド左＝;" + gridLeft;
+                double myCellWidth = (MainWindowWidth - (gridLeft*2) - 200) / 31;
+                dbMsg += ",セルj幅＝;" + myCellWidth;
                 for (int rowCount=0; rowCount < 2; rowCount++){
                     if (0== rowCount) {
                         for (int colCount = 1; colCount <= 31; colCount++) {
                             DateTime cDay = cStart.AddDays(colCount - 1);
                             DayOfWeek dow = cDay.DayOfWeek;
                             cell = GetDataGridCell(CalenderDG, rowCount, colCount);
-                            cell.Width = myCellWidth;
+                            cell.MinWidth = myCellWidth;   //  反映されない
                             object content = cell.Content;
-                            TextBlock textBlock = content as TextBlock;
-                            textBlock.Text = colCount.ToString();
-                            textBlock.HorizontalAlignment = HorizontalAlignment.Right;
-                            textBlock.Foreground = Brushes.White;
+                            cell.Content = colCount.ToString();
+                            //文字の右詰め//
+                            cell.HorizontalContentAlignment = HorizontalAlignment.Right;
+                            //効かず　HorizontalContentAlignment    HorizontalAlignment
+                            //textBlock.HorizontalAlignment = HorizontalAlignment.Right;
+                            cell.Foreground = Brushes.White;
                             if (lEnd < colCount) {
-                                textBlock.Background = Brushes.DarkGray;
+                                cell.Background = Brushes.DarkGray;
                             } else if (dow == DayOfWeek.Sunday) {
-                                textBlock.Background = Brushes.Red;
-                                //if (0 == BtWidth) {
-                                //    BtWidth = nLabel.Width - 2;
-                                //}
+                                cell.Background = Brushes.Red;
                             } else if (dow == DayOfWeek.Saturday) {
-                                textBlock.Background = Brushes.Blue;
+                                cell.Background = Brushes.Blue;
                             } else {
-                                textBlock.Foreground = Brushes.Black;
-                                textBlock.Background = Brushes.White;
+                                cell.Background = Brushes.White;
+                                cell.Foreground = Brushes.Black;
                             }
                         }
                     } else {
@@ -783,32 +760,37 @@ namespace ProductionSchedule.ViewModels
                             DateTime cDay = cStart.AddDays(colCount - 1);
                             DayOfWeek dow = cDay.DayOfWeek;
                             cell = GetDataGridCell(CalenderDG, rowCount, colCount);
-                            object content = cell.Content;
-                            TextBlock textBlock = content as TextBlock;
-                        //    textBlock.Text = colCount.ToString();
-                        //    textBlock.HorizontalAlignment = HorizontalAlignment.Right;
-                        //    textBlock.Foreground = Brushes.White;
+                            cell.Name = "R" + rowCount + "C" + colCount;
+                            cell.Content = cell.Name;
+                            //     TextBlock textBlock = content as TextBlock;
+                            //    textBlock.Text = colCount.ToString();
                             if (lEnd < colCount) {
-                                textBlock.Background = Brushes.DarkGray;
+                                cell.Background = Brushes.DarkGray;
                             } else if (dow == DayOfWeek.Sunday) {
-                                textBlock.Background = Brushes.LightPink;
-                                //if (0 == BtWidth) {
-                                //    BtWidth = nLabel.Width - 2;
-                                //}
+                                cell.Background = Brushes.LightPink;
                             } else if (dow == DayOfWeek.Saturday) {
-                                textBlock.Background = Brushes.LightCyan;
+                                cell.Background = Brushes.LightCyan;
                             } else {
-                     //           textBlock.Foreground = Brushes.Black;
-                                textBlock.Background = Brushes.White;
+                                cell.Background = Brushes.White;
                             }
+                       //     object content = cell.Content;
+                       //     StackPanel stackPanel = content as StackPanel;
+                       ////     stackPanel.Name = "R" + rowCount + "C" + colCount;
+                       //     stackPanel.Orientation = Orientation.Vertical;
+                       //     stackPanel.Background.Opacity = 0.5;
+
                         }
                         foreach (MyListItem MLI in MyListItems) {
                             dbMsg += "\r\n" + MLI.startDTStr + "～" + MLI.endDTStr;
-                            Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
-                            int startCol = startDT.DateTime.Value.Day;
+                            int startCol = MLI.startDT.Day;
+
+                            //Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
+                            //int startCol = startDT.DateTime.Value.Day;
                             cell = GetDataGridCell(CalenderDG, rowCount, startCol);
                             object content = cell.Content;
-                            TextBlock textBlock = content as TextBlock;
+                            Button eButton = content as Button;
+
+                            //                  TextBlock textBlock = content as TextBlock;
                             string ButtonFace = "";
                             if (!String.IsNullOrEmpty(MLI.description)) {
                                 ButtonFace += MLI.description;
@@ -817,7 +799,8 @@ namespace ProductionSchedule.ViewModels
                                 ButtonFace += MLI.summary;
                             }
                             dbMsg += ";" + ButtonFace + "[" + MLI.googleEvent.ColorId + "]";
-                            textBlock.Text = ButtonFace;
+                            eButton.Content = ButtonFace;
+                            //            textBlock.Text = ButtonFace;
                             int ColorId = 7;
                             if (!String.IsNullOrEmpty(MLI.googleEvent.ColorId)) {
                                 ColorId = int.Parse(MLI.googleEvent.ColorId);
@@ -830,7 +813,8 @@ namespace ProductionSchedule.ViewModels
                             string ColorIdStr = MLI.googleEvent.ColorId;
                             object obj = System.Windows.Media.ColorConverter.ConvertFromString(GoogleColors[ColorId]);
                             SolidColorBrush ret = new SolidColorBrush((System.Windows.Media.Color)obj);
-                            textBlock.Background = ret;
+                            eButton.Background = ret;
+                            //           textBlock.Background = ret;
                             //wBt.Background = ret;
                             //wBt.SetValue(Grid.RowProperty, 1);
                             //wBt.SetValue(Grid.ColumnProperty, startCol);
@@ -1004,18 +988,18 @@ namespace ProductionSchedule.ViewModels
                     foreach (var rEvent in ReadEvents) {
                         MyListItem MLI = new MyListItem();
                         MLI.startDTStr = rEvent.Start.DateTime.ToString();
-                        dbMsg += "\r\n" + MLI.startDTStr;
+                   //     dbMsg += "\r\n" + MLI.startDTStr;
                         if (String.IsNullOrEmpty(MLI.startDTStr)) {
                             MLI.startDTStr = rEvent.Start.Date;
                             dbMsg += ">>" + MLI.startDTStr;
                         }
                         MLI.endDTStr = rEvent.End.DateTime.ToString();
-                        dbMsg += "～" + MLI.endDTStr;
+                  //      dbMsg += "～" + MLI.endDTStr;
                         if (String.IsNullOrEmpty(MLI.endDTStr)) {
                             MLI.endDTStr = rEvent.End.Date;
                             dbMsg += ">>" + MLI.endDTStr;
                         }
-                        dbMsg += ";" + rEvent.Description + ";" + rEvent.Summary;
+                 //       dbMsg += ";" + rEvent.Description + ";" + rEvent.Summary;
                         MLI.description = rEvent.Description;
                         MLI.summary = rEvent.Summary;
                         if (String.IsNullOrEmpty(MLI.summary)) {
@@ -1501,14 +1485,27 @@ namespace ProductionSchedule.ViewModels
     /// リスト表示のためのモデル
     /// </summary>
     public class MyListItem {
+        public DateTime startDT { get; set; }
+        private string _startDTStr { set; get; }
         /// <summary>
         /// 開始日時
         /// </summary>
-        public string startDTStr { get; set; }
+        public string startDTStr {
+            get { return _startDTStr; }
+            set {
+                if (_startDTStr == value)
+                    return ;
+                _startDTStr = value;
+                startDT = DateTime.Parse(value);
+            }
+        }
+
+
         /// <summary>
         /// 終了日時
         /// </summary>
         public string endDTStr { get; set; }
+
 
         /// <summary>
         /// タイトル

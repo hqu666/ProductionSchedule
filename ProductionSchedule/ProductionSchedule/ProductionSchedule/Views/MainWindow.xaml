@@ -251,7 +251,7 @@ WindowStartupLocation="CenterScreen"
             ItemsSource="{Binding CalenderItems}"
             >
         </DataGrid>
-        <Grid
+        <!--<Grid
             Name="CalenderGR"
             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
             Margin="-8" 
@@ -298,7 +298,7 @@ WindowStartupLocation="CenterScreen"
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-        </Grid>
+        </Grid>-->
 
 
         <TextBox x:Name="ResultTB" 

@@ -42,11 +42,11 @@ namespace ProductionSchedule.Views
         {
             //ViewとViewModelの紐付け
             VM.MyView = this;
-            VM.CalenderGR = this.CalenderGR;
+       //     VM.CalenderGR = this.CalenderGR;
             VM.CalenderDG = this.CalenderDG;
             // ウィンドウのサイズを復元
             RecoverWindowBounds();
-
+            VM.MainWindowWidth = this.Width;
         }
 
         /// <summary>
@@ -70,7 +70,9 @@ namespace ProductionSchedule.Views
                 if (settings.WindowTop >= 0 &&
                     (settings.WindowTop + settings.WindowHeight) < SystemParameters.VirtualScreenHeight) { Top = settings.WindowTop; }
                 dbMsg += "[" + settings.WindowWidth + "×" + settings.WindowHeight + "]" + settings.WindowMaximized;
+
                 // 幅
+                double MainWindowWidth = this.Width;
                 if (settings.WindowWidth > 0 &&
                     settings.WindowWidth <= SystemParameters.WorkArea.Width) { Width = settings.WindowWidth; }
                 // 高さ
