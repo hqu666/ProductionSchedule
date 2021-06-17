@@ -242,7 +242,7 @@ WindowStartupLocation="CenterScreen"
 
         </StackPanel>
         <!--</Grid>-->
-        <DataGrid 
+        <!--<DataGrid 
             Name="CalenderDG"
             Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
             MinRowHeight="18" 
@@ -250,55 +250,55 @@ WindowStartupLocation="CenterScreen"
             HeadersVisibility="None"
             ItemsSource="{Binding CalenderItems}"
             >
-        </DataGrid>
-        <!--<Grid
+        </DataGrid>-->
+        <Grid
             Name="CalenderGR"
             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-            Margin="-8" 
+            Panel.ZIndex="-1"
             >
            <Grid.ColumnDefinitions>
-                <ColumnDefinition  x:Name="titiolCol" Width="*"  />
-                <ColumnDefinition  x:Name="c01" Width="*"  />
-                <ColumnDefinition  x:Name="c02" Width="*"  />
-                <ColumnDefinition  x:Name="c03" Width="*"  />
-                <ColumnDefinition  x:Name="c04" Width="*"  />
-                <ColumnDefinition  x:Name="c05" Width="*"  />
-                <ColumnDefinition  x:Name="c06" Width="*"  />
-                <ColumnDefinition  x:Name="c07" Width="*"  />
-                <ColumnDefinition  x:Name="c08" Width="*"  />
-                <ColumnDefinition  x:Name="c09" Width="*"  />
-                <ColumnDefinition  x:Name="c10" Width="*"  />
-                <ColumnDefinition  x:Name="c11" Width="*"  />
-                <ColumnDefinition  x:Name="c12" Width="*"  />
-                <ColumnDefinition  x:Name="c13" Width="*"  />
-                <ColumnDefinition  x:Name="c14" Width="*"  />
-                <ColumnDefinition  x:Name="c15" Width="*"  />
-                <ColumnDefinition  x:Name="c16" Width="*"  />
-                <ColumnDefinition  x:Name="c17" Width="*"  />
-                <ColumnDefinition  x:Name="c18" Width="*"  />
-                <ColumnDefinition  x:Name="c19" Width="*"  />
-                <ColumnDefinition  x:Name="c20" Width="*"  />
-                <ColumnDefinition  x:Name="c21" Width="*"  />
-                <ColumnDefinition  x:Name="c22" Width="*"  />
-                <ColumnDefinition  x:Name="c23" Width="*"  />
-                <ColumnDefinition  x:Name="c24" Width="*"  />
-                <ColumnDefinition  x:Name="c25" Width="*"  />
-                <ColumnDefinition  x:Name="c26" Width="*"  />
-                <ColumnDefinition  x:Name="c27" Width="*"  />
-                <ColumnDefinition  x:Name="c28" Width="*"  />
-                <ColumnDefinition  x:Name="c29" Width="*"  />
-                <ColumnDefinition  x:Name="c30" Width="*"  />
-                <ColumnDefinition  x:Name="c31" Width="*"  />
+                <ColumnDefinition  x:Name="titiolCol" Width="100*"  />
+                <ColumnDefinition  x:Name="c01" Width="40*"  />
+                <ColumnDefinition  x:Name="c02" Width="40*"  />
+                <ColumnDefinition  x:Name="c03" Width="40*"  />
+                <ColumnDefinition  x:Name="c04" Width="40*"  />
+                <ColumnDefinition  x:Name="c05" Width="40*"  />
+                <ColumnDefinition  x:Name="c06" Width="40*"  />
+                <ColumnDefinition  x:Name="c07" Width="40*"  />
+                <ColumnDefinition  x:Name="c08" Width="40*"  />
+                <ColumnDefinition  x:Name="c09" Width="40*"  />
+                <ColumnDefinition  x:Name="c10" Width="40*"  />
+                <ColumnDefinition  x:Name="c11" Width="40*"  />
+                <ColumnDefinition  x:Name="c12" Width="40*"  />
+                <ColumnDefinition  x:Name="c13" Width="40*"  />
+                <ColumnDefinition  x:Name="c14" Width="40*"  />
+                <ColumnDefinition  x:Name="c15" Width="40*"  />
+                <ColumnDefinition  x:Name="c16" Width="40*"  />
+                <ColumnDefinition  x:Name="c17" Width="40*"  />
+                <ColumnDefinition  x:Name="c18" Width="40*"  />
+                <ColumnDefinition  x:Name="c19" Width="40*"  />
+                <ColumnDefinition  x:Name="c20" Width="40*"  />
+                <ColumnDefinition  x:Name="c21" Width="40*"  />
+                <ColumnDefinition  x:Name="c22" Width="40*"  />
+                <ColumnDefinition  x:Name="c23" Width="40*"  />
+                <ColumnDefinition  x:Name="c24" Width="40*"  />
+                <ColumnDefinition  x:Name="c25" Width="40*"  />
+                <ColumnDefinition  x:Name="c26" Width="40*"  />
+                <ColumnDefinition  x:Name="c27" Width="40*"  />
+                <ColumnDefinition  x:Name="c28" Width="40*"  />
+                <ColumnDefinition  x:Name="c29" Width="40*"  />
+                <ColumnDefinition  x:Name="c30" Width="40*"  />
+                <ColumnDefinition  x:Name="c31" Width="40*"  />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions >
-                <RowDefinition x:Name="titolRow" Height="35"/>
+                <RowDefinition x:Name="titolRow"  Height="35"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-        </Grid>-->
+        </Grid>
 
 
         <TextBox x:Name="ResultTB" 

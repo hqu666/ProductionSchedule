@@ -35,8 +35,12 @@ namespace ProductionSchedule.ViewModels
         public Grid CalenderGR { get; set; }
         public DataGrid CalenderDG { get; set; }
         public List<Models.MyMenu> _MyMenu { get; set; }
+        /// <summary>
+        /// イベントボタンリスト
+        /// </summary>
+        public List<Button> BtList;
 
-		public System.Collections.IEnumerable TabItems { get; set; }
+        public System.Collections.IEnumerable TabItems { get; set; }
 
 		public string InfoLavel { get; set; }
 		public string ReTitle="";
@@ -150,6 +154,7 @@ namespace ProductionSchedule.ViewModels
             string dbMsg = "";
             try
             {
+                BtList = new List<Button>();
                 //本日日付
                 SelectedDateTime = DateTime.Today;
                 dbMsg += "今日は" + SelectedDateTime;
@@ -600,7 +605,7 @@ namespace ProductionSchedule.ViewModels
 
         public string[] GoogleColors={"#FFFFFF","#7986CB", "#33B679	", "#8E24AA", "#E67C73	", "#F6BF26",
                                         "#F4511E", "#039BE5", "#616161","#3F51B5", "#0B8043", "#D50000" };
-
+        public List< Button> btList;
         #region TargetEvent変更通知プロパティ
         private t_events _TargetEvent;
         /// <summary>
@@ -631,35 +636,6 @@ namespace ProductionSchedule.ViewModels
                 dbMsg += cStart + "～" + cEnd + "の予定を読み出しています"; ;
          //       double BtWidth = 0;
                 int lEnd = cEnd.Day;
-                /*
-                 *Gridにすると着色するエレメントのマージン分隙間ができる。再描画時のボタン消去の手間
-                for (int wDay = 1; wDay <= 31; wDay++) {
-                    DateTime cDay = cStart.AddDays(wDay - 1);
-                    DayOfWeek dow = cDay.DayOfWeek;
-                    Label nLabel = new Label();
-                    nLabel.Content = wDay;
-                    nLabel.HorizontalContentAlignment= HorizontalAlignment.Right;
-                    nLabel.Foreground = Brushes.White;
-                    if (lEnd < wDay) {
-                        nLabel.Background = Brushes.DarkGray;
-                    } else if (dow == DayOfWeek.Sunday) {
-                        nLabel.Background = Brushes.Red;
-                        if (0 == BtWidth) {
-                            BtWidth = nLabel.Width-2;
-                        }
-                    } else if (dow == DayOfWeek.Saturday) {
-                        nLabel.Background = Brushes.Blue;
-                    } else {
-                        nLabel.Foreground = Brushes.Black;
-                        nLabel.Background = Brushes.White;
-                    }
-
-                    nLabel.SetValue(Grid.RowProperty, 0);
-                    nLabel.SetValue(Grid.ColumnProperty, wDay);
-                    CalenderGR.Children.Add(nLabel);
-
-                }
-                */
                 waitingDLog = new Controls.WaitingDLog();
                 waitingDLog.Show(); //.ShowDialog(); だとこのオブジェクトは別のスレッドに所有されているため、呼び出しスレッドはこのオブジェクトにアクセスできません。
                                     //waitingDLog=wDLog.Result;  だと　呼び出しスレッドは、多数の UI コンポーネントが必要としているため、STA である必要があります。
@@ -683,9 +659,75 @@ namespace ProductionSchedule.ViewModels
                     String msgStr = GoogleAcountStr + "のカレンダに登録がありません。\r\nアカウントか年月を変えてみて下さい";
                     MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }else{
-/*
+                    dbMsg += ",ウインドウ＝;" + MainWindowWidth;
+                    double gridLeft = CalenderGR.Margin.Left;
+                    dbMsg += ",グリッド左＝;" + gridLeft;
+                    double myCellWidth = (MainWindowWidth - (gridLeft * 2) - 200) / 31;
+                    dbMsg += ",セルj幅＝;" + myCellWidth;
+                    dbMsg += "\r\n削除";
+                    foreach (Button dBt in BtList) {
+                        dbMsg += "," + dBt.Name;
+                        CalenderGR.Children.Remove(dBt);
+                    }
+                    //課題：stackPanelも同様に削除
+                    //タイトル列
+                    for (int wDay = 1; wDay <= 31; wDay++) {
+                        DateTime cDay = cStart.AddDays(wDay - 1);
+                        DayOfWeek dow = cDay.DayOfWeek;
+                        Label nLabel = new Label();
+                        nLabel.Content = wDay;
+                        nLabel.HorizontalContentAlignment= HorizontalAlignment.Right;
+                        nLabel.Foreground = Brushes.White;
+                        if (lEnd < wDay) {
+                            nLabel.Background = Brushes.DarkGray;
+                        } else if (dow == DayOfWeek.Sunday) {
+                            nLabel.Background = Brushes.Red;
+                            //if (0 == BtWidth) {
+                            //    BtWidth = nLabel.Width-2;
+                            //}
+                        } else if (dow == DayOfWeek.Saturday) {
+                            nLabel.Background = Brushes.Blue;
+                        } else {
+                            nLabel.Foreground = Brushes.Black;
+                            nLabel.Background = Brushes.White;
+                        }
+                        //課題：Gridにすると着色するエレメントのマージン分隙間ができる。
+               //         nLabel.Margin ={ -8,-8,-8,-8}:
+                        nLabel.SetValue(Grid.RowProperty, 0);
+                        nLabel.SetValue(Grid.ColumnProperty, wDay);
+                        CalenderGR.Children.Add(nLabel);
+
+                    }
+                    //課題：Rowを生成するには
+                    //データレコード
+                    //課題：stackPanelに枠線を入れる
+                    for (int rowCount = 1; rowCount < 2; rowCount++) {
+                        for (int colCount = 1; colCount <= 31; colCount++) {
+                            DateTime cDay = cStart.AddDays(colCount - 1);
+                            DayOfWeek dow = cDay.DayOfWeek;
+                            string cellName = "R" + rowCount + "C" + colCount;
+                            StackPanel stackPanel = new StackPanel();
+                            stackPanel.Name = cellName;
+                            if (lEnd < colCount) {
+                                stackPanel.Background = Brushes.DarkGray;
+                            } else if (dow == DayOfWeek.Sunday) {
+                                stackPanel.Background = Brushes.LightPink;
+                            } else if (dow == DayOfWeek.Saturday) {
+                                stackPanel.Background = Brushes.LightCyan;
+                            } else {
+                                stackPanel.Background = Brushes.White;
+                            }
+                            stackPanel.SetValue(Grid.RowProperty, 1);
+                            stackPanel.SetValue(Grid.ColumnProperty, colCount);
+                            CalenderGR.Children.Add(stackPanel);
+                        }
+                    }
+                        int btCount = 0;
+                    BtList = new List<Button>();
                     foreach (MyListItem MLI in MyListItems) {
-                        dbMsg += "\r\n" + MLI.startDTStr+ "～" + MLI.endDTStr;
+                        btCount++;
+                        dbMsg += "\r\n[" + btCount+"]"+ MLI.startDTStr+ "～" + MLI.endDTStr;
+                        dbMsg += "、" + MLI.startDT;
                         string ButtonFace = "";
                         if (!String.IsNullOrEmpty(MLI.description)) {
                             ButtonFace += MLI.description;
@@ -700,22 +742,25 @@ namespace ProductionSchedule.ViewModels
                         }
 
                         Button wBt = new Button();
+                        wBt.Name = "Bt_" + MLI.startDT.ToString("yyyyMMdd") + "_" + btCount;
                         wBt.Content = ButtonFace;
                 //        wBt.Padding.Top = (dDouble)-5;
-                        wBt.Width= BtWidth;
+                 //       wBt.Width= BtWidth;
                         string ColorIdStr = MLI.googleEvent.ColorId;
                         object obj = System.Windows.Media.ColorConverter.ConvertFromString(GoogleColors[ColorId]);
                         SolidColorBrush ret = new SolidColorBrush((System.Windows.Media.Color)obj);
                         wBt.Background = ret;
                         wBt.SetValue(Grid.RowProperty, 1);
+                        //課題：stackPanel内に配置させる
                         Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
                         int startCol = startDT.DateTime.Value.Day;
                         wBt.SetValue(Grid.ColumnProperty, startCol);
                         CalenderGR.Children.Add(wBt);
+                        BtList.Add(wBt);
                     }
-                    */
+                                     
                 }
-
+/*
                 //最低限のレコード作成でDataGridのItemsSource作成
                 CalenderItems = new ObservableCollection<CalenderRecord>();
                 CalenderRecord CalenderRowItem = new CalenderRecord();
@@ -821,8 +866,9 @@ namespace ProductionSchedule.ViewModels
                             //CalenderGR.Children.Add(wBt);
                         }
                     }
+                   
                 }
-
+*/
                 MyLog(TAG, dbMsg);
             }
             catch (Exception er)
