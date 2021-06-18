@@ -254,9 +254,9 @@ WindowStartupLocation="CenterScreen"
         <Grid
             Name="CalenderGR"
             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-            Panel.ZIndex="-1"
+            Panel.ZIndex="-1" Margin="0,8,0,0"
             >
-           <Grid.ColumnDefinitions>
+           <!--<Grid.ColumnDefinitions>
                 <ColumnDefinition  x:Name="titiolCol" Width="100*"  />
                 <ColumnDefinition  x:Name="c01" Width="40*"  />
                 <ColumnDefinition  x:Name="c02" Width="40*"  />
@@ -297,7 +297,7 @@ WindowStartupLocation="CenterScreen"
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+            </Grid.RowDefinitions>-->
         </Grid>
 
 

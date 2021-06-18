@@ -47,6 +47,7 @@ namespace ProductionSchedule.Views
             // ウィンドウのサイズを復元
             RecoverWindowBounds();
             VM.MainWindowWidth = this.Width;
+            VM.MakeCalenderBase();
         }
 
         /// <summary>
