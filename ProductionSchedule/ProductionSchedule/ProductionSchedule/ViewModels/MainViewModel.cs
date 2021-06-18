@@ -642,20 +642,31 @@ namespace ProductionSchedule.ViewModels
                 RowDefinition rowDef = new RowDefinition();
                 CalenderGR.RowDefinitions.Add(rowDef);
                 //タイトル列
-                LbList = new List<Label>();
                 for (int wDay = 0; wDay <= 31; wDay++) {
                     // Columnsを設定する
                     ColumnDefinition colDef = new ColumnDefinition();
-                    CalenderGR.ColumnDefinitions.Add(colDef);
-                    Label nLabel = new Label();
-                    nLabel.Name = "l" + wDay;
                     if (0 == wDay) {
                         colDef.MinWidth = 80;
                     } else {
                         colDef.MinWidth = 40;
+                    }
+                    CalenderGR.ColumnDefinitions.Add(colDef);
+                }
+                LbList = new List<Label>();
+                for (int wDay = 0; wDay <= 31; wDay++) {
+                    //// Columnsを設定する
+                    //ColumnDefinition colDef = new ColumnDefinition();
+                    //CalenderGR.ColumnDefinitions.Add(colDef);
+                    Label nLabel = new Label();
+                    nLabel.Name = "l" + wDay;
+                    if (0 == wDay) {
+                //        colDef.MinWidth = 80;
+                    } else {
+                        //       colDef.MinWidth = 40;
+                        nLabel.MinWidth = 40;
                         nLabel.Content = wDay;
                         nLabel.HorizontalContentAlignment = HorizontalAlignment.Right;
-                        nLabel.Foreground = Brushes.White;
+                    //    nLabel.Foreground = Brushes.White;
                         //課題：Gridにすると着色するエレメントのマージン分隙間ができる。
                         //         nLabel.Margin ={ -8,-8,-8,-8}:
                         nLabel.SetValue(Grid.RowProperty, 0);
@@ -674,20 +685,9 @@ namespace ProductionSchedule.ViewModels
                     rowDef = new RowDefinition();
                     CalenderGR.RowDefinitions.Add(rowDef);
                     for (int colCount = 1; colCount <= 31; colCount++) {
-                        //DateTime cDay = cStart.AddDays(colCount - 1);
-                        //DayOfWeek dow = cDay.DayOfWeek;
                         string cellName = "R" + rowCount + "C" + colCount;
                         StackPanel stackPanel = new StackPanel();
                         stackPanel.Name = cellName;
-                        //if (lEnd < colCount) {
-                        //    stackPanel.Background = Brushes.DarkGray;
-                        //} else if (dow == DayOfWeek.Sunday) {
-                        //    stackPanel.Background = Brushes.LightPink;
-                        //} else if (dow == DayOfWeek.Saturday) {
-                        //    stackPanel.Background = Brushes.LightCyan;
-                        //} else {
-                        //    stackPanel.Background = Brushes.White;
-                        //}
                         stackPanel.SetValue(Grid.RowProperty, 1);
                         stackPanel.SetValue(Grid.ColumnProperty, colCount);
                         CalenderGR.Children.Add(stackPanel);
@@ -750,7 +750,7 @@ namespace ProductionSchedule.ViewModels
                         DateTime cDay = cStart.AddDays(wDay - 1);
                         DayOfWeek dow = cDay.DayOfWeek;
                         string lavelName = "l" + wDay;
-                        Label nLabel = CalenderGR.FindName(lavelName) as Label; ;           // new StackPanel();
+                        Label nLabel = MyView.FindName(lavelName) as Label; ;           // new StackPanel();
                     //    Label nLabel = LbList[wDay];
                    //     nLabel.Content = wDay;
                         nLabel.HorizontalContentAlignment= HorizontalAlignment.Right;
@@ -783,7 +783,7 @@ namespace ProductionSchedule.ViewModels
                             DateTime cDay = cStart.AddDays(colCount - 1);
                             DayOfWeek dow = cDay.DayOfWeek;
                             string cellName = "R" + rowCount + "C" + colCount;
-                            StackPanel stackPanel = CalenderGR.FindName(cellName) as StackPanel; ;           // new StackPanel();
+                            StackPanel stackPanel = MyView.FindName(cellName) as StackPanel; ;           // new StackPanel();
                             stackPanel.Name = cellName;
                             if (lEnd < colCount) {
                                 stackPanel.Background = Brushes.DarkGray;
