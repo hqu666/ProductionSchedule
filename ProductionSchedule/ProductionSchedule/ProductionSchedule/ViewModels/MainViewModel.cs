@@ -39,9 +39,9 @@ namespace ProductionSchedule.ViewModels
         /// イベントボタンリスト
         /// </summary>
         public List<Button> BtList;
-        public List<Label> LbList;
-        public List<StackPanel> SPList;
-
+        public Dictionary<string,Label> LbList;
+        public Dictionary<string, StackPanel> SPList;
+        public int GridRowCount = 24;
         public System.Collections.IEnumerable TabItems { get; set; }
 
 		public string InfoLavel { get; set; }
@@ -629,7 +629,10 @@ namespace ProductionSchedule.ViewModels
         }
         #endregion
 
-   //     public ICommand MakeCalender => new DelegateCommand(MakeCalenderBase);
+        //     public ICommand MakeCalender => new DelegateCommand(MakeCalenderBase);
+        /// <summary>
+        /// 起動時に
+        /// </summary>
         public void MakeCalenderBase() {
             string TAG = MethodBase.GetCurrentMethod().Name;
             string dbMsg = "";
@@ -642,48 +645,51 @@ namespace ProductionSchedule.ViewModels
                 RowDefinition rowDef = new RowDefinition();
                 CalenderGR.RowDefinitions.Add(rowDef);
                 //タイトル列
+                //for (int wDay = 0; wDay <= 31; wDay++) {
+                //    // Columnsを設定する
+                //    ColumnDefinition colDef = new ColumnDefinition();
+                //    if (0 == wDay) {
+                //        colDef.MinWidth = 80;
+                //    } else {
+                //        colDef.MinWidth = 40;
+                //    }
+                //    CalenderGR.ColumnDefinitions.Add(colDef);
+                //}
+                LbList = new Dictionary<string, Label>();
                 for (int wDay = 0; wDay <= 31; wDay++) {
                     // Columnsを設定する
                     ColumnDefinition colDef = new ColumnDefinition();
-                    if (0 == wDay) {
-                        colDef.MinWidth = 80;
-                    } else {
-                        colDef.MinWidth = 40;
-                    }
                     CalenderGR.ColumnDefinitions.Add(colDef);
-                }
-                LbList = new List<Label>();
-                for (int wDay = 0; wDay <= 31; wDay++) {
-                    //// Columnsを設定する
-                    //ColumnDefinition colDef = new ColumnDefinition();
-                    //CalenderGR.ColumnDefinitions.Add(colDef);
                     Label nLabel = new Label();
                     nLabel.Name = "l" + wDay;
                     if (0 == wDay) {
-                //        colDef.MinWidth = 80;
+                        colDef.MinWidth = 20;
                     } else {
-                        //       colDef.MinWidth = 40;
+                        colDef.MinWidth = 40;
                         nLabel.MinWidth = 40;
                         nLabel.Content = wDay;
                         nLabel.HorizontalContentAlignment = HorizontalAlignment.Right;
-                    //    nLabel.Foreground = Brushes.White;
                         //課題：Gridにすると着色するエレメントのマージン分隙間ができる。
                         //         nLabel.Margin ={ -8,-8,-8,-8}:
                         nLabel.SetValue(Grid.RowProperty, 0);
                         nLabel.SetValue(Grid.ColumnProperty, wDay);
                         CalenderGR.Children.Add(nLabel);
                     }
-                    LbList.Add(nLabel);
+                    LbList.Add(nLabel.Name,nLabel);
                 }
                 dbMsg += ",LbList=" + LbList.Count + "件";
                 //データレコード
-                SPList = new List<StackPanel>();
-
+                SPList = new Dictionary<string, StackPanel>();
                 //課題：stackPanelに枠線を入れる
-                for (int rowCount = 1; rowCount < 24; rowCount++) {
+                for (int rowCount = 1; rowCount < GridRowCount; rowCount++) {
                     // Rowを設定する
                     rowDef = new RowDefinition();
                     CalenderGR.RowDefinitions.Add(rowDef);
+                    Label nLabel = new Label();
+                    nLabel.Content = (rowCount-1) + ":00";
+                    nLabel.SetValue(Grid.RowProperty, rowCount);
+                    nLabel.SetValue(Grid.ColumnProperty, 0);
+                    CalenderGR.Children.Add(nLabel);
                     for (int colCount = 1; colCount <= 31; colCount++) {
                         string cellName = "R" + rowCount + "C" + colCount;
                         StackPanel stackPanel = new StackPanel();
@@ -691,7 +697,7 @@ namespace ProductionSchedule.ViewModels
                         stackPanel.SetValue(Grid.RowProperty, 1);
                         stackPanel.SetValue(Grid.ColumnProperty, colCount);
                         CalenderGR.Children.Add(stackPanel);
-                        SPList.Add(stackPanel);
+                        SPList.Add(cellName,stackPanel);
                     }
                 }
                 dbMsg += ",SPList=" + SPList.Count + "件";
@@ -750,30 +756,19 @@ namespace ProductionSchedule.ViewModels
                         DateTime cDay = cStart.AddDays(wDay - 1);
                         DayOfWeek dow = cDay.DayOfWeek;
                         string lavelName = "l" + wDay;
-                        Label nLabel = MyView.FindName(lavelName) as Label; ;           // new StackPanel();
-                    //    Label nLabel = LbList[wDay];
-                   //     nLabel.Content = wDay;
+                        Label nLabel = LbList[lavelName];
                         nLabel.HorizontalContentAlignment= HorizontalAlignment.Right;
                         nLabel.Foreground = Brushes.White;
                         if (lEnd < wDay) {
                             nLabel.Background = Brushes.DarkGray;
                         } else if (dow == DayOfWeek.Sunday) {
                             nLabel.Background = Brushes.Red;
-                            //if (0 == BtWidth) {
-                            //    BtWidth = nLabel.Width-2;
-                            //}
                         } else if (dow == DayOfWeek.Saturday) {
                             nLabel.Background = Brushes.Blue;
                         } else {
                             nLabel.Foreground = Brushes.Black;
                             nLabel.Background = Brushes.White;
                         }
-                        //課題：Gridにすると着色するエレメントのマージン分隙間ができる。
-               ////         nLabel.Margin ={ -8,-8,-8,-8}:
-               //         nLabel.SetValue(Grid.RowProperty, 0);
-               //         nLabel.SetValue(Grid.ColumnProperty, wDay);
-               //         CalenderGR.Children.Add(nLabel);
-
                     }
                     //課題：Rowを生成するには
                     //データレコード
@@ -783,7 +778,8 @@ namespace ProductionSchedule.ViewModels
                             DateTime cDay = cStart.AddDays(colCount - 1);
                             DayOfWeek dow = cDay.DayOfWeek;
                             string cellName = "R" + rowCount + "C" + colCount;
-                            StackPanel stackPanel = MyView.FindName(cellName) as StackPanel; ;           // new StackPanel();
+//                            StackPanel stackPanel = MyView.FindName(cellName) as StackPanel; ;           // new StackPanel();
+                            StackPanel stackPanel = SPList[cellName]; ;           // new StackPanel();
                             stackPanel.Name = cellName;
                             if (lEnd < colCount) {
                                 stackPanel.Background = Brushes.DarkGray;
@@ -796,7 +792,6 @@ namespace ProductionSchedule.ViewModels
                             }
                             stackPanel.SetValue(Grid.RowProperty, 1);
                             stackPanel.SetValue(Grid.ColumnProperty, colCount);
-                   //         CalenderGR.Children.Add(stackPanel);
                         }
                     }
                         int btCount = 0;
@@ -829,8 +824,10 @@ namespace ProductionSchedule.ViewModels
                         wBt.Background = ret;
                         wBt.SetValue(Grid.RowProperty, 1);
                         //課題：stackPanel内に配置させる
-                        Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
-                        int startCol = startDT.DateTime.Value.Day;
+                //        Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
+                        int startRow = MLI.startDT.Hour;
+                        wBt.SetValue(Grid.ColumnProperty, startRow);
+                        int startCol = MLI.startDT.Day;
                         wBt.SetValue(Grid.ColumnProperty, startCol);
                         CalenderGR.Children.Add(wBt);
                         BtList.Add(wBt);
@@ -1624,10 +1621,20 @@ namespace ProductionSchedule.ViewModels
         }
 
 
+        public DateTime endDT { get; set; }
+        private string _endDTStr { set; get; }
         /// <summary>
         /// 終了日時
         /// </summary>
-        public string endDTStr { get; set; }
+        public string endDTStr {
+            get { return _endDTStr; }
+            set {
+                if (_endDTStr == value)
+                    return;
+                _endDTStr = value;
+                endDT = DateTime.Parse(value);
+            }
+        }
 
 
         /// <summary>
