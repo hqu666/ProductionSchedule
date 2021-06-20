@@ -104,6 +104,12 @@ namespace ProductionSchedule.ViewModels
                     if (value == _GoogleAcountStr)
                         return;
                     _GoogleAcountStr = value;
+                    if (!String.IsNullOrEmpty(_GoogleAcountStr) &&
+                        !_GoogleAcountStr.Equals(Constant.GoogleAcountMSG)) {
+
+                        Connect();
+                    }
+                    //変更イベントに使用
                     MyLog(TAG, dbMsg);
                 }
                 catch (Exception er)
@@ -165,6 +171,8 @@ namespace ProductionSchedule.ViewModels
                 this.TargetURLStr = Constant.WebStratUrl;
                 dbMsg += ",遷移先URL=  " + TargetURLStr;
                 NotifyPropertyChanged("TargetURI");
+                //起動時は接続側のみ
+                Cancel();
                 //    GoogleAcountStr = "hkuwauama@gmail.com";
                 var settings = Settings.Default;
                 GoogleAcountStr = Constant.GoogleAcountMSG;
@@ -185,8 +193,7 @@ namespace ProductionSchedule.ViewModels
                     }
                 }
 
-                //起動時は接続側のみ
-                Cancel();
+
                 //          ToDaySet();
 
 
@@ -308,7 +315,9 @@ namespace ProductionSchedule.ViewModels
                     //{
                     //    dbMsg += "[" + Constant.RootFolderID + "]" + Constant.RootFolderName;
                     //}
+                    CalenderWrite();
                 }
+
                 MyLog(TAG, dbMsg);
     //            Messenger.Raise(new WindowActionMessage(WindowAction.Close, "Close"));
             }
