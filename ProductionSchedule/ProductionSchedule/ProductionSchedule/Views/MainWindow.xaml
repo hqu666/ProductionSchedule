@@ -11,7 +11,7 @@
 		xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
 		xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
 		FontSize="14" 
-        MinWidth="1800"
+        MinWidth="800"
         MinHeight="600"
 		WindowStartupLocation="CenterScreen"
         Width="1800"
@@ -25,13 +25,14 @@
 			SizeToContent="WidthAndHeight"
 WindowStartupLocation="CenterScreen" 
  		Loaded="Window_Loaded" Closing="Window_Closing" 
-   -->
-
-    <Window.DataContext>
+    
+        <Window.DataContext>
         <vm:MainViewModel/>
     </Window.DataContext>
 
-    <!--<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">-->
+
+   -->
+
     <!--<i:Interaction.Triggers>
 			<i:EventTrigger EventName="ContentRendered">
 				-->
@@ -56,11 +57,8 @@ WindowStartupLocation="CenterScreen"
 		</i:Interaction.Behaviors>-->
 
     <Window.Resources>
-        <!--<Style TargetType="StackPanel">
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,5,0,5"/>
-        </Style>-->
-
+        <BooleanToVisibilityConverter x:Key="BoolVisibilityConverter" />
+        
         <Style TargetType="Label">
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Margin" Value="5"/>
@@ -122,7 +120,8 @@ WindowStartupLocation="CenterScreen"
             <Setter Property="Template"  Value="{StaticResource buttonTemplate}"/>
         </Style>
     </Window.Resources>
-    <Grid Margin="8,8,8,8" >
+    <!--<ScrollViewer VerticalScrollBarVisibility="Auto">-->
+      <Grid Margin="8,8,8,8" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition  Width="*"  />
             <ColumnDefinition  Width="auto"  />
@@ -131,11 +130,9 @@ WindowStartupLocation="CenterScreen"
         <Grid.RowDefinitions >
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition x:Name="attach_row" Height="*"/>
         </Grid.RowDefinitions>
 
         <!--
@@ -144,7 +141,8 @@ WindowStartupLocation="CenterScreen"
         
         -->
         <!--<Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">-->
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center"
+            <StackPanel Name="ContorolSP"
+                        Orientation="Horizontal" VerticalAlignment="Center"
                         Grid.Row="0" Grid.Column="0">
                 <Button x:Name="UpDateBT"
                          Style="{DynamicResource SquareButton}" Height="30"
@@ -231,17 +229,16 @@ WindowStartupLocation="CenterScreen"
             </ComboBox>
             <Button 
 			            Command="{Binding ConnectCommand}"
-                        Visibility="{Binding ConnectVisibility}"
+                        Visibility="{Binding ConnectVisibility, Converter={StaticResource BoolVisibilityConverter}}"
 			            Name="Connect_bt" Content="Googleログイン" HorizontalAlignment="Right"
 			            />
             <Button 
-			            Command="{Binding CancelCommand}"
+			            Command="{Binding CancelCommand, Converter={StaticResource BoolVisibilityConverter}}"
                         Visibility="{Binding CancelVisibility}"
 			            Name="Cancel_bt" Content="ログアウト" 
 			            />
 
         </StackPanel>
-        <!--</Grid>-->
         <!--<DataGrid 
             Name="CalenderDG"
             Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
@@ -251,54 +248,17 @@ WindowStartupLocation="CenterScreen"
             ItemsSource="{Binding CalenderItems}"
             >
         </DataGrid>-->
-        <Grid
-            Name="CalenderGR"
+        <ScrollViewer 
+            Name="CalenderSV"
             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-            Panel.ZIndex="-1" Margin="0,8,0,0"
-            >
-           <!--<Grid.ColumnDefinitions>
-                <ColumnDefinition  x:Name="titiolCol" Width="100*"  />
-                <ColumnDefinition  x:Name="c01" Width="40*"  />
-                <ColumnDefinition  x:Name="c02" Width="40*"  />
-                <ColumnDefinition  x:Name="c03" Width="40*"  />
-                <ColumnDefinition  x:Name="c04" Width="40*"  />
-                <ColumnDefinition  x:Name="c05" Width="40*"  />
-                <ColumnDefinition  x:Name="c06" Width="40*"  />
-                <ColumnDefinition  x:Name="c07" Width="40*"  />
-                <ColumnDefinition  x:Name="c08" Width="40*"  />
-                <ColumnDefinition  x:Name="c09" Width="40*"  />
-                <ColumnDefinition  x:Name="c10" Width="40*"  />
-                <ColumnDefinition  x:Name="c11" Width="40*"  />
-                <ColumnDefinition  x:Name="c12" Width="40*"  />
-                <ColumnDefinition  x:Name="c13" Width="40*"  />
-                <ColumnDefinition  x:Name="c14" Width="40*"  />
-                <ColumnDefinition  x:Name="c15" Width="40*"  />
-                <ColumnDefinition  x:Name="c16" Width="40*"  />
-                <ColumnDefinition  x:Name="c17" Width="40*"  />
-                <ColumnDefinition  x:Name="c18" Width="40*"  />
-                <ColumnDefinition  x:Name="c19" Width="40*"  />
-                <ColumnDefinition  x:Name="c20" Width="40*"  />
-                <ColumnDefinition  x:Name="c21" Width="40*"  />
-                <ColumnDefinition  x:Name="c22" Width="40*"  />
-                <ColumnDefinition  x:Name="c23" Width="40*"  />
-                <ColumnDefinition  x:Name="c24" Width="40*"  />
-                <ColumnDefinition  x:Name="c25" Width="40*"  />
-                <ColumnDefinition  x:Name="c26" Width="40*"  />
-                <ColumnDefinition  x:Name="c27" Width="40*"  />
-                <ColumnDefinition  x:Name="c28" Width="40*"  />
-                <ColumnDefinition  x:Name="c29" Width="40*"  />
-                <ColumnDefinition  x:Name="c30" Width="40*"  />
-                <ColumnDefinition  x:Name="c31" Width="40*"  />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions >
-                <RowDefinition x:Name="titolRow"  Height="35"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>-->
-        </Grid>
+            HorizontalScrollBarVisibility="Auto" 
+            VerticalScrollBarVisibility="Auto">
+            <Grid
+                Name="CalenderGR"
+                Panel.ZIndex="-1" Margin="0,8,0,0" MinWidth="30"
+                >
+            </Grid>
+        </ScrollViewer>
 
 
         <TextBox x:Name="ResultTB" 

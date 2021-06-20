@@ -47,6 +47,9 @@ namespace ProductionSchedule.Views
             // ウィンドウのサイズを復元
             RecoverWindowBounds();
             VM.MainWindowWidth = this.Width;
+            VM.MainWindowHight = this.Height;
+            //VM.CalenderTop = ContorolSP.Height + ContorolSP.Margin.Top+ContorolSP.Margin.Bottom;
+            //CalenderSV.Height = this.Height- (ContorolSP.Height + ContorolSP.Margin.Top + ContorolSP.Margin.Bottom);
             VM.MakeCalenderBase();
         }
 

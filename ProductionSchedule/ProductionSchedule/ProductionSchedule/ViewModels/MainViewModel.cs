@@ -32,6 +32,8 @@ namespace ProductionSchedule.ViewModels
 
         public Views.MainWindow MyView { get; set; }
         public double MainWindowWidth { get; set; }
+        public double MainWindowHight { get; set; }
+        public double CalenderTop { get; set; }
         public Grid CalenderGR { get; set; }
         public DataGrid CalenderDG { get; set; }
         public List<Models.MyMenu> _MyMenu { get; set; }
@@ -41,7 +43,7 @@ namespace ProductionSchedule.ViewModels
         public List<Button> BtList;
         public Dictionary<string,Label> LbList;
         public Dictionary<string, StackPanel> SPList;
-        public int GridRowCount = 24;
+        public int GridRowCount = 25;
         public System.Collections.IEnumerable TabItems { get; set; }
 
 		public string InfoLavel { get; set; }
@@ -80,11 +82,11 @@ namespace ProductionSchedule.ViewModels
         /// <summary>
         /// 接続ボタン表示
         /// </summary>
-        public string ConnectVisibility { set; get; }
+        public bool ConnectVisibility { set; get; }
         /// <summary>
         /// 解除ボタン表示
         /// </summary>
-        public string CancelVisibility { set; get; }
+        public bool CancelVisibility { set; get; }
 
 
         private string _GoogleAcountStr;
@@ -315,11 +317,15 @@ namespace ProductionSchedule.ViewModels
                     //{
                     //    dbMsg += "[" + Constant.RootFolderID + "]" + Constant.RootFolderName;
                     //}
+                    ConnectVisibility = false;          //colapsed
+                    NotifyPropertyChanged("ConnectVisibility");
+                    CancelVisibility = true;
+                    NotifyPropertyChanged("CancelVisibility");
+                    NotifyPropertyChanged();
                     CalenderWrite();
                 }
 
                 MyLog(TAG, dbMsg);
-    //            Messenger.Raise(new WindowActionMessage(WindowAction.Close, "Close"));
             }
             catch (Exception er)
             {
@@ -398,8 +404,6 @@ namespace ProductionSchedule.ViewModels
                 CalenderNameStr = "praimary";
                 CalenderNameList.Add(CalenderNameStr);
 
-                ConnectVisibility = "Hidden";
-                CancelVisibility = "Visible";
 
                 //Constant.RootFolderID = GDriveUtil.MakeAriadneGoogleFolder();
                 //if (Constant.RootFolderID.Equals("")){
@@ -570,14 +574,10 @@ namespace ProductionSchedule.ViewModels
                 Constant.MyCalendarService = null;
                 dbMsg += "\r\n>>" + Constant.MyDriveCredential.Token.ToString();
                 MyLog(TAG, dbMsg);
-                ConnectVisibility = "Visible";
-      //          RaisePropertyChanged("ConnectVisibility");
-                CancelVisibility = "Hidden";
-                //RaisePropertyChanged("CancelVisibility");
-                //RaisePropertyChanged();
-                //		Messenger.Raise(new WindowActionMessage(WindowAction.Close, "Close"));
-            }
-            catch (Exception er)
+                ConnectVisibility = true;
+                CancelVisibility = false;
+                NotifyPropertyChanged();
+            } catch (Exception er)
             {
                 MyErrorLog(TAG, dbMsg, er);
             }
@@ -650,6 +650,8 @@ namespace ProductionSchedule.ViewModels
                 //CalenderGR.HorizontalAlignment = HorizontalAlignment.Left;
                 //CalenderGR.VerticalAlignment = VerticalAlignment.Top;
                 CalenderGR.ShowGridLines = true;
+                //CalenderGR.Height = MainWindowHight - CalenderTop;
+
                 // Rowを設定する
                 RowDefinition rowDef = new RowDefinition();
                 CalenderGR.RowDefinitions.Add(rowDef);
@@ -1116,19 +1118,18 @@ namespace ProductionSchedule.ViewModels
                     ///    EDays = new ObservableCollection<ADay>();
                     foreach (var rEvent in ReadEvents) {
                         MyListItem MLI = new MyListItem();
-                        MLI.startDTStr = rEvent.Start.DateTime.ToString();
+                        MLI.startDTStr = rEvent.Start.Date;
                    //     dbMsg += "\r\n" + MLI.startDTStr;
-                        if (String.IsNullOrEmpty(MLI.startDTStr)) {
-                            MLI.startDTStr = rEvent.Start.Date;
+                        if (rEvent.Start.DateTime!=null) {
+                            MLI.startDTStr = rEvent.Start.DateTime.ToString();
                             dbMsg += ">>" + MLI.startDTStr;
                         }
-                        MLI.endDTStr = rEvent.End.DateTime.ToString();
-                  //      dbMsg += "～" + MLI.endDTStr;
-                        if (String.IsNullOrEmpty(MLI.endDTStr)) {
-                            MLI.endDTStr = rEvent.End.Date;
-                            dbMsg += ">>" + MLI.endDTStr;
+                        MLI.endDTStr = rEvent.End.Date;
+                        //     dbMsg += "\r\n" + MLI.startDTStr;
+                        if (rEvent.End.DateTime != null) {
+                            MLI.startDTStr = rEvent.End.DateTime.ToString();
+                            dbMsg += ">>" + MLI.startDTStr;
                         }
-                 //       dbMsg += ";" + rEvent.Description + ";" + rEvent.Summary;
                         MLI.description = rEvent.Description;
                         MLI.summary = rEvent.Summary;
                         if (String.IsNullOrEmpty(MLI.summary)) {
