@@ -656,16 +656,6 @@ namespace ProductionSchedule.ViewModels
                 RowDefinition rowDef = new RowDefinition();
                 CalenderGR.RowDefinitions.Add(rowDef);
                 //タイトル列
-                //for (int wDay = 0; wDay <= 31; wDay++) {
-                //    // Columnsを設定する
-                //    ColumnDefinition colDef = new ColumnDefinition();
-                //    if (0 == wDay) {
-                //        colDef.MinWidth = 80;
-                //    } else {
-                //        colDef.MinWidth = 40;
-                //    }
-                //    CalenderGR.ColumnDefinitions.Add(colDef);
-                //}
                 LbList = new Dictionary<string, Label>();
                 for (int wDay = 0; wDay <= 31; wDay++) {
                     // Columnsを設定する
@@ -692,20 +682,26 @@ namespace ProductionSchedule.ViewModels
                 //データレコード
                 SPList = new Dictionary<string, StackPanel>();
                 //課題：stackPanelに枠線を入れる
+                GridRowCount++;
                 for (int rowCount = 1; rowCount < GridRowCount; rowCount++) {
                     // Rowを設定する
                     rowDef = new RowDefinition();
                     CalenderGR.RowDefinitions.Add(rowDef);
+                    //行ラベル
                     Label nLabel = new Label();
-                    nLabel.Content = (rowCount-1) + ":00";
+                    if (1== rowCount) {
+                        nLabel.Content =  "終日";
+                    } else {
+                        nLabel.Content = (rowCount - 2) + ":00";
+                    }
                     nLabel.SetValue(Grid.RowProperty, rowCount);
                     nLabel.SetValue(Grid.ColumnProperty, 0);
                     CalenderGR.Children.Add(nLabel);
                     for (int colCount = 1; colCount <= 31; colCount++) {
-                        string cellName = "R" + rowCount + "C" + colCount;
+                        string cellName = "R" + (rowCount-1) + "C" + colCount;
                         StackPanel stackPanel = new StackPanel();
                         stackPanel.Name = cellName;
-                        stackPanel.SetValue(Grid.RowProperty, 1);
+                        stackPanel.SetValue(Grid.RowProperty, rowCount);
                         stackPanel.SetValue(Grid.ColumnProperty, colCount);
                         CalenderGR.Children.Add(stackPanel);
                         SPList.Add(cellName,stackPanel);
@@ -753,10 +749,10 @@ namespace ProductionSchedule.ViewModels
                     MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }else{
                     dbMsg += ",ウインドウ＝;" + MainWindowWidth;
-                    double gridLeft = CalenderGR.Margin.Left;
-                    dbMsg += ",グリッド左＝;" + gridLeft;
-                    double myCellWidth = (MainWindowWidth - (gridLeft * 2) - 200) / 31;
-                    dbMsg += ",セルj幅＝;" + myCellWidth;
+                    //double gridLeft = CalenderGR.Margin.Left;
+                    //dbMsg += ",グリッド左＝;" + gridLeft;
+                    //double myCellWidth = (MainWindowWidth - (gridLeft * 2) - 200) / 31;
+                    //dbMsg += ",セルj幅＝;" + myCellWidth;
                     dbMsg += "\r\n削除";
                     foreach (Button dBt in BtList) {
                         dbMsg += "," + dBt.Name;
@@ -768,41 +764,33 @@ namespace ProductionSchedule.ViewModels
                         DayOfWeek dow = cDay.DayOfWeek;
                         string lavelName = "l" + wDay;
                         Label nLabel = LbList[lavelName];
-                        nLabel.HorizontalContentAlignment= HorizontalAlignment.Right;
-                        nLabel.Foreground = Brushes.White;
-                        if (lEnd < wDay) {
-                            nLabel.Background = Brushes.DarkGray;
-                        } else if (dow == DayOfWeek.Sunday) {
-                            nLabel.Background = Brushes.Red;
-                        } else if (dow == DayOfWeek.Saturday) {
-                            nLabel.Background = Brushes.Blue;
-                        } else {
-                            nLabel.Foreground = Brushes.Black;
-                            nLabel.Background = Brushes.White;
-                        }
-                    }
-                    //課題：Rowを生成するには
-                    //データレコード
-                    //課題：stackPanelに枠線を入れる
-                    for (int rowCount = 1; rowCount < 2; rowCount++) {
-                        for (int colCount = 1; colCount <= 31; colCount++) {
-                            DateTime cDay = cStart.AddDays(colCount - 1);
-                            DayOfWeek dow = cDay.DayOfWeek;
-                            string cellName = "R" + rowCount + "C" + colCount;
-//                            StackPanel stackPanel = MyView.FindName(cellName) as StackPanel; ;           // new StackPanel();
-                            StackPanel stackPanel = SPList[cellName]; ;           // new StackPanel();
-                            stackPanel.Name = cellName;
-                            if (lEnd < colCount) {
-                                stackPanel.Background = Brushes.DarkGray;
+                        if (nLabel != null) {
+                            dbMsg += ",日付ラベル" + nLabel.Name;
+                            nLabel.HorizontalContentAlignment = HorizontalAlignment.Right;
+                            nLabel.Foreground = Brushes.White;
+                            Brush stackPanelBackground = Brushes.White;
+
+                            if (lEnd < wDay) {
+                                nLabel.Background = Brushes.DarkGray;
+                                stackPanelBackground = Brushes.DarkGray;
                             } else if (dow == DayOfWeek.Sunday) {
-                                stackPanel.Background = Brushes.LightPink;
+                                nLabel.Background = Brushes.Red;
+                                stackPanelBackground = Brushes.LightPink;
                             } else if (dow == DayOfWeek.Saturday) {
-                                stackPanel.Background = Brushes.LightCyan;
+                                nLabel.Background = Brushes.Blue;
+                                stackPanelBackground = Brushes.LightBlue;
                             } else {
-                                stackPanel.Background = Brushes.White;
+                                nLabel.Foreground = Brushes.Black;
+                                nLabel.Background = Brushes.White;
                             }
-                            stackPanel.SetValue(Grid.RowProperty, 1);
-                            stackPanel.SetValue(Grid.ColumnProperty, colCount);
+                            for (int rowCount = 0; rowCount < (GridRowCount-1); rowCount++) {
+                                string cellName = "R" + rowCount + "C" + wDay;
+                                StackPanel stackPanel = SPList[cellName]; ;           // new StackPanel();
+                                if (stackPanel != null) {
+                                    dbMsg += ",stackPanel" + stackPanel.Name;
+                                    stackPanel.Background = stackPanelBackground;
+                                }
+                            }
                         }
                     }
                         int btCount = 0;
@@ -840,6 +828,8 @@ namespace ProductionSchedule.ViewModels
                         wBt.SetValue(Grid.ColumnProperty, startRow);
                         int startCol = MLI.startDT.Day;
                         wBt.SetValue(Grid.ColumnProperty, startCol);
+                        dbMsg += "、R" + startRow+ "C" + startRow;
+
                         CalenderGR.Children.Add(wBt);
                         BtList.Add(wBt);
                     }
