@@ -590,6 +590,8 @@ namespace ProductionSchedule.ViewModels
         /// Viewの高さ
         /// </summary>
         public double vHeight { get; set; }
+        public double rHeight { get; set; }
+
         /// <summary>
         /// Viewを格納するGridの高さ
         /// </summary>
@@ -653,6 +655,7 @@ namespace ProductionSchedule.ViewModels
                 //CalenderGR.Height = MainWindowHight - CalenderTop;
 
                 // Rowを設定する
+                rHeight = 30;
                 RowDefinition rowDef = new RowDefinition();
                 CalenderGR.RowDefinitions.Add(rowDef);
                 //タイトル列
@@ -765,7 +768,7 @@ namespace ProductionSchedule.ViewModels
                         string lavelName = "l" + wDay;
                         Label nLabel = LbList[lavelName];
                         if (nLabel != null) {
-                            dbMsg += ",日付ラベル" + nLabel.Name;
+                  //          dbMsg += ",日付ラベル" + nLabel.Name;
                             nLabel.HorizontalContentAlignment = HorizontalAlignment.Right;
                             nLabel.Foreground = Brushes.White;
                             Brush stackPanelBackground = Brushes.White;
@@ -787,20 +790,22 @@ namespace ProductionSchedule.ViewModels
                                 string cellName = "R" + rowCount + "C" + wDay;
                                 StackPanel stackPanel = SPList[cellName]; ;           // new StackPanel();
                                 if (stackPanel != null) {
-                                    dbMsg += ",stackPanel" + stackPanel.Name;
+                             //       dbMsg += ",stackPanel" + stackPanel.Name;
                                     stackPanel.Background = stackPanelBackground;
                                 }
                             }
                         }
                     }
-                        int btCount = 0;
+
+                    //イベント配置
+                    int btCount = 0;
                     BtList = new List<Button>();
+                    rHeight = 30;
                     foreach (MyListItem MLI in MyListItems) {
                         btCount++;
                         dbMsg += "\r\n[" + btCount+"]"+ MLI.startDTStr+ "～" + MLI.endDTStr;
-                        dbMsg += "、" + MLI.startDT;
                         string ButtonFace = "";
-                        if (!String.IsNullOrEmpty(MLI.description)) {
+                        if (!String.IsNullOrEmpty(MLI.startDT.ToString("yyyyMMdd"))) {
                             ButtonFace += MLI.description;
                         }
                         if (!String.IsNullOrEmpty(MLI.summary)) {
@@ -811,24 +816,63 @@ namespace ProductionSchedule.ViewModels
                         if (! String.IsNullOrEmpty(MLI.googleEvent.ColorId)) {
                             ColorId = int.Parse(MLI.googleEvent.ColorId);
                         }
+                        Thickness btMargin =  new Thickness(0, 0, 0, 0);
 
                         Button wBt = new Button();
                         wBt.Name = "Bt_" + MLI.startDT.ToString("yyyyMMdd") + "_" + btCount;
-                        wBt.Content = ButtonFace;
-                //        wBt.Padding.Top = (dDouble)-5;
-                 //       wBt.Width= BtWidth;
                         string ColorIdStr = MLI.googleEvent.ColorId;
                         object obj = System.Windows.Media.ColorConverter.ConvertFromString(GoogleColors[ColorId]);
-                        SolidColorBrush ret = new SolidColorBrush((System.Windows.Media.Color)obj);
-                        wBt.Background = ret;
-                        wBt.SetValue(Grid.RowProperty, 1);
+                        SolidColorBrush BGColor = new SolidColorBrush((System.Windows.Media.Color)obj);
+                        wBt.Background = BGColor;
                         //課題：stackPanel内に配置させる
                 //        Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
-                        int startRow = MLI.startDT.Hour;
-                        wBt.SetValue(Grid.ColumnProperty, startRow);
+                        int startRow = MLI.startDT.Hour+2;
+                        if (MLI.startDTStr.Contains('-')) {
+                            dbMsg += "、終日";
+                            startRow = MLI.startDT.Hour + 1;
+                            ButtonFace = MLI.startDT.ToString("MM/dd")+"\r\n" + ButtonFace;
+                        } else {
+                            ButtonFace = MLI.startDT.ToString("HH:mm") + "～" + MLI.endDT.ToString("HH:mm") + "\r\n" + ButtonFace;
+                            //開始分数はみ出させる。
+                            if (0 < MLI.startDT.Minute) {
+                                dbMsg += "開始分=" + MLI.startDT.Minute;
+                                double startMargin = rHeight * (MLI.endDT.Minute / 60);
+                                dbMsg += ",はみ出し=" + startMargin;
+                                btMargin.Top = startMargin;
+                            }
+                        }
+                        dbMsg += "、R=" + startRow;
+                        wBt.SetValue(Grid.RowProperty, startRow);
+                        if (!MLI.startDTStr.Contains('-')) {
+                            int endtRow = MLI.endDT.Hour + 2;
+                            dbMsg += "～" + endtRow;
+                            int rowSpan = endtRow - startRow;
+                            dbMsg += "[" + rowSpan + "時間]";
+                            if (1 < rowSpan) {
+                                wBt.SetValue(Grid.RowSpanProperty, rowSpan + 1);
+                            }
+                        }
+                        //終了分数はみ出させる。
+                        if (0<MLI.endDT.Minute) {
+                            dbMsg += "終了分=" + MLI.endDT.Minute;
+                            double endMargin = -rHeight * (MLI.endDT.Minute / 60);
+                            dbMsg += ",はみ出し=" + endMargin;
+                            btMargin.Bottom = endMargin;
+                        }
                         int startCol = MLI.startDT.Day;
+                        dbMsg += "、C=" + startCol;
                         wBt.SetValue(Grid.ColumnProperty, startCol);
+                        int endCol = MLI.endDT.Day;
+                        dbMsg += "～" + endCol + "日";
+                        int colSpan = endCol - startCol+1;
+                        dbMsg += "[" + colSpan + "日間]";
+                        if (1<colSpan) {
+                            wBt.SetValue(Grid.ColumnSpanProperty, colSpan);
+                        }
                         dbMsg += "、R" + startRow+ "C" + startRow;
+                        wBt.Content = ButtonFace;
+                        wBt.BorderBrush = Brushes.White;
+                        wBt.Margin= btMargin;
 
                         CalenderGR.Children.Add(wBt);
                         BtList.Add(wBt);
@@ -1117,8 +1161,8 @@ namespace ProductionSchedule.ViewModels
                         MLI.endDTStr = rEvent.End.Date;
                         //     dbMsg += "\r\n" + MLI.startDTStr;
                         if (rEvent.End.DateTime != null) {
-                            MLI.startDTStr = rEvent.End.DateTime.ToString();
-                            dbMsg += ">>" + MLI.startDTStr;
+                            MLI.endDTStr = rEvent.End.DateTime.ToString();
+                            dbMsg += ">>" + MLI.endDTStr;
                         }
                         MLI.description = rEvent.Description;
                         MLI.summary = rEvent.Summary;
