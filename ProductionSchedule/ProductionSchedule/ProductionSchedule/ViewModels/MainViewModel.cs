@@ -590,7 +590,10 @@ namespace ProductionSchedule.ViewModels
         /// Viewの高さ
         /// </summary>
         public double vHeight { get; set; }
-        public double rHeight { get; set; }
+        public double rHeight;
+        public int startHour;
+        public int endHour;
+
 
         /// <summary>
         /// Viewを格納するGridの高さ
@@ -642,7 +645,7 @@ namespace ProductionSchedule.ViewModels
 
         //     public ICommand MakeCalender => new DelegateCommand(MakeCalenderBase);
         /// <summary>
-        /// 起動時に
+        /// 起動時のカレンダ作成
         /// </summary>
         public void MakeCalenderBase() {
             string TAG = MethodBase.GetCurrentMethod().Name;
@@ -657,6 +660,7 @@ namespace ProductionSchedule.ViewModels
                 // Rowを設定する
                 rHeight = 30;
                 RowDefinition rowDef = new RowDefinition();
+                rowDef.Height = new GridLength(0, GridUnitType.Star);
                 CalenderGR.RowDefinitions.Add(rowDef);
                 //タイトル列
                 LbList = new Dictionary<string, Label>();
@@ -679,6 +683,8 @@ namespace ProductionSchedule.ViewModels
                         nLabel.SetValue(Grid.ColumnProperty, wDay);
                         CalenderGR.Children.Add(nLabel);
                     }
+                    nLabel.Height = 40;
+                    nLabel.Margin = new Thickness(0, 0, 0, 0);
                     LbList.Add(nLabel.Name,nLabel);
                 }
                 dbMsg += ",LbList=" + LbList.Count + "件";
@@ -689,6 +695,8 @@ namespace ProductionSchedule.ViewModels
                 for (int rowCount = 1; rowCount < GridRowCount; rowCount++) {
                     // Rowを設定する
                     rowDef = new RowDefinition();
+                    //    rowDef.Height = new GridLength(1.0, GridUnitType.Star);          // <RowDefinition Height="*"/> と同じ
+                    rowDef.Height = GridLength.Auto;            // <RowDefinition Height="Auto"/> と同じ
                     CalenderGR.RowDefinitions.Add(rowDef);
                     //行ラベル
                     Label nLabel = new Label();
@@ -697,6 +705,8 @@ namespace ProductionSchedule.ViewModels
                     } else {
                         nLabel.Content = (rowCount - 2) + ":00";
                     }
+          //          nLabel.Height = 0;
+                    nLabel.Margin = new Thickness(0, 0, 0, 0);
                     nLabel.SetValue(Grid.RowProperty, rowCount);
                     nLabel.SetValue(Grid.ColumnProperty, 0);
                     CalenderGR.Children.Add(nLabel);
@@ -717,6 +727,9 @@ namespace ProductionSchedule.ViewModels
             }
         }
 
+        /// <summary>
+        /// 毎月のカレンダ更新
+        /// </summary>
         public void CalenderWrite()
         {
             string TAG = MethodBase.GetCurrentMethod().Name;
@@ -772,7 +785,6 @@ namespace ProductionSchedule.ViewModels
                             nLabel.HorizontalContentAlignment = HorizontalAlignment.Right;
                             nLabel.Foreground = Brushes.White;
                             Brush stackPanelBackground = Brushes.White;
-
                             if (lEnd < wDay) {
                                 nLabel.Background = Brushes.DarkGray;
                                 stackPanelBackground = Brushes.DarkGray;
@@ -797,10 +809,26 @@ namespace ProductionSchedule.ViewModels
                         }
                     }
 
+                    dbMsg += "、全高=" + CalenderGR.ActualHeight;
+             //       CalenderGR.Height=CalenderGR.ActualHeight;
+                    int endRowNo = CalenderGR.RowDefinitions.Count;
+                    dbMsg += "、最終行=" + endRowNo;
+                    rHeight = CalenderGR.ActualHeight/ endRowNo;
+                    dbMsg += "、行高=" + rHeight;
+                    //for (int rowCount = 2; rowCount <= endRowNo; rowCount++) {
+                    // //   GridLength rHi = CalenderGR.RowDefinitions[rowCount].Height;
+                    //    if ((startHour-1) <=rowCount && rowCount <=(endHour+1)) {
+                    //        CalenderGR.RowDefinitions[rowCount].Height= new GridLength(rHeight, GridUnitType.Star);
+                    //    } else {
+                    //        CalenderGR.RowDefinitions[rowCount].Height = new GridLength(0, GridUnitType.Star);
+                    //    }
+                    //}
+
+
                     //イベント配置
                     int btCount = 0;
                     BtList = new List<Button>();
-                    rHeight = 30;
+
                     foreach (MyListItem MLI in MyListItems) {
                         btCount++;
                         dbMsg += "\r\n[" + btCount+"]"+ MLI.startDTStr+ "～" + MLI.endDTStr;
@@ -816,7 +844,7 @@ namespace ProductionSchedule.ViewModels
                         if (! String.IsNullOrEmpty(MLI.googleEvent.ColorId)) {
                             ColorId = int.Parse(MLI.googleEvent.ColorId);
                         }
-                        Thickness btMargin =  new Thickness(0, 0, 0, 0);
+                        Thickness btMargin =  new Thickness(2, 2, 2, 2);
 
                         Button wBt = new Button();
                         wBt.Name = "Bt_" + MLI.startDT.ToString("yyyyMMdd") + "_" + btCount;
@@ -835,8 +863,9 @@ namespace ProductionSchedule.ViewModels
                             ButtonFace = MLI.startDT.ToString("HH:mm") + "～" + MLI.endDT.ToString("HH:mm") + "\r\n" + ButtonFace;
                             //開始分数はみ出させる。
                             if (0 < MLI.startDT.Minute) {
-                                dbMsg += "開始分=" + MLI.startDT.Minute;
-                                double startMargin = rHeight * (MLI.endDT.Minute / 60);
+                                int startMinute = MLI.startDT.Minute;
+                                dbMsg += "開始分=" + startMinute;
+                                double startMargin = rHeight * (startMinute / 60);
                                 dbMsg += ",はみ出し=" + startMargin;
                                 btMargin.Top = startMargin;
                             }
@@ -849,13 +878,14 @@ namespace ProductionSchedule.ViewModels
                             int rowSpan = endtRow - startRow;
                             dbMsg += "[" + rowSpan + "時間]";
                             if (1 < rowSpan) {
-                                wBt.SetValue(Grid.RowSpanProperty, rowSpan + 1);
+                                wBt.SetValue(Grid.RowSpanProperty, rowSpan);
                             }
                         }
                         //終了分数はみ出させる。
                         if (0<MLI.endDT.Minute) {
-                            dbMsg += "終了分=" + MLI.endDT.Minute;
-                            double endMargin = -rHeight * (MLI.endDT.Minute / 60);
+                            int endMinute= MLI.endDT.Minute;
+                            dbMsg += "終了分=" + endMinute;
+                            double endMargin = -rHeight * (endMinute / 60);
                             dbMsg += ",はみ出し=" + endMargin;
                             btMargin.Bottom = endMargin;
                         }
@@ -864,14 +894,18 @@ namespace ProductionSchedule.ViewModels
                         wBt.SetValue(Grid.ColumnProperty, startCol);
                         int endCol = MLI.endDT.Day;
                         dbMsg += "～" + endCol + "日";
-                        int colSpan = endCol - startCol+1;
+                        int colSpan = endCol - startCol;
                         dbMsg += "[" + colSpan + "日間]";
                         if (1<colSpan) {
-                            wBt.SetValue(Grid.ColumnSpanProperty, colSpan);
+                            wBt.SetValue(Grid.ColumnSpanProperty, colSpan+1);
                         }
                         dbMsg += "、R" + startRow+ "C" + startRow;
                         wBt.Content = ButtonFace;
                         wBt.BorderBrush = Brushes.White;
+                        wBt.BorderThickness = new Thickness(2, 2, 2, 2);
+                        wBt.HorizontalContentAlignment = HorizontalAlignment.Left;
+                        wBt.VerticalContentAlignment = VerticalAlignment.Top;
+                        //       wBt.Padding = new Thickness(2, 2, 2, 2);
                         wBt.Margin= btMargin;
 
                         CalenderGR.Children.Add(wBt);
@@ -1136,6 +1170,9 @@ namespace ProductionSchedule.ViewModels
             string dbMsg = "";
             MyListItems = new ObservableCollection<MyListItem>();
             try {
+
+                startHour=23;
+                endHour=0;
                 dbMsg += "" + SelectedDateTime;
                 CS_Util Util = new CS_Util();
                 //予定取得///////////////////////////////////////////
@@ -1157,12 +1194,18 @@ namespace ProductionSchedule.ViewModels
                         if (rEvent.Start.DateTime!=null) {
                             MLI.startDTStr = rEvent.Start.DateTime.ToString();
                             dbMsg += ">>" + MLI.startDTStr;
+                            if (rEvent.Start.DateTime.Value.Hour< startHour) {
+                                startHour =rEvent.Start.DateTime.Value.Hour;
+                            }
                         }
                         MLI.endDTStr = rEvent.End.Date;
                         //     dbMsg += "\r\n" + MLI.startDTStr;
                         if (rEvent.End.DateTime != null) {
                             MLI.endDTStr = rEvent.End.DateTime.ToString();
                             dbMsg += ">>" + MLI.endDTStr;
+                            if (rEvent.End.DateTime.Value.Hour > endHour) {
+                                endHour = rEvent.End.DateTime.Value.Hour;
+                            }
                         }
                         MLI.description = rEvent.Description;
                         MLI.summary = rEvent.Summary;
@@ -1176,6 +1219,7 @@ namespace ProductionSchedule.ViewModels
                 }
                 NotifyPropertyChanged("MyListItems");
                 dbMsg += "\r\n" + MyListItems.Count + "レコード";
+                dbMsg += ",イベント：" + startHour + "～" + endHour + "時";
                 MyLog(TAG, dbMsg);
             }catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
