@@ -828,6 +828,7 @@ namespace ProductionSchedule.ViewModels
                     //イベント配置
                     int btCount = 0;
                     BtList = new List<Button>();
+                    CS_Util Util = new CS_Util();
 
                     foreach (MyListItem MLI in MyListItems) {
                         btCount++;
@@ -852,8 +853,18 @@ namespace ProductionSchedule.ViewModels
                         object obj = System.Windows.Media.ColorConverter.ConvertFromString(GoogleColors[ColorId]);
                         SolidColorBrush BGColor = new SolidColorBrush((System.Windows.Media.Color)obj);
                         wBt.Background = BGColor;
+                        dbMsg += "、背景色=" + BGColor;
+                        if (Util.IsForegroundWhite(BGColor.ToString())) {
+                            dbMsg += "に白文字";
+                            wBt.Foreground = Brushes.White;
+                        } else {
+                            dbMsg += "に黒文字";
+                            wBt.Foreground = Brushes.Black;
+                        }
+
+
                         //課題：stackPanel内に配置させる
-                //        Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
+                        //        Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
                         int startRow = MLI.startDT.Hour+2;
                         if (MLI.startDTStr.Contains('-')) {
                             dbMsg += "、終日";
