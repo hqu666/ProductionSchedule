@@ -79,7 +79,7 @@ namespace ProductionSchedule
                 } else {
                     dbMsg += ">>文字数不足";
                 }
-                MyLog(TAG, dbMsg);
+     //           MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }

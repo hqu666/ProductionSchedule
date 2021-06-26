@@ -40,7 +40,7 @@ namespace ProductionSchedule.ViewModels
         /// <summary>
         /// イベントボタンリスト
         /// </summary>
-        public List<Button> BtList;
+   //     public List<Button> BtList;
         public Dictionary<string,Label> LbList;
         public Dictionary<string, StackPanel> SPList;
         public int GridRowCount = 25;
@@ -164,7 +164,8 @@ namespace ProductionSchedule.ViewModels
             string dbMsg = "";
             try
             {
-                BtList = new List<Button>();
+                EventButtons = new ObservableCollection<EventButton>();
+            //    BtList = new List<Button>();
                 //本日日付
                 SelectedDateTime = DateTime.Today;
                 dbMsg += "今日は" + SelectedDateTime;
@@ -614,6 +615,7 @@ namespace ProductionSchedule.ViewModels
         public ObservableCollection<t_events> OrderedByStart { get; set; }
 
         public ObservableCollection<MyListItem> MyListItems { get; set; }
+        public ObservableCollection<EventButton> EventButtons { get; set; }
 
         public ObservableCollection<CalenderRecord> CalenderItems { get; set; }
 
@@ -770,10 +772,16 @@ namespace ProductionSchedule.ViewModels
                     //double myCellWidth = (MainWindowWidth - (gridLeft * 2) - 200) / 31;
                     //dbMsg += ",セルj幅＝;" + myCellWidth;
                     dbMsg += "\r\n削除";
-                    foreach (Button dBt in BtList) {
+                    //foreach (Button dBt in BtList) {
+                    //    dbMsg += "," + dBt.Name;
+                    //    CalenderGR.Children.Remove(dBt);
+                    //}
+                    foreach (EventButton eb in EventButtons) {
+                        Button dBt = eb.eButton;
                         dbMsg += "," + dBt.Name;
                         CalenderGR.Children.Remove(dBt);
                     }
+
                     //タイトル列の曜日着色
                     for (int wDay = 1; wDay <= 31; wDay++) {
                         DateTime cDay = cStart.AddDays(wDay - 1);
@@ -827,12 +835,14 @@ namespace ProductionSchedule.ViewModels
 
                     //イベント配置
                     int btCount = 0;
-                    BtList = new List<Button>();
+                    EventButtons = new ObservableCollection<EventButton>();
+       //             BtList = new List<Button>();
                     CS_Util Util = new CS_Util();
 
                     foreach (MyListItem MLI in MyListItems) {
                         btCount++;
                         dbMsg += "\r\n[" + btCount+"]"+ MLI.startDTStr+ "～" + MLI.endDTStr;
+                        EventButton eventButton = new EventButton();
                         string ButtonFace = "";
                         if (!String.IsNullOrEmpty(MLI.startDT.ToString("yyyyMMdd"))) {
                             ButtonFace += MLI.description;
@@ -861,18 +871,42 @@ namespace ProductionSchedule.ViewModels
                             dbMsg += "に黒文字";
                             wBt.Foreground = Brushes.Black;
                         }
+                        wBt.Click += (sender, e) => EventButtonClick(sender);
+                        ButtonFace = MLI.startDT.ToString("HH:mm") + "～" + MLI.endDT.ToString("HH:mm") + "\r\n" + ButtonFace;
+                        wBt.Content = ButtonFace;
+                        wBt.BorderBrush = Brushes.White;
+                        wBt.BorderThickness = new Thickness(2, 2, 2, 2);
+                        //       wBt.Padding = new Thickness(2, 2, 2, 2);
+                        wBt.Margin = btMargin;
 
 
                         //課題：stackPanel内に配置させる
                         //        Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
                         int startRow = MLI.startDT.Hour+2;
+                        int endtRow = MLI.endDT.Hour + 2;
+                        dbMsg += "～" + endtRow;
+                        int rowSpan = endtRow - startRow;
+                        dbMsg += "[" + rowSpan + "時間]";
+                        dbMsg += "、R=" + startRow;
+                        int startCol = MLI.startDT.Day;
+                        dbMsg += "、C=" + startCol;
                         if (MLI.startDTStr.Contains('-')) {
                             dbMsg += "、終日";
                             startRow = MLI.startDT.Hour + 1;
-                            ButtonFace = MLI.startDT.ToString("MM/dd")+"\r\n" + ButtonFace;
+                            ButtonFace = MLI.startDT.ToString("MM/dd") + "\r\n" + ButtonFace;
+                        }else if (rowSpan <=1) {
+                            string cellName = "R" + (startRow-1) + "C" + startCol;
+                            StackPanel stackPanel = SPList[cellName];
+                            //既にButtinが配置されている場合もあるので2階層づつ上げる
+                            Panel.SetZIndex(stackPanel, Panel.GetZIndex(stackPanel)+2);
+                            stackPanel.Children.Add(wBt);
+
                         } else {
-                            ButtonFace = MLI.startDT.ToString("HH:mm") + "～" + MLI.endDT.ToString("HH:mm") + "\r\n" + ButtonFace;
-                            //開始分数はみ出させる。
+                            //課題；左肩に文字表示
+                            wBt.HorizontalContentAlignment = HorizontalAlignment.Left;
+                            wBt.VerticalContentAlignment = VerticalAlignment.Top;
+                            //課題；文字回転
+                            //課題；開始分数はみ出させる。
                             if (0 < MLI.startDT.Minute) {
                                 int startMinute = MLI.startDT.Minute;
                                 dbMsg += "開始分=" + startMinute;
@@ -880,47 +914,33 @@ namespace ProductionSchedule.ViewModels
                                 dbMsg += ",はみ出し=" + startMargin;
                                 btMargin.Top = startMargin;
                             }
-                        }
-                        dbMsg += "、R=" + startRow;
-                        wBt.SetValue(Grid.RowProperty, startRow);
-                        if (!MLI.startDTStr.Contains('-')) {
-                            int endtRow = MLI.endDT.Hour + 2;
-                            dbMsg += "～" + endtRow;
-                            int rowSpan = endtRow - startRow;
-                            dbMsg += "[" + rowSpan + "時間]";
-                            if (1 < rowSpan) {
-                                wBt.SetValue(Grid.RowSpanProperty, rowSpan);
+                            wBt.SetValue(Grid.RowProperty, startRow);
+                            if (!MLI.startDTStr.Contains('-')) {
+                                if (1 < rowSpan) {
+                                    wBt.SetValue(Grid.RowSpanProperty, rowSpan);
+                                }
                             }
+                            //終了分数はみ出させる。
+                            if (0 < MLI.endDT.Minute) {
+                                int endMinute = MLI.endDT.Minute;
+                                dbMsg += "終了分=" + endMinute;
+                                double endMargin = -rHeight * (endMinute / 60);
+                                dbMsg += ",はみ出し=" + endMargin;
+                                btMargin.Bottom = endMargin;
+                            }
+                            wBt.SetValue(Grid.ColumnProperty, startCol);
+                            int endCol = MLI.endDT.Day;
+                            dbMsg += "～" + endCol + "日";
+                            int colSpan = endCol - startCol;
+                            dbMsg += "[" + colSpan + "日間]";
+                            if (1 < colSpan) {
+                                wBt.SetValue(Grid.ColumnSpanProperty, colSpan + 1);
+                            }
+                            CalenderGR.Children.Add(wBt);
                         }
-                        //終了分数はみ出させる。
-                        if (0<MLI.endDT.Minute) {
-                            int endMinute= MLI.endDT.Minute;
-                            dbMsg += "終了分=" + endMinute;
-                            double endMargin = -rHeight * (endMinute / 60);
-                            dbMsg += ",はみ出し=" + endMargin;
-                            btMargin.Bottom = endMargin;
-                        }
-                        int startCol = MLI.startDT.Day;
-                        dbMsg += "、C=" + startCol;
-                        wBt.SetValue(Grid.ColumnProperty, startCol);
-                        int endCol = MLI.endDT.Day;
-                        dbMsg += "～" + endCol + "日";
-                        int colSpan = endCol - startCol;
-                        dbMsg += "[" + colSpan + "日間]";
-                        if (1<colSpan) {
-                            wBt.SetValue(Grid.ColumnSpanProperty, colSpan+1);
-                        }
-                        dbMsg += "、R" + startRow+ "C" + startRow;
-                        wBt.Content = ButtonFace;
-                        wBt.BorderBrush = Brushes.White;
-                        wBt.BorderThickness = new Thickness(2, 2, 2, 2);
-                        wBt.HorizontalContentAlignment = HorizontalAlignment.Left;
-                        wBt.VerticalContentAlignment = VerticalAlignment.Top;
-                        //       wBt.Padding = new Thickness(2, 2, 2, 2);
-                        wBt.Margin= btMargin;
-
-                        CalenderGR.Children.Add(wBt);
-                        BtList.Add(wBt);
+                        eventButton.eButton = wBt;
+                        EventButtons.Add(eventButton);
+         //               BtList.Add(wBt);
                     }
                                      
                 }
@@ -1040,6 +1060,22 @@ namespace ProductionSchedule.ViewModels
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
+
+
+        private void EventButtonClick(object sender) {
+            string TAG = "EventButtonClick";
+            string dbMsg = "";
+            MyListItems = new ObservableCollection<MyListItem>();
+            try {
+                Button bt = (Button)sender;
+                dbMsg += bt.Name + "がクリックされました。";
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+
 
         //https://www.paveway.info/entry/2019/05/27/wpf_datagridbackground から
         public DataGridCell GetDataGridCell(DataGrid dataGrid, int rowIndex, int columnIndex) {
@@ -1200,6 +1236,7 @@ namespace ProductionSchedule.ViewModels
                     ///    EDays = new ObservableCollection<ADay>();
                     foreach (var rEvent in ReadEvents) {
                         MyListItem MLI = new MyListItem();
+                        MLI.isChanged = false;
                         MLI.startDTStr = rEvent.Start.Date;
                    //     dbMsg += "\r\n" + MLI.startDTStr;
                         if (rEvent.Start.DateTime!=null) {
@@ -1704,6 +1741,15 @@ namespace ProductionSchedule.ViewModels
     /// リスト表示のためのモデル
     /// </summary>
     public class MyListItem {
+        ///<summary>
+        ///変更された
+        ///</summary>
+        public bool isChanged { get; set; }
+        ///<summary>
+        ///終日
+        ///</summary>
+        public bool isDaylong { get; set; }
+
         public DateTime startDT { get; set; }
         private string _startDTStr { set; get; }
         /// <summary>
@@ -1786,6 +1832,35 @@ namespace ProductionSchedule.ViewModels
         public string d30 { get; set; }
         public string d31 { get; set; }
     }
+
+    /// <summary>
+    /// イベントボタン
+    /// </summary>
+    public class EventButton {
+
+        public Button eButton { get; set; }
+
+        public int startRow { get; set; }
+        public double startMargint { get; set; }
+        public int endRow { get; set; }
+        public double enrMargint { get; set; }
+        public int rowSpan { get; set; }
+
+        public int startCol { get; set; }
+        public double startColMargint { get; set; }
+        public int endCol { get; set; }
+        public double enrColMargint { get; set; }
+        public int colSpan { get; set; }
+
+
+        /// <summary>
+        /// リスト表示のためのモデル
+        /// </summary>
+        public MyListItem eListItem { get; set; }
+
+    }
+
+
 
     /// <summary>
     /// 一日分の箱
