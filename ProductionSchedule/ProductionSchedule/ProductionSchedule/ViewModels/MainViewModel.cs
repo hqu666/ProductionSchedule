@@ -37,9 +37,11 @@ namespace ProductionSchedule.ViewModels
         public Grid CalenderGR { get; set; }
         public DataGrid CalenderDG { get; set; }
         public List<Models.MyMenu> _MyMenu { get; set; }
+        public ObservableCollection<MyListItem> MyListItems { get; set; }
         /// <summary>
         /// イベントボタンリスト
         /// </summary>
+        public ObservableCollection<EventButton> EventButtons { get; set; }
         public Dictionary<string,Label> LbList;
         public Dictionary<string, StackPanel> SPList;
         public int GridRowCount = 25;
@@ -193,12 +195,6 @@ namespace ProductionSchedule.ViewModels
                         //}
                     }
                 }
-
-
-                //          ToDaySet();
-
-
-
                 MyLog(TAG, dbMsg);
             }
             catch (Exception er)
@@ -611,9 +607,6 @@ namespace ProductionSchedule.ViewModels
         /// 開始日順の対象イベント配列
         /// </summary>
         public ObservableCollection<t_events> OrderedByStart { get; set; }
-
-        public ObservableCollection<MyListItem> MyListItems { get; set; }
-        public ObservableCollection<EventButton> EventButtons { get; set; }
 
         public ObservableCollection<CalenderRecord> CalenderItems { get; set; }
 
@@ -1066,7 +1059,31 @@ namespace ProductionSchedule.ViewModels
             MyListItems = new ObservableCollection<MyListItem>();
             try {
                 Button bt = (Button)sender;
-                dbMsg += bt.Name + "がクリックされました。";
+                string btName = bt.Name;
+                dbMsg += btName + "がクリックされました。";
+          //      EventButton eb ;
+                foreach (EventButton eb in EventButtons) {
+                    Button dBt = eb.eButton;
+                    dbMsg += "," + dBt.Name;
+                    if (dBt.Name.Equals(btName)) {
+                        MyListItem MLI = eb.eListItem;
+                        dbMsg += "," + MLI.startDTStr + "～" + MLI.endDTStr;
+                        Google.Apis.Calendar.v3.Data.Event gEvent = MLI.googleEvent;
+                        dbMsg += "[" + gEvent.Id + "]" + gEvent.Summary;
+                        string htmlLink=gEvent.HtmlLink;
+                        string[] delimiter = { "eid=" };
+                        string[] rStr = htmlLink.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                        string eid = rStr[1];
+                        TargetURLStr = "https://calendar.google.com/calendar/u/1/r/eventedit/";
+                        TargetURLStr += eid;
+                        TargetURLStr += "?sf=true?";
+                        NotifyPropertyChanged("TargetURLStr");
+                        //6/2　　https://calendar.google.com/calendar/u/1/r/eventedit/NnNzajZwMzM2a29qMGI5aDYxaGo4YjlrY2RqMzhiYjE2aGltNmJiMmM0cWphZTMyNjhybTZwMWdjNCBoa3V3YXVhbWFAbQ?sf=true
+                        WebStart();
+                        break;
+                    }
+                }
+
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
