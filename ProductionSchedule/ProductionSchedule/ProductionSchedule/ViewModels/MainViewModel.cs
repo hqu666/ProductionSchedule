@@ -779,7 +779,13 @@ namespace ProductionSchedule.ViewModels
                     foreach (EventButton eb in EventButtons) {
                         Button dBt = eb.eButton;
                         dbMsg += "," + dBt.Name;
-                        CalenderGR.Children.Remove(dBt);
+                        if (eb.stackPanel !=null) {
+                            eb.stackPanel.Children.Remove(dBt);
+                            //Buttinが配置時に上げた階層を下げる
+                            Panel.SetZIndex(eb.stackPanel, Panel.GetZIndex(eb.stackPanel) - 2);
+                        } else {
+                            CalenderGR.Children.Remove(dBt);
+                        }
                     }
 
                     //タイトル列の曜日着色
@@ -843,6 +849,7 @@ namespace ProductionSchedule.ViewModels
                         btCount++;
                         dbMsg += "\r\n[" + btCount+"]"+ MLI.startDTStr+ "～" + MLI.endDTStr;
                         EventButton eventButton = new EventButton();
+                        eventButton.eListItem = MLI;
                         string ButtonFace = "";
                         if (!String.IsNullOrEmpty(MLI.startDT.ToString("yyyyMMdd"))) {
                             ButtonFace += MLI.description;
@@ -896,10 +903,10 @@ namespace ProductionSchedule.ViewModels
                             ButtonFace = MLI.startDT.ToString("MM/dd") + "\r\n" + ButtonFace;
                         }else if (rowSpan <=1) {
                             string cellName = "R" + (startRow-1) + "C" + startCol;
-                            StackPanel stackPanel = SPList[cellName];
+                            eventButton.stackPanel = SPList[cellName];
                             //既にButtinが配置されている場合もあるので2階層づつ上げる
-                            Panel.SetZIndex(stackPanel, Panel.GetZIndex(stackPanel)+2);
-                            stackPanel.Children.Add(wBt);
+                            Panel.SetZIndex(eventButton.stackPanel, Panel.GetZIndex(eventButton.stackPanel) +2);
+                            eventButton.stackPanel.Children.Add(wBt);
 
                         } else {
                             //課題；左肩に文字表示
@@ -1838,7 +1845,12 @@ namespace ProductionSchedule.ViewModels
     /// </summary>
     public class EventButton {
 
+        public bool isInStackPanel { get; set; }
         public Button eButton { get; set; }
+        /// <summary>
+        /// 格納するスタックパネル
+        /// </summary>
+        public StackPanel stackPanel { get; set; }
 
         public int startRow { get; set; }
         public double startMargint { get; set; }
