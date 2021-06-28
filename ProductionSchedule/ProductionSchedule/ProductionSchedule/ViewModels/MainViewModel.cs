@@ -708,6 +708,9 @@ namespace ProductionSchedule.ViewModels
                         stackPanel.Name = cellName;
                         stackPanel.SetValue(Grid.RowProperty, rowCount);
                         stackPanel.SetValue(Grid.ColumnProperty, colCount);
+                        stackPanel.MouseRightButtonUp += (sender, e) => CellPanelClick(sender);
+                        stackPanel.MouseLeftButtonUp += (sender, e) => CellPanelSelect(sender);
+
                         CalenderGR.Children.Add(stackPanel);
                         SPList.Add(cellName,stackPanel);
                     }
@@ -863,7 +866,7 @@ namespace ProductionSchedule.ViewModels
                             dbMsg += "に黒文字";
                             wBt.Foreground = Brushes.Black;
                         }
-                        wBt.Click += (sender, e) => EventButtonClick(sender);
+                        wBt.MouseDoubleClick += (sender, e) => EventButtonClick(sender);
                         ButtonFace = MLI.startDT.ToString("HH:mm") + "～" + MLI.endDT.ToString("HH:mm") + "\r\n" + ButtonFace;
                         wBt.Content = ButtonFace;
                         wBt.BorderBrush = Brushes.White;
@@ -1052,7 +1055,10 @@ namespace ProductionSchedule.ViewModels
             }
         }
 
-
+        /// <summary>
+        /// イベントボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
         private void EventButtonClick(object sender) {
             string TAG = "EventButtonClick";
             string dbMsg = "";
@@ -1061,7 +1067,6 @@ namespace ProductionSchedule.ViewModels
                 Button bt = (Button)sender;
                 string btName = bt.Name;
                 dbMsg += btName + "がクリックされました。";
-          //      EventButton eb ;
                 foreach (EventButton eb in EventButtons) {
                     Button dBt = eb.eButton;
                     dbMsg += "," + dBt.Name;
@@ -1078,12 +1083,81 @@ namespace ProductionSchedule.ViewModels
                         TargetURLStr += eid;
                         TargetURLStr += "?sf=true?";
                         NotifyPropertyChanged("TargetURLStr");
-                        //6/2　　https://calendar.google.com/calendar/u/1/r/eventedit/NnNzajZwMzM2a29qMGI5aDYxaGo4YjlrY2RqMzhiYjE2aGltNmJiMmM0cWphZTMyNjhybTZwMWdjNCBoa3V3YXVhbWFAbQ?sf=true
                         WebStart();
                         break;
                     }
                 }
 
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        /// <summary>
+        /// セルに配置したパネルのクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        private void CellPanelClick(object sender) {
+            string TAG = "CellPanelClick";
+            string dbMsg = "";
+            MyListItems = new ObservableCollection<MyListItem>();
+            try {
+                StackPanel stackPanel = (StackPanel)sender;
+                string panelName = stackPanel.Name;
+                dbMsg += panelName ;
+                string rNamw = panelName.Remove(0, 1);
+                string[] delimiter = { "C" };
+                string[] rStr = rNamw.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                int hInt = int.Parse(rStr[0])-1;
+                int dayInt = int.Parse(rStr[1]);
+                dbMsg += ","+ dayInt +"日"+ hInt + "時がクリックされました。";
+                dbMsg += ",現在:;" + SelectedDateTime.ToString();
+                SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, 0, 0, 0);
+                dbMsg += ">>" + SelectedDateTime.ToString();
+                if (hInt < 0) {
+                    dbMsg += "：終日";
+
+                } else {
+                    SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, hInt, 0, 0);
+                    dbMsg += ">>" + SelectedDateTime.ToString();
+                }
+                TargetURLStr = "https://calendar.google.com/calendar/u/1/r/day/";
+                TargetURLStr += SelectedDateTime.Year+"/"+SelectedDateTime.Month+"/"+ dayInt;
+                TargetURLStr += "?sf=true%3F";
+                NotifyPropertyChanged("TargetURLStr");
+                WebStart();
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        private void CellPanelSelect(object sender) {
+            string TAG = "CellPanelClick";
+            string dbMsg = "";
+            MyListItems = new ObservableCollection<MyListItem>();
+            try {
+                StackPanel stackPanel = (StackPanel)sender;
+                string panelName = stackPanel.Name;
+                dbMsg += panelName;
+                string rNamw = panelName.Remove(0, 1);
+                string[] delimiter = { "C" };
+                string[] rStr = rNamw.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                int hInt = int.Parse(rStr[0]) - 1;
+                int dayInt = int.Parse(rStr[1]);
+                dbMsg += "," + dayInt + "日" + hInt + "時がクリックされました。";
+                dbMsg += ",現在:;" + SelectedDateTime.ToString();
+                SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, 0, 0, 0);
+                dbMsg += ">>" + SelectedDateTime.ToString();
+                if (hInt < 0) {
+                    dbMsg += "：終日";
+
+                } else {
+                    SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, hInt, 0, 0);
+                    dbMsg += ">>" + SelectedDateTime.ToString();
+                }
+                stackPanel.Background = Brushes.LightYellow;
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
