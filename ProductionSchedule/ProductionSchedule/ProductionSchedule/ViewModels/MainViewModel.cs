@@ -44,6 +44,7 @@ namespace ProductionSchedule.ViewModels
         public ObservableCollection<EventButton> EventButtons { get; set; }
         public Dictionary<string,Label> LbList;
         public Dictionary<string, StackPanel> SPList;
+        public Dictionary<string, SolidColorBrush> DayColorList;
         public int GridRowCount = 25;
         public System.Collections.IEnumerable TabItems { get; set; }
 
@@ -776,6 +777,7 @@ namespace ProductionSchedule.ViewModels
                             CalenderGR.Children.Remove(dBt);
                         }
                     }
+                    DayColorList= new Dictionary<string, SolidColorBrush>();
 
                     //タイトル列の曜日着色
                     for (int wDay = 1; wDay <= 31; wDay++) {
@@ -787,20 +789,27 @@ namespace ProductionSchedule.ViewModels
                   //          dbMsg += ",日付ラベル" + nLabel.Name;
                             nLabel.HorizontalContentAlignment = HorizontalAlignment.Right;
                             nLabel.Foreground = Brushes.White;
-                            Brush stackPanelBackground = Brushes.White;
+                    //        Brush stackPanelBackground = Brushes.White;
+                            SolidColorBrush BgColer = Brushes.White;
                             if (lEnd < wDay) {
                                 nLabel.Background = Brushes.DarkGray;
-                                stackPanelBackground = Brushes.DarkGray;
+                                BgColer = Brushes.DarkGray;
+                     //           stackPanelBackground = Brushes.DarkGray;
                             } else if (dow == DayOfWeek.Sunday) {
                                 nLabel.Background = Brushes.Red;
-                                stackPanelBackground = Brushes.LightPink;
+                                BgColer = Brushes.LightPink;
+                    //            stackPanelBackground = Brushes.LightPink;
                             } else if (dow == DayOfWeek.Saturday) {
                                 nLabel.Background = Brushes.Blue;
-                                stackPanelBackground = Brushes.LightBlue;
+                                BgColer = Brushes.LightBlue;
+                     //           stackPanelBackground = Brushes.LightBlue;
                             } else {
                                 nLabel.Foreground = Brushes.Black;
+                                BgColer = Brushes.White;
                                 nLabel.Background = Brushes.White;
                             }
+                            DayColorList.Add("day"+ wDay, BgColer);
+                            Brush stackPanelBackground = BgColer;
                             for (int rowCount = 0; rowCount < (GridRowCount-1); rowCount++) {
                                 string cellName = "R" + rowCount + "C" + wDay;
                                 StackPanel stackPanel = SPList[cellName]; ;           // new StackPanel();
@@ -1133,6 +1142,64 @@ namespace ProductionSchedule.ViewModels
             }
         }
 
+        private void MakeNewEvent(DateTime selectedDateTime, bool isDayLong) {
+            string TAG = "MakeNewEvent";
+            string dbMsg = "";
+            try {
+                dbMsg += ",:;" + selectedDateTime.ToString() + ",終日:;" + isDayLong;
+                String titolStr = Constant.ApplicationName;
+                String msgStr = selectedDateTime.ToString();
+                if (isDayLong) {
+                    msgStr = String.Format("{0:yyyy年MM月dd日}", SelectedDateTime)+"(終日)の予定を新規作成します。";
+                } else {
+                    msgStr += String.Format("{0:yyyy年MM月dd日HH時}", SelectedDateTime) + "から始まる予定を新規作成します。";
+                }
+
+                MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
+                //webでアカウントを拾えるなら　　 MessageBoxButton.YesNoCancel    \r\nwebでアカウントを選択しますか？
+                dbMsg += ",result=" + result;
+                if (result == MessageBoxResult.Yes) {
+                    //this.TargetURLStr = Constant.GoogleLogInPage;
+                    //WebStart();
+                }
+                /*
+                 StackPanel stackPanel = (StackPanel)sender;
+                 string panelName = stackPanel.Name;
+                 dbMsg += panelName;
+                 string rNamw = panelName.Remove(0, 1);
+                 string[] delimiter = { "C" };
+                 string[] rStr = rNamw.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                 int hInt = int.Parse(rStr[0]) - 1;
+                 int dayInt = int.Parse(rStr[1]);
+                 dbMsg += "," + dayInt + "日" + hInt + "時がクリックされました。";
+                 dbMsg += ",現在:;" + SelectedDateTime.ToString();
+                 SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, 0, 0, 0);
+                 dbMsg += ">>" + SelectedDateTime.ToString();
+                 if (hInt < 0) {
+                     dbMsg += "：終日";
+
+                 } else {
+                     SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, hInt, 0, 0);
+                     dbMsg += ">>" + SelectedDateTime.ToString();
+                 }
+                 TargetURLStr = "https://calendar.google.com/calendar/u/1/r/day/";
+                 TargetURLStr += SelectedDateTime.Year + "/" + SelectedDateTime.Month + "/" + dayInt;
+                 TargetURLStr += "?sf=true%3F";
+                 NotifyPropertyChanged("TargetURLStr");
+                 WebStart();
+                 */
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+
+
+        /// <summary>
+        /// セル＝StackPanelのクリック
+        /// </summary>
+        /// <param name="sender"></param>
         private void CellPanelSelect(object sender) {
             string TAG = "CellPanelClick";
             string dbMsg = "";
@@ -1141,6 +1208,8 @@ namespace ProductionSchedule.ViewModels
                 StackPanel stackPanel = (StackPanel)sender;
                 string panelName = stackPanel.Name;
                 dbMsg += panelName;
+                SolidColorBrush selectedColer = Brushes.LightYellow;
+                bool isDayLong = false;
                 string rNamw = panelName.Remove(0, 1);
                 string[] delimiter = { "C" };
                 string[] rStr = rNamw.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
@@ -1152,12 +1221,27 @@ namespace ProductionSchedule.ViewModels
                 dbMsg += ">>" + SelectedDateTime.ToString();
                 if (hInt < 0) {
                     dbMsg += "：終日";
-
+                    isDayLong = true;
                 } else {
                     SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, hInt, 0, 0);
                     dbMsg += ">>" + SelectedDateTime.ToString();
                 }
-                stackPanel.Background = Brushes.LightYellow;
+                if (stackPanel.Background.Equals(selectedColer)) {
+                    dbMsg += ",二度目のクリック";
+                    MakeNewEvent(SelectedDateTime, isDayLong);
+
+                }
+                for (int wDay = 1; wDay <= 31; wDay++) {
+                    for (int rowCount = 0; rowCount < (GridRowCount - 1); rowCount++) {
+                        string cellName = "R" + rowCount + "C" + wDay;
+                        StackPanel sp = SPList[cellName];           // new StackPanel();
+                        if (sp.Background.Equals(selectedColer)) {
+                            //       dbMsg += ",stackPanel" + stackPanel.Name;
+                            sp.Background = DayColorList["day" + wDay];
+                        }
+                    }
+                }
+                stackPanel.Background = selectedColer;
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
