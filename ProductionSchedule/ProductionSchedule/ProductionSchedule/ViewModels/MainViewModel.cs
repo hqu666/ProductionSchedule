@@ -848,9 +848,9 @@ namespace ProductionSchedule.ViewModels
                         EventButton eb = new EventButton();
                         eb.eListItem = MLI;
                         string ButtonFace = "";
-                        if (!String.IsNullOrEmpty(MLI.startDT.ToString("yyyyMMdd"))) {
-                            ButtonFace += MLI.description;
-                        }
+                        //if (!String.IsNullOrEmpty(MLI.startDT.ToString("yyyyMMdd"))) {
+                        //    ButtonFace += MLI.description;
+                        //}
                         if (!String.IsNullOrEmpty(MLI.summary)) {
                             ButtonFace += MLI.summary;
                         }
@@ -1120,28 +1120,30 @@ namespace ProductionSchedule.ViewModels
                 string[] rStr = rNamw.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
                 int hInt = int.Parse(rStr[0])-1;
                 int dayInt = int.Parse(rStr[1]);
+                bool isDayLong = false;
                 dbMsg += ","+ dayInt +"日"+ hInt + "時がクリックされました。";
                 dbMsg += ",現在:;" + SelectedDateTime.ToString();
                 SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, 0, 0, 0);
                 dbMsg += ">>" + SelectedDateTime.ToString();
                 if (hInt < 0) {
                     dbMsg += "：終日";
-
+                    isDayLong = true;
                 } else {
                     SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, hInt, 0, 0);
                     dbMsg += ">>" + SelectedDateTime.ToString();
                 }
-                TargetURLStr = "https://calendar.google.com/calendar/u/1/r/day/";
-                TargetURLStr += SelectedDateTime.Year+"/"+SelectedDateTime.Month+"/"+ dayInt;
-                TargetURLStr += "?sf=true%3F";
-                NotifyPropertyChanged("TargetURLStr");
-                WebStart();
+                MakeNewEvent(SelectedDateTime, isDayLong);
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
 
+        /// <summary>
+        /// 新規イベント作成
+        /// </summary>
+        /// <param name="selectedDateTime"></param>
+        /// <param name="isDayLong"></param>
         private void MakeNewEvent(DateTime selectedDateTime, bool isDayLong) {
             string TAG = "MakeNewEvent";
             string dbMsg = "";
@@ -1152,49 +1154,53 @@ namespace ProductionSchedule.ViewModels
                 if (isDayLong) {
                     msgStr = String.Format("{0:yyyy年MM月dd日}", SelectedDateTime)+"(終日)の予定を新規作成します。";
                 } else {
-                    msgStr += String.Format("{0:yyyy年MM月dd日HH時}", SelectedDateTime) + "から始まる予定を新規作成します。";
+                    msgStr = String.Format("{0:yyyy年MM月dd日HH時}", SelectedDateTime) + "から始まる予定を新規作成します。";
                 }
 
                 MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
                 //webでアカウントを拾えるなら　　 MessageBoxButton.YesNoCancel    \r\nwebでアカウントを選択しますか？
                 dbMsg += ",result=" + result;
                 if (result == MessageBoxResult.Yes) {
-                    //this.TargetURLStr = Constant.GoogleLogInPage;
-                    //WebStart();
-                }
-                /*
-                 StackPanel stackPanel = (StackPanel)sender;
-                 string panelName = stackPanel.Name;
-                 dbMsg += panelName;
-                 string rNamw = panelName.Remove(0, 1);
-                 string[] delimiter = { "C" };
-                 string[] rStr = rNamw.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
-                 int hInt = int.Parse(rStr[0]) - 1;
-                 int dayInt = int.Parse(rStr[1]);
-                 dbMsg += "," + dayInt + "日" + hInt + "時がクリックされました。";
-                 dbMsg += ",現在:;" + SelectedDateTime.ToString();
-                 SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, 0, 0, 0);
-                 dbMsg += ">>" + SelectedDateTime.ToString();
-                 if (hInt < 0) {
-                     dbMsg += "：終日";
+                    Google.Apis.Calendar.v3.Data.Event eventItem = new Google.Apis.Calendar.v3.Data.Event();
+                    eventItem.Start = new Google.Apis.Calendar.v3.Data.EventDateTime();
+                    eventItem.Start.DateTime = SelectedDateTime;
+                    eventItem.End = new Google.Apis.Calendar.v3.Data.EventDateTime();
+                    eventItem.End.DateTime = SelectedDateTime.AddHours(1);
+                    if (isDayLong) {
+                        //課題；終日失敗
+                        eventItem.Start.Date = String.Format("{0:yyyy-MM-dd}", SelectedDateTime);
+                    }
+                    eventItem.Summary = "設定中";
+                    eventItem.Description = "内容を設定して下さい。";
 
-                 } else {
-                     SelectedDateTime = new DateTime(SelectedDateTime.Year, SelectedDateTime.Month, dayInt, hInt, 0, 0);
-                     dbMsg += ">>" + SelectedDateTime.ToString();
-                 }
-                 TargetURLStr = "https://calendar.google.com/calendar/u/1/r/day/";
-                 TargetURLStr += SelectedDateTime.Year + "/" + SelectedDateTime.Month + "/" + dayInt;
-                 TargetURLStr += "?sf=true%3F";
-                 NotifyPropertyChanged("TargetURLStr");
-                 WebStart();
-                 */
+                    GoogleCalendarUtil GCU = new GoogleCalendarUtil();
+
+                    Task<string> retLink = Task.Run(() => {
+                        return GCU.InsertGEventsAsync(eventItem);
+                    });
+                    retLink.Wait();
+                    string linkStr= retLink.Result;
+                    dbMsg += "\r\nretLink" + linkStr;
+                    string[] delimiter = { "eid=" };
+                    string[] rStr = linkStr.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                    if (1< rStr.Length) {
+                        string eid = rStr[1];
+                        TargetURLStr = "https://calendar.google.com/calendar/u/1/r/eventedit/";
+                        TargetURLStr += eid;
+                        TargetURLStr += "?sf=true?";
+                        NotifyPropertyChanged("TargetURLStr");
+                        WebStart();
+                    } else {
+                        msgStr = "失敗したかもしれません\r\n更新してイベントが追加されていなければもう一度イベント作成を試してください。";
+                        result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+                    }
+                }
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
-
-
 
         /// <summary>
         /// セル＝StackPanelのクリック
@@ -1247,8 +1253,6 @@ namespace ProductionSchedule.ViewModels
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
-
-
 
         //https://www.paveway.info/entry/2019/05/27/wpf_datagridbackground から
         public DataGridCell GetDataGridCell(DataGrid dataGrid, int rowIndex, int columnIndex) {

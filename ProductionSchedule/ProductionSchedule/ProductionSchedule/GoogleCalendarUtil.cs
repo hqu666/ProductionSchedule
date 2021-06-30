@@ -541,7 +541,7 @@ namespace ProductionSchedule
 		/// 予定を新規登録
 		/// </summary>
 		/// <returns></returns>
-		public string InsertGEvents(Google.Apis.Calendar.v3.Data.Event eventItem)
+		public string InsertGEventsAsync(Google.Apis.Calendar.v3.Data.Event eventItem)
 		{
 			string TAG = "InsertGEvents";
 			string dbMsg = "[GoogleCalendarUtil]";
@@ -565,10 +565,12 @@ namespace ProductionSchedule
 				});
 				string calendarId = "primary";
 				EventsResource.InsertRequest request = service.Events.Insert(body, calendarId);
-				Event createdEvent = request.Execute();
-				eventId = createdEvent.Id;
-				dbMsg += "," + eventId + ")";
-				retLink = createdEvent.HtmlLink;
+
+                Event createdEvent =  request.Execute();
+             //   Event createdEvent = await request.ExecuteAsync(); でも失敗する
+                 eventId = createdEvent.Id;
+                dbMsg += "," + eventId + ")";
+                retLink = createdEvent.HtmlLink;
 				dbMsg += ">>" + retLink;
 				//添付許可を出す Optional query parameters	supportsAttachments　をtrueにする
 				EventsResource.PatchRequest EPatch = service.Events.Patch(eventItem, calendarId, eventId);
@@ -786,7 +788,7 @@ namespace ProductionSchedule
 				taregetEvent.Description = description;
 				if (taregetEvent.Id == null) {
 					dbMsg += "新規";
-					retLink = InsertGEvents(taregetEvent);
+					retLink = InsertGEventsAsync(taregetEvent);
 				} else {
 					dbMsg += "変更";
 					retLink = UpDateGEvents(taregetEvent);
