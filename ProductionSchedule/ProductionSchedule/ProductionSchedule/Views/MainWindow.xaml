@@ -135,11 +135,7 @@ WindowStartupLocation="CenterScreen"
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!--
-        
-        			Visibility="{Binding ConnectVisibility}"
-        
-        -->
+          
         <!--<Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">-->
             <StackPanel Name="ContorolSP"
                         Orientation="Horizontal" VerticalAlignment="Center"

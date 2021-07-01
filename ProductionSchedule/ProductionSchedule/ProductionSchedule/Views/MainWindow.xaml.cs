@@ -139,8 +139,90 @@ namespace ProductionSchedule.Views
             }
         }
 
+        //Drag&Drop///////////////////////////////////////////////////////////////
+        protected override void OnMouseMove(MouseEventArgs e) {
+            base.OnMouseMove(e);
+            string TAG = "OnMouseMove";
+            string dbMsg = "";
+            try {
+                if (e.LeftButton == MouseButtonState.Pressed) {
+                    // Package the data.
+                    DataObject data = new DataObject();
+                    //data.SetData(DataFormats.StringFormat, circleUI.Fill.ToString());
+                    //data.SetData("Double", circleUI.Height);
+                    data.SetData("Object", this);
 
-        ////////////////////////////////////////////////////////////////
+                    // Inititate the drag-and-drop operation.
+                    DragDrop.DoDragDrop(this, data, DragDropEffects.Copy | DragDropEffects.Move);
+                }
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+
+        /// <summary>
+        /// ユーザーにフィードバックを表示する
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnGiveFeedback(GiveFeedbackEventArgs e) {
+            base.OnGiveFeedback(e);
+            string TAG = "OnGiveFeedback";
+            string dbMsg = "";
+            try {
+                // These Effects values are set in the drop target's
+                // DragOver event handler.
+                if (e.Effects.HasFlag(DragDropEffects.Copy)) {
+                    Mouse.SetCursor(Cursors.Cross);
+                } else if (e.Effects.HasFlag(DragDropEffects.Move)) {
+                    Mouse.SetCursor(Cursors.Pen);
+                } else {
+                    Mouse.SetCursor(Cursors.No);
+                }
+                e.Handled = true;
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+        protected override void OnDrop(DragEventArgs e) {
+            base.OnDrop(e);
+            string TAG = "OnDrop";
+            string dbMsg = "";
+            try {
+                // If the DataObject contains string data, extract it.
+                if (e.Data.GetDataPresent(DataFormats.StringFormat)) {
+                    string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
+
+                    // If the string can be converted into a Brush,
+                    // convert it and apply it to the ellipse.
+                    BrushConverter converter = new BrushConverter();
+                    if (converter.IsValid(dataString)) {
+                        Brush newFill = (Brush)converter.ConvertFromString(dataString);
+                        //            circleUI.Fill = newFill;
+
+                        // Set Effects to notify the drag source what effect
+                        // the drag-and-drop operation had.
+                        // (Copy if CTRL is pressed; otherwise, move.)
+                        if (e.KeyStates.HasFlag(DragDropKeyStates.ControlKey)) {
+                            e.Effects = DragDropEffects.Copy;
+                        } else {
+                            e.Effects = DragDropEffects.Move;
+                        }
+                    }
+                }
+                e.Handled = true;
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+
+        }
+
+
+
+        /////////////////////////////////////////////////////////////Drag&Drop///
         public static void MyLog(string TAG, string dbMsg)
         {
             dbMsg = "[MainWindow ]" + dbMsg;

@@ -711,7 +711,7 @@ namespace ProductionSchedule.ViewModels
                         stackPanel.SetValue(Grid.ColumnProperty, colCount);
                         stackPanel.MouseRightButtonUp += (sender, e) => CellPanelClick(sender);
                         stackPanel.MouseLeftButtonUp += (sender, e) => CellPanelSelect(sender);
-
+                        stackPanel.AllowDrop = true;
                         CalenderGR.Children.Add(stackPanel);
                         SPList.Add(cellName,stackPanel);
                     }
@@ -848,9 +848,6 @@ namespace ProductionSchedule.ViewModels
                         EventButton eb = new EventButton();
                         eb.eListItem = MLI;
                         string ButtonFace = "";
-                        //if (!String.IsNullOrEmpty(MLI.startDT.ToString("yyyyMMdd"))) {
-                        //    ButtonFace += MLI.description;
-                        //}
                         if (!String.IsNullOrEmpty(MLI.summary)) {
                             ButtonFace += MLI.summary;
                         }
@@ -876,6 +873,8 @@ namespace ProductionSchedule.ViewModels
                             wBt.Foreground = Brushes.Black;
                         }
                         wBt.MouseDoubleClick += (sender, e) => EventButtonClick(sender);
+                        wBt.MouseMove += (sender, e) => Botton_MouseMove(sender, e);
+                        wBt.AllowDrop = true;
                         ButtonFace = MLI.startDT.ToString("HH:mm") + "～" + MLI.endDT.ToString("HH:mm") + "\r\n" + ButtonFace;
                         wBt.Content = ButtonFace;
                         wBt.BorderBrush = Brushes.White;
@@ -1253,6 +1252,119 @@ namespace ProductionSchedule.ViewModels
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
+
+        //Drag&Drop///////////////////////////////////////////////////////////////
+        private void Botton_MouseMove(object sender, MouseEventArgs e) {
+            string TAG = "Botton_MouseMove";
+            string dbMsg = "";
+            try {
+                Button dropButton = sender as Button;
+                dbMsg += ","+ dropButton.Name;
+                if (dropButton != null && e.LeftButton == MouseButtonState.Pressed) {
+                    DragDrop.DoDragDrop(dropButton,
+                                         "drop now",
+                                         DragDropEffects.Copy);
+                }
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+        private Brush _previousFill = null;
+        private void bottone_DragEnter(object sender, DragEventArgs e) {
+            string TAG = "bottone_DragEnter";
+            string dbMsg = "";
+            try {
+                Button dropButton = sender as Button;
+                dbMsg += "," + dropButton.Name;
+                if (dropButton != null) {
+                    // Save the current Fill brush so that you can revert back to this value in DragLeave.
+                    _previousFill = dropButton.Background;
+
+                    // If the DataObject contains string data, extract it.
+                    if (e.Data.GetDataPresent(DataFormats.StringFormat)) {
+                        string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
+
+                        // If the string can be converted into a Brush, convert it.
+                        BrushConverter converter = new BrushConverter();
+                        if (converter.IsValid(dataString)) {
+                            Brush newFill = (Brush)converter.ConvertFromString(dataString);
+                            dropButton.Background = newFill;
+                        }
+                    }
+                }
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        private void Button_DragOver(object sender, DragEventArgs e) {
+            string TAG = "Button_DragOver";
+            string dbMsg = "";
+            try {
+                Button dropButton = sender as Button;
+                dbMsg += "," + dropButton.Name;
+                e.Effects = DragDropEffects.None;
+
+                // If the DataObject contains string data, extract it.
+                if (e.Data.GetDataPresent(DataFormats.StringFormat)) {
+                    string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
+
+                    // If the string can be converted into a Brush, allow copying.
+                    BrushConverter converter = new BrushConverter();
+                    if (converter.IsValid(dataString)) {
+                        e.Effects = DragDropEffects.Copy | DragDropEffects.Move;
+                    }
+                }
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        private void Botton_DragLeave(object sender, DragEventArgs e) {
+            string TAG = "Botton_DragLeave";
+            string dbMsg = "";
+            try {
+                Button dropButton = sender as Button;
+                dbMsg += "," + dropButton.Name;
+                if (dropButton != null) {
+                    dropButton.Background = _previousFill;
+                }
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        private void Botton_Drop(object sender, DragEventArgs e) {
+            string TAG = "botton_Drop";
+            string dbMsg = "";
+            try {
+                Button dropButton = sender as Button;
+                dbMsg += "," + dropButton.Name;
+                if (dropButton != null) {
+                    // If the DataObject contains string data, extract it.
+                    if (e.Data.GetDataPresent(DataFormats.StringFormat)) {
+                        string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
+
+                        // If the string can be converted into a Brush,
+                        // convert it and apply it to the ellipse.
+                        BrushConverter converter = new BrushConverter();
+                        if (converter.IsValid(dataString)) {
+                            Brush newFill = (Brush)converter.ConvertFromString(dataString);
+                            dropButton.Background = newFill;
+                        }
+                    }
+                }
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        ///////////////////////////////////////////////////////////////Drag&Drop//
 
         //https://www.paveway.info/entry/2019/05/27/wpf_datagridbackground から
         public DataGridCell GetDataGridCell(DataGrid dataGrid, int rowIndex, int columnIndex) {
