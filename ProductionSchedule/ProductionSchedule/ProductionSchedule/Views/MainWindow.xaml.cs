@@ -140,6 +140,7 @@ namespace ProductionSchedule.Views
         }
 
         //Drag&Drop///////////////////////////////////////////////////////////////
+        /*
         protected override void OnMouseMove(MouseEventArgs e) {
             base.OnMouseMove(e);
             string TAG = "OnMouseMove";
@@ -220,7 +221,7 @@ namespace ProductionSchedule.Views
 
         }
 
-
+        */
 
         /////////////////////////////////////////////////////////////Drag&Drop///
         public static void MyLog(string TAG, string dbMsg)

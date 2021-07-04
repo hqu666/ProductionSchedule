@@ -873,8 +873,12 @@ namespace ProductionSchedule.ViewModels
                             wBt.Foreground = Brushes.Black;
                         }
                         wBt.MouseDoubleClick += (sender, e) => EventButtonClick(sender);
-                        wBt.MouseMove += (sender, e) => Botton_MouseMove(sender, e);
                         wBt.AllowDrop = true;
+                        wBt.MouseMove += (sender, e) => Botton_MouseMove(sender, e);
+                        wBt.DragEnter += (sender, e) => Buttone_DragEnter(sender, e);
+                        wBt.DragLeave += (sender, e) => Botton_DragLeave(sender, e);
+                        wBt.DragOver += (sender, e) => Button_DragOver(sender, e);
+                        wBt.Drop += (sender, e) => Botton_Drop(sender, e);
                         ButtonFace = MLI.startDT.ToString("HH:mm") + "～" + MLI.endDT.ToString("HH:mm") + "\r\n" + ButtonFace;
                         wBt.Content = ButtonFace;
                         wBt.BorderBrush = Brushes.White;
@@ -946,115 +950,6 @@ namespace ProductionSchedule.ViewModels
                     }
                                      
                 }
-/*
-                //最低限のレコード作成でDataGridのItemsSource作成
-                CalenderItems = new ObservableCollection<CalenderRecord>();
-                CalenderRecord CalenderRowItem = new CalenderRecord();
-                CalenderItems.Add(CalenderRowItem);
-                CalenderRowItem = new CalenderRecord();
-                CalenderItems.Add(CalenderRowItem);
-                NotifyPropertyChanged("CalenderItems");
-                DataGridCell cell = GetDataGridCell(CalenderDG, 0, 0);
-                cell.MinWidth = 150;
-                dbMsg += ",ウインドウ＝;" + MainWindowWidth;
-                double gridLeft = CalenderDG.Margin.Left;
-                dbMsg += ",グリッド左＝;" + gridLeft;
-                double myCellWidth = (MainWindowWidth - (gridLeft*2) - 200) / 31;
-                dbMsg += ",セルj幅＝;" + myCellWidth;
-                for (int rowCount=0; rowCount < 2; rowCount++){
-                    if (0== rowCount) {
-                        for (int colCount = 1; colCount <= 31; colCount++) {
-                            DateTime cDay = cStart.AddDays(colCount - 1);
-                            DayOfWeek dow = cDay.DayOfWeek;
-                            cell = GetDataGridCell(CalenderDG, rowCount, colCount);
-                            cell.MinWidth = myCellWidth;   //  反映されない
-                            object content = cell.Content;
-                            cell.Content = colCount.ToString();
-                            //文字の右詰め//
-                            cell.HorizontalContentAlignment = HorizontalAlignment.Right;
-                            //効かず　HorizontalContentAlignment    HorizontalAlignment
-                            //textBlock.HorizontalAlignment = HorizontalAlignment.Right;
-                            cell.Foreground = Brushes.White;
-                            if (lEnd < colCount) {
-                                cell.Background = Brushes.DarkGray;
-                            } else if (dow == DayOfWeek.Sunday) {
-                                cell.Background = Brushes.Red;
-                            } else if (dow == DayOfWeek.Saturday) {
-                                cell.Background = Brushes.Blue;
-                            } else {
-                                cell.Background = Brushes.White;
-                                cell.Foreground = Brushes.Black;
-                            }
-                        }
-                    } else {
-                        for (int colCount = 1; colCount <= 31; colCount++) {
-                            DateTime cDay = cStart.AddDays(colCount - 1);
-                            DayOfWeek dow = cDay.DayOfWeek;
-                            cell = GetDataGridCell(CalenderDG, rowCount, colCount);
-                            cell.Name = "R" + rowCount + "C" + colCount;
-                            cell.Content = cell.Name;
-                            //     TextBlock textBlock = content as TextBlock;
-                            //    textBlock.Text = colCount.ToString();
-                            if (lEnd < colCount) {
-                                cell.Background = Brushes.DarkGray;
-                            } else if (dow == DayOfWeek.Sunday) {
-                                cell.Background = Brushes.LightPink;
-                            } else if (dow == DayOfWeek.Saturday) {
-                                cell.Background = Brushes.LightCyan;
-                            } else {
-                                cell.Background = Brushes.White;
-                            }
-                       //     object content = cell.Content;
-                       //     StackPanel stackPanel = content as StackPanel;
-                       ////     stackPanel.Name = "R" + rowCount + "C" + colCount;
-                       //     stackPanel.Orientation = Orientation.Vertical;
-                       //     stackPanel.Background.Opacity = 0.5;
-
-                        }
-                        foreach (MyListItem MLI in MyListItems) {
-                            dbMsg += "\r\n" + MLI.startDTStr + "～" + MLI.endDTStr;
-                            int startCol = MLI.startDT.Day;
-
-                            //Google.Apis.Calendar.v3.Data.EventDateTime startDT = MLI.googleEvent.Start;
-                            //int startCol = startDT.DateTime.Value.Day;
-                            cell = GetDataGridCell(CalenderDG, rowCount, startCol);
-                            object content = cell.Content;
-                            Button eButton = content as Button;
-
-                            //                  TextBlock textBlock = content as TextBlock;
-                            string ButtonFace = "";
-                            if (!String.IsNullOrEmpty(MLI.description)) {
-                                ButtonFace += MLI.description;
-                            }
-                            if (!String.IsNullOrEmpty(MLI.summary)) {
-                                ButtonFace += MLI.summary;
-                            }
-                            dbMsg += ";" + ButtonFace + "[" + MLI.googleEvent.ColorId + "]";
-                            eButton.Content = ButtonFace;
-                            //            textBlock.Text = ButtonFace;
-                            int ColorId = 7;
-                            if (!String.IsNullOrEmpty(MLI.googleEvent.ColorId)) {
-                                ColorId = int.Parse(MLI.googleEvent.ColorId);
-                            }
-
-                            //Button wBt = new Button();
-                            //wBt.Content = ButtonFace;
-                            ////        wBt.Padding.Top = (dDouble)-5;
-                            //wBt.Width = BtWidth;
-                            string ColorIdStr = MLI.googleEvent.ColorId;
-                            object obj = System.Windows.Media.ColorConverter.ConvertFromString(GoogleColors[ColorId]);
-                            SolidColorBrush ret = new SolidColorBrush((System.Windows.Media.Color)obj);
-                            eButton.Background = ret;
-                            //           textBlock.Background = ret;
-                            //wBt.Background = ret;
-                            //wBt.SetValue(Grid.RowProperty, 1);
-                            //wBt.SetValue(Grid.ColumnProperty, startCol);
-                            //CalenderGR.Children.Add(wBt);
-                        }
-                    }
-                   
-                }
-*/
                 MyLog(TAG, dbMsg);
             }
             catch (Exception er)
@@ -1254,24 +1149,30 @@ namespace ProductionSchedule.ViewModels
         }
 
         //Drag&Drop///////////////////////////////////////////////////////////////
+        //   https://docs.microsoft.com/ja-jp/dotnet/desktop/wpf/advanced/drag-and-drop-overview?view=netframeworkdesktop-4.8
         private void Botton_MouseMove(object sender, MouseEventArgs e) {
             string TAG = "Botton_MouseMove";
             string dbMsg = "";
             try {
                 Button dropButton = sender as Button;
-                dbMsg += ","+ dropButton.Name;
-                if (dropButton != null && e.LeftButton == MouseButtonState.Pressed) {
-                    DragDrop.DoDragDrop(dropButton,
-                                         "drop now",
-                                         DragDropEffects.Copy);
+                if (dropButton != null) {
+                    dbMsg += "," + dropButton.Name;
+                    dbMsg += "," + e.LeftButton;
+                    if ( e.LeftButton == MouseButtonState.Pressed) {
+                        DragDrop.DoDragDrop(dropButton,
+                                             "drop now",
+                                             DragDropEffects.Copy);
+                    }
                 }
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
+
         private Brush _previousFill = null;
-        private void bottone_DragEnter(object sender, DragEventArgs e) {
+
+        private void Buttone_DragEnter(object sender, DragEventArgs e) {
             string TAG = "bottone_DragEnter";
             string dbMsg = "";
             try {
