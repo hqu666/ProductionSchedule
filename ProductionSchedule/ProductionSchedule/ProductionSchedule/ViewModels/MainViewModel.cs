@@ -49,7 +49,9 @@ namespace ProductionSchedule.ViewModels
         public System.Collections.IEnumerable TabItems { get; set; }
 
 		public string InfoLavel { get; set; }
-		public string ReTitle="";
+        public string ResultStr { get; set; }
+        
+        public string ReTitle="";
         private string _TargetURLStr;
         /// <summary>
         /// 遷移先URL文字列
@@ -608,6 +610,7 @@ namespace ProductionSchedule.ViewModels
         /// 開始日順の対象イベント配列
         /// </summary>
         public ObservableCollection<t_events> OrderedByStart { get; set; }
+        public Button DragingdButton;
 
         public ObservableCollection<CalenderRecord> CalenderItems { get; set; }
 
@@ -712,6 +715,8 @@ namespace ProductionSchedule.ViewModels
                         stackPanel.MouseRightButtonUp += (sender, e) => CellPanelClick(sender);
                         stackPanel.MouseLeftButtonUp += (sender, e) => CellPanelSelect(sender);
                         stackPanel.AllowDrop = true;
+                        stackPanel.Drop += (sender, e) => Drop2Panel(sender, e);
+
                         CalenderGR.Children.Add(stackPanel);
                         SPList.Add(cellName,stackPanel);
                     }
@@ -789,20 +794,16 @@ namespace ProductionSchedule.ViewModels
                   //          dbMsg += ",日付ラベル" + nLabel.Name;
                             nLabel.HorizontalContentAlignment = HorizontalAlignment.Right;
                             nLabel.Foreground = Brushes.White;
-                    //        Brush stackPanelBackground = Brushes.White;
                             SolidColorBrush BgColer = Brushes.White;
                             if (lEnd < wDay) {
                                 nLabel.Background = Brushes.DarkGray;
                                 BgColer = Brushes.DarkGray;
-                     //           stackPanelBackground = Brushes.DarkGray;
                             } else if (dow == DayOfWeek.Sunday) {
                                 nLabel.Background = Brushes.Red;
                                 BgColer = Brushes.LightPink;
-                    //            stackPanelBackground = Brushes.LightPink;
                             } else if (dow == DayOfWeek.Saturday) {
                                 nLabel.Background = Brushes.Blue;
                                 BgColer = Brushes.LightBlue;
-                     //           stackPanelBackground = Brushes.LightBlue;
                             } else {
                                 nLabel.Foreground = Brushes.Black;
                                 BgColer = Brushes.White;
@@ -872,13 +873,17 @@ namespace ProductionSchedule.ViewModels
                             dbMsg += "に黒文字";
                             wBt.Foreground = Brushes.Black;
                         }
+                        //ボタンへのイベント登録
                         wBt.MouseDoubleClick += (sender, e) => EventButtonClick(sender);
                         wBt.AllowDrop = true;
+                        //   wBt.MouseLeftButtonDown += (sender, e) => Botton_MouseMove(sender, e);
                         wBt.MouseMove += (sender, e) => Botton_MouseMove(sender, e);
-                        wBt.DragEnter += (sender, e) => Buttone_DragEnter(sender, e);
+                        wBt.DragEnter += (sender, e) => Buttone_DragEnter(sender, e);   //Pressed が発生しない
                         wBt.DragLeave += (sender, e) => Botton_DragLeave(sender, e);
                         wBt.DragOver += (sender, e) => Button_DragOver(sender, e);
-                        wBt.Drop += (sender, e) => Botton_Drop(sender, e);
+                    //    wBt.Drop += (sender, e) => Botton_Drop(sender, e);
+
+
                         ButtonFace = MLI.startDT.ToString("HH:mm") + "～" + MLI.endDT.ToString("HH:mm") + "\r\n" + ButtonFace;
                         wBt.Content = ButtonFace;
                         wBt.BorderBrush = Brushes.White;
@@ -1150,21 +1155,30 @@ namespace ProductionSchedule.ViewModels
 
         //Drag&Drop///////////////////////////////////////////////////////////////
         //   https://docs.microsoft.com/ja-jp/dotnet/desktop/wpf/advanced/drag-and-drop-overview?view=netframeworkdesktop-4.8
+        /// <summary>
+        /// DoDragDropの第二引数
+        /// </summary>
+        private int m_dragIndex=0;
+
         private void Botton_MouseMove(object sender, MouseEventArgs e) {
             string TAG = "Botton_MouseMove";
             string dbMsg = "";
             try {
-                Button dropButton = sender as Button;
-                if (dropButton != null) {
-                    dbMsg += "," + dropButton.Name;
+                DragingdButton = sender as Button;
+                if (DragingdButton != null) {
+                    ResultStr = "";
+                    NotifyPropertyChanged("ResultStr");
+                    dbMsg += "," + DragingdButton.Name;
                     dbMsg += "," + e.LeftButton;
                     if ( e.LeftButton == MouseButtonState.Pressed) {
-                        DragDrop.DoDragDrop(dropButton,
-                                             "drop now",
+                        m_dragIndex++;
+                        dbMsg += "[" + m_dragIndex +"]";
+                        DragDrop.DoDragDrop(DragingdButton,
+                                             m_dragIndex,
                                              DragDropEffects.Copy);
+                        MyLog(TAG, dbMsg);
                     }
                 }
-                MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }
@@ -1176,7 +1190,10 @@ namespace ProductionSchedule.ViewModels
             string TAG = "bottone_DragEnter";
             string dbMsg = "";
             try {
+                ResultStr = "Dragはマウス左ボタンをクリックしてボタンにマウスを合わせるとは発生しやすいです。";
+                NotifyPropertyChanged("ResultStr");
                 Button dropButton = sender as Button;
+                dbMsg += "[" + m_dragIndex + "]";
                 dbMsg += "," + dropButton.Name;
                 if (dropButton != null) {
                     // Save the current Fill brush so that you can revert back to this value in DragLeave.
@@ -1185,12 +1202,13 @@ namespace ProductionSchedule.ViewModels
                     // If the DataObject contains string data, extract it.
                     if (e.Data.GetDataPresent(DataFormats.StringFormat)) {
                         string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
-
+                        dbMsg += ",dataString=" + dataString;
                         // If the string can be converted into a Brush, convert it.
                         BrushConverter converter = new BrushConverter();
                         if (converter.IsValid(dataString)) {
                             Brush newFill = (Brush)converter.ConvertFromString(dataString);
                             dropButton.Background = newFill;
+                            dbMsg += ",Background=" + dropButton.Background.ToString();
                         }
                     }
                 }
@@ -1204,21 +1222,26 @@ namespace ProductionSchedule.ViewModels
             string TAG = "Button_DragOver";
             string dbMsg = "";
             try {
+                ResultStr = "";
+                NotifyPropertyChanged("ResultStr");
                 Button dropButton = sender as Button;
-                dbMsg += "," + dropButton.Name;
+                dbMsg += "[" + m_dragIndex + "]"+ dropButton.Name;
                 e.Effects = DragDropEffects.None;
 
                 // If the DataObject contains string data, extract it.
                 if (e.Data.GetDataPresent(DataFormats.StringFormat)) {
                     string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
+                    dbMsg += ",dataString=" + dataString;
 
                     // If the string can be converted into a Brush, allow copying.
                     BrushConverter converter = new BrushConverter();
                     if (converter.IsValid(dataString)) {
                         e.Effects = DragDropEffects.Copy | DragDropEffects.Move;
+                        dbMsg += ",Effects=" + e.Effects;
+
                     }
                 }
-                MyLog(TAG, dbMsg);
+        //        MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }
@@ -1229,9 +1252,10 @@ namespace ProductionSchedule.ViewModels
             string dbMsg = "";
             try {
                 Button dropButton = sender as Button;
-                dbMsg += "," + dropButton.Name;
+                dbMsg += "[" + m_dragIndex + "]" + dropButton.Name;
                 if (dropButton != null) {
                     dropButton.Background = _previousFill;
+                    dbMsg += ",Background=" + dropButton.Background.ToString();
                 }
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
@@ -1239,31 +1263,71 @@ namespace ProductionSchedule.ViewModels
             }
         }
 
-        private void Botton_Drop(object sender, DragEventArgs e) {
-            string TAG = "botton_Drop";
+        //private void Botton_Drop(object sender, DragEventArgs e) {
+        //    string TAG = "Botton_Drop";
+        //    string dbMsg = "";
+        //    try {
+        //        Button dropButton = sender as Button;
+        //        dbMsg += "[" + m_dragIndex + "]" + dropButton.Name;
+        //        if (dropButton != null) {
+        //            // If the DataObject contains string data, extract it.
+        //            if (e.Data.GetDataPresent(DataFormats.StringFormat)) {
+        //                string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
+        //                dbMsg += ",dataString=" + dataString;
+        //                // If the string can be converted into a Brush,
+        //                // convert it and apply it to the ellipse.
+        //                BrushConverter converter = new BrushConverter();
+        //                if (converter.IsValid(dataString)) {
+        //                    Brush newFill = (Brush)converter.ConvertFromString(dataString);
+        //                    dropButton.Background = newFill;
+        //                }
+        //            }
+        //        }
+        //        m_dragIndex--;
+
+        //        MyLog(TAG, dbMsg);
+        //    } catch (Exception er) {
+        //        MyErrorLog(TAG, dbMsg, er);
+        //    }
+        //}
+
+
+        /// <summary>
+        /// ボタンをDropされたパネル
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Drop2Panel(object sender, DragEventArgs e) {
+            string TAG = "Drop2Panel";
             string dbMsg = "";
             try {
-                Button dropButton = sender as Button;
-                dbMsg += "," + dropButton.Name;
-                if (dropButton != null) {
+                StackPanel dropPanel= sender as StackPanel;
+                dbMsg += "[" + m_dragIndex + "]" + dropPanel.Name;
+
+                dbMsg += "に[" + m_dragIndex + "]" + DragingdButton.Name +"にドロップ";
+                if (DragingdButton != null) {
                     // If the DataObject contains string data, extract it.
+                    dbMsg += ",GetDataPresent=" + e.Data.GetDataPresent(DataFormats.StringFormat);
                     if (e.Data.GetDataPresent(DataFormats.StringFormat)) {
                         string dataString = (string)e.Data.GetData(DataFormats.StringFormat);
-
+                        dbMsg += ",dataString=" + dataString;
                         // If the string can be converted into a Brush,
                         // convert it and apply it to the ellipse.
                         BrushConverter converter = new BrushConverter();
                         if (converter.IsValid(dataString)) {
                             Brush newFill = (Brush)converter.ConvertFromString(dataString);
-                            dropButton.Background = newFill;
+                            DragingdButton.Background = newFill;
                         }
                     }
                 }
+                m_dragIndex--;
+                DragingdButton = null;
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
+
 
         ///////////////////////////////////////////////////////////////Drag&Drop//
 

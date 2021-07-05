@@ -6,22 +6,22 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-		xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+	    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
         xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
-		xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
-		xmlns:vm="clr-namespace:ProductionSchedule.ViewModels"
-		xmlns:v="clr-namespace:ProductionSchedule.Views"
-	  xmlns:controlzex="urn:controlzex"
-	  mc:Ignorable="d"
- 		WindowStartupLocation="CenterScreen"  
-	   		ScrollViewer.HorizontalScrollBarVisibility="Auto" 
+	    xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+	    xmlns:vm="clr-namespace:ProductionSchedule.ViewModels"
+	    xmlns:v="clr-namespace:ProductionSchedule.Views"
+	    xmlns:controlzex="urn:controlzex"
+	    mc:Ignorable="d"
+        Topmost="True"
+	    WindowStartupLocation="CenterScreen"  
+	   	ScrollViewer.HorizontalScrollBarVisibility="Auto" 
 		ScrollViewer.VerticalScrollBarVisibility="Auto" 
-         d:DesignHeight="450" d:DesignWidth="800"
+        d:DesignHeight="450" d:DesignWidth="800"
 		Title="web" Closing="Window_Closing">
 
     <!--
-   		Topmost="True"
  
     <Window.DataContext>
         <vm:WsbViewModel/>
