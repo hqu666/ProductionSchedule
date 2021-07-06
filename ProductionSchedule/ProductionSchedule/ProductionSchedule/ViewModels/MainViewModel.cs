@@ -47,8 +47,9 @@ namespace ProductionSchedule.ViewModels
         public Dictionary<string, SolidColorBrush> DayColorList;
         public int GridRowCount = 25;
         public System.Collections.IEnumerable TabItems { get; set; }
+        public List<string> RowNames { get; set; }
 
-		public string InfoLavel { get; set; }
+        public string InfoLavel { get; set; }
         public string ResultStr { get; set; }
         
         public string ReTitle="";
@@ -688,6 +689,7 @@ namespace ProductionSchedule.ViewModels
                 SPList = new Dictionary<string, StackPanel>();
                 //課題：stackPanelに枠線を入れる
                 GridRowCount++;
+                RowNames = new List<string>();
                 for (int rowCount = 1; rowCount < GridRowCount; rowCount++) {
                     // Rowを設定する
                     rowDef = new RowDefinition();
@@ -701,6 +703,7 @@ namespace ProductionSchedule.ViewModels
                     } else {
                         nLabel.Content = (rowCount - 2) + ":00";
                     }
+                    RowNames.Add(nLabel.Content.ToString());
           //          nLabel.Height = 0;
                     nLabel.Margin = new Thickness(0, 0, 0, 0);
                     nLabel.SetValue(Grid.RowProperty, rowCount);
@@ -1303,9 +1306,69 @@ namespace ProductionSchedule.ViewModels
             try {
                 StackPanel dropPanel= sender as StackPanel;
                 dbMsg += "[" + m_dragIndex + "]" + dropPanel.Name;
-
-                dbMsg += "に[" + m_dragIndex + "]" + DragingdButton.Name +"にドロップ";
+                string btName = DragingdButton.Name;
+                dbMsg += "に[" + m_dragIndex + "]" + btName + "をドロップ";
+                string[] rStrs = dropPanel.Name.Split('C');
+                int rInt = int.Parse(rStrs[0].Substring(1));
+                int cInt = int.Parse(rStrs[1]);
+                string startTime = RowNames[rInt];
+                dbMsg += "," + cInt + "日" + startTime;
                 if (DragingdButton != null) {
+
+                    foreach (EventButton eb in EventButtons) {
+                        Button dBt = eb.eButton;
+                        dbMsg += "," + dBt.Name;
+                        if (dBt.Name.Equals(btName)) {
+                            int oStartRow = eb.startRow;
+                            int oEndtRow = eb.endtRow;
+                            int rowSpan = eb.rowSpan;
+                            dbMsg += ",元R" + oStartRow + "～" + oEndtRow + "の" + rowSpan + "行";
+                            int oStartCol = eb.startCol;
+                            int oEndCol = eb.endCol;
+                            int colSpan = eb.colSpan;
+                            dbMsg += ",元C" + oStartCol + "～" + oEndCol + "の" + colSpan + "列";
+                            if (eb.stackPanel != null) {
+                                dbMsg += ",パネル移動";
+                                eb.stackPanel.Children.Remove(DragingdButton);
+                                Panel.SetZIndex(eb.stackPanel, Panel.GetZIndex(eb.stackPanel) - 2);
+                                dropPanel.Children.Add(DragingdButton);
+                                eb.stackPanel = dropPanel;
+                                Panel.SetZIndex(eb.stackPanel, Panel.GetZIndex(eb.stackPanel) + 2);
+                            } else {
+                                CalenderGR.Children.Remove(DragingdButton);
+                                dbMsg += ",R" + rInt + "C" + cInt + "に移動";
+                                DragingdButton.SetValue(Grid.RowProperty, rInt+1);
+                                DragingdButton.SetValue(Grid.ColumnProperty, cInt);
+                                CalenderGR.Children.Add(DragingdButton);
+                                eb.startRow= rInt;
+                                eb.endtRow = rInt+ rowSpan-1;
+                                eb.startCol= cInt;
+                                eb.endCol = cInt+ colSpan-1;
+                            }
+
+                            MyListItem MLI = eb.eListItem;
+                            dbMsg += "," + MLI.startDTStr + "～" + MLI.endDTStr;
+                            Google.Apis.Calendar.v3.Data.Event gEvent = MLI.googleEvent;
+                            dbMsg += "[" + gEvent.Id + "]" + gEvent.Summary;
+
+
+
+                            //string htmlLink = gEvent.HtmlLink;
+                            //string[] delimiter = { "eid=" };
+                            //string[] rStr = htmlLink.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                            //string eid = rStr[1];
+                            //TargetURLStr = "https://calendar.google.com/calendar/u/1/r/eventedit/";
+                            //TargetURLStr += eid;
+                            //TargetURLStr += "?sf=true?";
+                            //NotifyPropertyChanged("TargetURLStr");
+                            //WebStart();
+                            break;
+                        }
+                    }
+
+                    //       int RowSpan = DragingdButton.GetValue(Grid.RowSpanProperty).ToString();
+
+
                     // If the DataObject contains string data, extract it.
                     dbMsg += ",GetDataPresent=" + e.Data.GetDataPresent(DataFormats.StringFormat);
                     if (e.Data.GetDataPresent(DataFormats.StringFormat)) {
