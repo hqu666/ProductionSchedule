@@ -1315,9 +1315,18 @@ namespace ProductionSchedule.ViewModels
                 dbMsg += "," + cInt + "日" + startTime;
                 if (DragingdButton != null) {
 
+                    String titolStr = Constant.ApplicationName;
+                    String msgStr = DragingdButton.Content.ToString()+"を";
+                    msgStr += "\r\n"+cInt + "日" + startTime + "に変更しますか？";
+                    msgStr += "\r\nこのままGooglekレンダーを更新する場合はYes、\r\n更新ボタンで後からまとめて更新する場合はNo、";
+                    msgStr += "\r\nボタンの移動も行わない場合はCancelをクリックしてください。";
+                    MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.YesNoCancel, MessageBoxImage.Exclamation);
+                    dbMsg += ",result=" + result;
+
                     foreach (EventButton eb in EventButtons) {
                         Button dBt = eb.eButton;
                         dbMsg += "," + dBt.Name;
+                        eb.isSaved = false;
                         if (dBt.Name.Equals(btName)) {
                             int oStartRow = eb.startRow;
                             int oEndtRow = eb.endtRow;
@@ -1327,41 +1336,46 @@ namespace ProductionSchedule.ViewModels
                             int oEndCol = eb.endCol;
                             int colSpan = eb.colSpan;
                             dbMsg += ",元C" + oStartCol + "～" + oEndCol + "の" + colSpan + "列";
-                            if (eb.stackPanel != null) {
-                                dbMsg += ",パネル移動";
-                                eb.stackPanel.Children.Remove(DragingdButton);
-                                Panel.SetZIndex(eb.stackPanel, Panel.GetZIndex(eb.stackPanel) - 2);
-                                dropPanel.Children.Add(DragingdButton);
-                                eb.stackPanel = dropPanel;
-                                Panel.SetZIndex(eb.stackPanel, Panel.GetZIndex(eb.stackPanel) + 2);
-                            } else {
-                                CalenderGR.Children.Remove(DragingdButton);
-                                dbMsg += ",R" + rInt + "C" + cInt + "に移動";
-                                DragingdButton.SetValue(Grid.RowProperty, rInt+1);
-                                DragingdButton.SetValue(Grid.ColumnProperty, cInt);
-                                CalenderGR.Children.Add(DragingdButton);
-                                eb.startRow= rInt;
-                                eb.endtRow = rInt+ rowSpan-1;
-                                eb.startCol= cInt;
-                                eb.endCol = cInt+ colSpan-1;
-                            }
 
                             MyListItem MLI = eb.eListItem;
                             dbMsg += "," + MLI.startDTStr + "～" + MLI.endDTStr;
                             Google.Apis.Calendar.v3.Data.Event gEvent = MLI.googleEvent;
                             dbMsg += "[" + gEvent.Id + "]" + gEvent.Summary;
 
+                            if (result == MessageBoxResult.Yes) {
+                                
 
+                                //string htmlLink = gEvent.HtmlLink;
+                                //string[] delimiter = { "eid=" };
+                                //string[] rStr = htmlLink.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                                //string eid = rStr[1];
+                                //TargetURLStr = "https://calendar.google.com/calendar/u/1/r/eventedit/";
+                                //TargetURLStr += eid;
+                                //TargetURLStr += "?sf=true?";
+                                //NotifyPropertyChanged("TargetURLStr");
+                                //WebStart();
+                            } else if (result == MessageBoxResult.No) {
 
-                            //string htmlLink = gEvent.HtmlLink;
-                            //string[] delimiter = { "eid=" };
-                            //string[] rStr = htmlLink.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
-                            //string eid = rStr[1];
-                            //TargetURLStr = "https://calendar.google.com/calendar/u/1/r/eventedit/";
-                            //TargetURLStr += eid;
-                            //TargetURLStr += "?sf=true?";
-                            //NotifyPropertyChanged("TargetURLStr");
-                            //WebStart();
+                                if (eb.stackPanel != null) {
+                                    dbMsg += ",パネル移動";
+                                    eb.stackPanel.Children.Remove(DragingdButton);
+                                    Panel.SetZIndex(eb.stackPanel, Panel.GetZIndex(eb.stackPanel) - 2);
+                                    dropPanel.Children.Add(DragingdButton);
+                                    eb.stackPanel = dropPanel;
+                                    Panel.SetZIndex(eb.stackPanel, Panel.GetZIndex(eb.stackPanel) + 2);
+                                } else {
+                                    CalenderGR.Children.Remove(DragingdButton);
+                                    dbMsg += ",R" + rInt + "C" + cInt + "に移動";
+                                    DragingdButton.SetValue(Grid.RowProperty, rInt + 1);
+                                    DragingdButton.SetValue(Grid.ColumnProperty, cInt);
+                                    CalenderGR.Children.Add(DragingdButton);
+                                    eb.startRow = rInt;
+                                    eb.endtRow = rInt + rowSpan - 1;
+                                    eb.startCol = cInt;
+                                    eb.endCol = cInt + colSpan - 1;
+                                }
+                            }
+
                             break;
                         }
                     }
@@ -2161,6 +2175,10 @@ namespace ProductionSchedule.ViewModels
         /// 格納するスタックパネル
         /// </summary>
         public StackPanel stackPanel { get; set; }
+        /// <summary>
+        /// 更新済み
+        /// </summary>
+        public bool isSaved { get; set; }
 
         public int startRow { get; set; }
         public double startMargint { get; set; }
