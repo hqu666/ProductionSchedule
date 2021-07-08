@@ -141,7 +141,8 @@ WindowStartupLocation="CenterScreen"
                         Orientation="Horizontal" VerticalAlignment="Center"
                         Grid.Row="0" Grid.Column="0">
                 <Button x:Name="UpDateBT"
-                         Style="{DynamicResource SquareButton}" Height="30"
+  							Command="{Binding Refresh}"
+                       Style="{DynamicResource SquareButton}" Height="30"
 							>
                     <Button.Background>
                         <ImageBrush ImageSource="/ProductionSchedule;component/Resource/ReDrow.png"/>

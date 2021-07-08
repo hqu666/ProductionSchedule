@@ -1314,19 +1314,9 @@ namespace ProductionSchedule.ViewModels
                 string startTime = RowNames[rInt];
                 dbMsg += "," + cInt + "日" + startTime;
                 if (DragingdButton != null) {
-
-                    String titolStr = Constant.ApplicationName;
-                    String msgStr = DragingdButton.Content.ToString()+"を";
-                    msgStr += "\r\n"+cInt + "日" + startTime + "に変更しますか？";
-                    msgStr += "\r\nこのままGooglekレンダーを更新する場合はYes、\r\n更新ボタンで後からまとめて更新する場合はNo、";
-                    msgStr += "\r\nボタンの移動も行わない場合はCancelをクリックしてください。";
-                    MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.YesNoCancel, MessageBoxImage.Exclamation);
-                    dbMsg += ",result=" + result;
-
                     foreach (EventButton eb in EventButtons) {
                         Button dBt = eb.eButton;
                         dbMsg += "," + dBt.Name;
-                        eb.isSaved = false;
                         if (dBt.Name.Equals(btName)) {
                             int oStartRow = eb.startRow;
                             int oEndtRow = eb.endtRow;
@@ -1342,20 +1332,49 @@ namespace ProductionSchedule.ViewModels
                             Google.Apis.Calendar.v3.Data.Event gEvent = MLI.googleEvent;
                             dbMsg += "[" + gEvent.Id + "]" + gEvent.Summary;
 
-                            if (result == MessageBoxResult.Yes) {
-                                
 
-                                //string htmlLink = gEvent.HtmlLink;
-                                //string[] delimiter = { "eid=" };
-                                //string[] rStr = htmlLink.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
-                                //string eid = rStr[1];
-                                //TargetURLStr = "https://calendar.google.com/calendar/u/1/r/eventedit/";
-                                //TargetURLStr += eid;
-                                //TargetURLStr += "?sf=true?";
-                                //NotifyPropertyChanged("TargetURLStr");
-                                //WebStart();
+                            String titolStr = Constant.ApplicationName;
+                            String msgStr = String.Format("{0:yyyy/MM/dd hh:mm}", MLI.startDT)+ "から" + cInt + "日" + startTime + "に変更しますか？";
+                            msgStr += "\r\n\r\nこのままGoogleカレンダを更新する場合は「はい」、";
+                            msgStr += "\r\nボタン移動のみで更新ボタンで後からまとめて更新する場合は「いいえ」、";
+                            msgStr += "\r\nボタンの移動も行わない場合は「キャンセル」をクリックしてください。";
+                            MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.YesNoCancel, MessageBoxImage.Exclamation);
+                            dbMsg += ",result=" + result;
+
+                            if (result == MessageBoxResult.Yes) {
+                                DateTime dateTime = DateTime.Parse(MLI.startDTStr);
+                                //       dateTime.AddHours((int)tEvents.event_time_start);
+                                gEvent.Start.DateTime = dateTime;
+                                //taregetEvent.Start.DateTime = taregetEvent.Start.DateTime.        DateTime.Parse(tEvents.event_date_start.ToString() + " " + tEvents.event_time_start.ToString() + ":00");
+                                dbMsg += "  ," + gEvent.Start.DateTime;
+                                dateTime = DateTime.Parse(MLI.endDTStr);
+                             //   dateTime.AddHours((int)tEvents.event_time_end);
+                                gEvent.End.DateTime = dateTime;               // DateTime.Parse(tEvents.event_date_end.ToString() + " " + tEvents.event_date_end.ToString() + ":00");
+                                dbMsg += "～" + gEvent.End.DateTime;
+                                gEvent.OriginalStartTime = new Google.Apis.Calendar.v3.Data.EventDateTime();
+                                gEvent.OriginalStartTime.DateTime = gEvent.Start.DateTime;
+                                dbMsg += ",OriginalStartTime=" + gEvent.OriginalStartTime.DateTime;
+                                if (oStartRow==1) {
+                                    dbMsg += ",終日";                            // + tEvents.event_is_daylong;
+                                    gEvent.Start.Date = String.Format("yyyy-MM-dd", gEvent.Start.DateTime);
+                                    dbMsg += ">>" + gEvent.Start.Date;
+                                } else {
+
+                                }
+
+                                string htmlLink = gEvent.HtmlLink;
+                                string[] delimiter = { "eid=" };
+                                string[] rStr = htmlLink.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                                string eid = rStr[1];
+                                TargetURLStr = "https://calendar.google.com/calendar/u/1/r/eventedit/";
+                                TargetURLStr += eid;
+                                TargetURLStr += "?sf=true?";
+                                NotifyPropertyChanged("TargetURLStr");
+                                WebStart();
+                                RefreshMe();
                             } else if (result == MessageBoxResult.No) {
 
+                                eb.isSaved = false;
                                 if (eb.stackPanel != null) {
                                     dbMsg += ",パネル移動";
                                     eb.stackPanel.Children.Remove(DragingdButton);
@@ -1926,6 +1945,25 @@ namespace ProductionSchedule.ViewModels
                 MyErrorLog(TAG, dbMsg, er);
             }
             return Events;
+        }
+
+        public ICommand Refresh => new DelegateCommand(RefreshMe);
+        /// <summary>
+        /// 更新
+        /// </summary>
+        public void RefreshMe() {
+            string TAG = "RefreshMe";
+            string dbMsg = "";
+            try {
+                dbMsg += "対象年月=" + SelectedDateTime;
+                CurrentDateStr = String.Format("{0:yyyy年MM月}", SelectedDateTime);
+                dbMsg += ">>" + CurrentDateStr;
+                NotifyPropertyChanged("CurrentDateStr");
+                CalenderWrite();
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
         }
 
         //戻し/////////////////////////////////////////////////////////////////////////
