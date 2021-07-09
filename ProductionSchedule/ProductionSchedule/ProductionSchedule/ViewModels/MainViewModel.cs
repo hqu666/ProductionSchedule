@@ -1312,7 +1312,9 @@ namespace ProductionSchedule.ViewModels
                 int rInt = int.Parse(rStrs[0].Substring(1));
                 int cInt = int.Parse(rStrs[1]);
                 string startTime = RowNames[rInt];
-                dbMsg += "," + cInt + "日" + startTime;
+                string destinationDTStr= CurrentDateStr + cInt + "日 " + startTime;
+                DateTime destinationDT = DateTime.Parse(destinationDTStr);
+                dbMsg += ","+ destinationDTStr;
                 if (DragingdButton != null) {
                     foreach (EventButton eb in EventButtons) {
                         Button dBt = eb.eButton;
@@ -1340,16 +1342,12 @@ namespace ProductionSchedule.ViewModels
                             msgStr += "\r\nボタンの移動も行わない場合は「キャンセル」をクリックしてください。";
                             MessageBoxResult result = MessageShowWPF(titolStr, msgStr, MessageBoxButton.YesNoCancel, MessageBoxImage.Exclamation);
                             dbMsg += ",result=" + result;
-
+// 7/9：；開始日時から
                             if (result == MessageBoxResult.Yes) {
-                                DateTime dateTime = DateTime.Parse(MLI.startDTStr);
-                                //       dateTime.AddHours((int)tEvents.event_time_start);
-                                gEvent.Start.DateTime = dateTime;
-                                //taregetEvent.Start.DateTime = taregetEvent.Start.DateTime.        DateTime.Parse(tEvents.event_date_start.ToString() + " " + tEvents.event_time_start.ToString() + ":00");
-                                dbMsg += "  ," + gEvent.Start.DateTime;
-                                dateTime = DateTime.Parse(MLI.endDTStr);
-                             //   dateTime.AddHours((int)tEvents.event_time_end);
-                                gEvent.End.DateTime = dateTime;               // DateTime.Parse(tEvents.event_date_end.ToString() + " " + tEvents.event_date_end.ToString() + ":00");
+                                gEvent.Start.DateTime = destinationDT;
+                                dbMsg += "＞＞カレンダ登録：" + gEvent.Start.DateTime;
+                                TimeSpan dtSpan = MLI.endDT - MLI.startDT;
+                                gEvent.End.DateTime = destinationDT.Add(dtSpan);               // DateTime.Parse(tEvents.event_date_end.ToString() + " " + tEvents.event_date_end.ToString() + ":00");
                                 dbMsg += "～" + gEvent.End.DateTime;
                                 gEvent.OriginalStartTime = new Google.Apis.Calendar.v3.Data.EventDateTime();
                                 gEvent.OriginalStartTime.DateTime = gEvent.Start.DateTime;
@@ -1361,8 +1359,13 @@ namespace ProductionSchedule.ViewModels
                                 } else {
 
                                 }
-
-                                string htmlLink = gEvent.HtmlLink;
+                                GoogleCalendarUtil GCU = new GoogleCalendarUtil();
+                                Task<string> geURL = Task.Run(() => {
+                                    return GCU.UpDateGEvents(gEvent);
+                                });
+                                geURL.Wait();
+                                string htmlLink = geURL.Result;
+                                //                              string htmlLink = gEvent.HtmlLink;
                                 string[] delimiter = { "eid=" };
                                 string[] rStr = htmlLink.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
                                 string eid = rStr[1];
