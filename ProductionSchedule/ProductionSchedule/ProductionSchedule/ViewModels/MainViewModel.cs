@@ -1352,6 +1352,7 @@ namespace ProductionSchedule.ViewModels
                                 gEvent.OriginalStartTime = new Google.Apis.Calendar.v3.Data.EventDateTime();
                                 gEvent.OriginalStartTime.DateTime = gEvent.Start.DateTime;
                                 dbMsg += ",OriginalStartTime=" + gEvent.OriginalStartTime.DateTime;
+                                //課題；終日イベント確認待ち
                                 if (oStartRow==1) {
                                     dbMsg += ",終日";                            // + tEvents.event_is_daylong;
                                     gEvent.Start.Date = String.Format("yyyy-MM-dd", gEvent.Start.DateTime);
@@ -1359,21 +1360,23 @@ namespace ProductionSchedule.ViewModels
                                 } else {
 
                                 }
+                                //更新して
                                 GoogleCalendarUtil GCU = new GoogleCalendarUtil();
                                 Task<string> geURL = Task.Run(() => {
                                     return GCU.UpDateGEvents(gEvent);
                                 });
                                 geURL.Wait();
                                 string htmlLink = geURL.Result;
-                                //                              string htmlLink = gEvent.HtmlLink;
-                                string[] delimiter = { "eid=" };
-                                string[] rStr = htmlLink.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
-                                string eid = rStr[1];
-                                TargetURLStr = "https://calendar.google.com/calendar/u/1/r/eventedit/";
-                                TargetURLStr += eid;
-                                TargetURLStr += "?sf=true?";
-                                NotifyPropertyChanged("TargetURLStr");
-                                WebStart();
+                                ////編集画面を見せる
+                                //string[] delimiter = { "eid=" };
+                                //string[] rStr = htmlLink.Split(delimiter, StringSplitOptions.RemoveEmptyEntries);
+                                //string eid = rStr[1];
+                                //TargetURLStr = "https://calendar.google.com/calendar/u/1/r/eventedit/";
+                                //TargetURLStr += eid;
+                                //TargetURLStr += "?sf=true?";
+                                //NotifyPropertyChanged("TargetURLStr");
+                                //WebStart();
+                                ////課題；webを閉じたタイミングで更新
                                 RefreshMe();
                             } else if (result == MessageBoxResult.No) {
 
@@ -2035,7 +2038,30 @@ namespace ProductionSchedule.ViewModels
             }
         }
 
-        //////////////////////////////////////////////////////////////////////////////////カレンダ作成//
+        //データベース管理////////////////////////////////////////////////////////////////////////////////カレンダ作成//
+        public ICommand DBStartCommand => new DelegateCommand(Go2DB);
+        /// <summary>
+        /// データベース管理画面へ
+        /// </summary>
+        public void Go2DB() {
+            string TAG = "Go2DB";
+            string dbMsg = "";
+            try {
+                DBWindow dw = new DBWindow();
+                dw.SelItemID = 999999;
+                dw.SelItemName = "選択しているアイテム";
+                dw.SelItemHierarchy = 9;
+                dw.SelParentID = 888888;
+                dw.SelParentName = "親の名称";
+
+                //dbMsg += ",初期表示=" + this.TargetURLStr;
+                //ww.VM.TargetURLStr = this.TargetURLStr;
+                dw.Show();
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
         /// <summary>
         /// このウィンドウを閉じる
         /// </summary>

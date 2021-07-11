@@ -123,7 +123,7 @@ WindowStartupLocation="CenterScreen"
     <!--<ScrollViewer VerticalScrollBarVisibility="Auto">-->
       <Grid Margin="8,8,8,8" >
         <Grid.ColumnDefinitions>
-            <ColumnDefinition  Width="*"  />
+            <ColumnDefinition  Width="Auto"  />
             <ColumnDefinition  Width="*"  />
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
@@ -207,6 +207,10 @@ WindowStartupLocation="CenterScreen"
                             HorizontalAlignment="Right"
                         Grid.Row="0" Grid.Column="1"
                     >
+            <Button 
+			        Command="{Binding DBStartCommand}"
+			        Name="DB_bt" Content="分類名称管理"
+			        />
             <TextBox x:Name="TargetURLTB" 
 								Text="{Binding TargetURLStr, Mode=TwoWay}" 
 								/>
@@ -236,15 +240,6 @@ WindowStartupLocation="CenterScreen"
 			            />
 
         </StackPanel>
-        <!--<DataGrid 
-            Name="CalenderDG"
-            Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-            MinRowHeight="18" 
-            IsReadOnly="True"
-            HeadersVisibility="None"
-            ItemsSource="{Binding CalenderItems}"
-            >
-        </DataGrid>-->
         <ScrollViewer 
             Name="CalenderSV"
             Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
