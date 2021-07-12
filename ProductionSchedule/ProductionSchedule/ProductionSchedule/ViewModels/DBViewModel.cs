@@ -6,23 +6,25 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using ProductionSchedule.Properties;                //Settings
-
-using ProductionSchedule.Views;
-using ProductionSchedule.Models;
+using System.Collections.ObjectModel;
+using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Controls.Primitives;
+//using ProductionSchedule.Properties;                //Settings
+//using ProductionSchedule.Views;
+//using ProductionSchedule.Models;
 //using ProductionSchedule.Enums;
 using System.Reflection;
 using System.Windows.Input;
 using Google.Apis.Drive.v3;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
-
-using ProductionSchedule.Controls;
 using Google.Apis.Auth.OAuth2;
-using System.Collections.ObjectModel;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Controls.Primitives;
+using Google.Apis.Sheets.v4;
+using Google.Apis.Sheets.v4.Data;
+using Google.Apis.Util.Store;
+using System.IO;
+//using ProductionSchedule.Controls;
 
 namespace ProductionSchedule.ViewModels {
     class DBViewModel : INotifyPropertyChanged {
@@ -297,6 +299,43 @@ namespace ProductionSchedule.ViewModels {
             }
         }
 
+        // ファイルの操作/////////////////////
+
+        // スプレットシート/////////////////////ファイルの操作
+        // https://www.ka-net.org/blog/?p=7007
+        static string[] Scopes = { SheetsService.Scope.SpreadsheetsReadonly };
+        static string ApplicationName = "Google Sheets API .NET Quickstart";
+        static string AppClientId = "(クライアント ID)";
+        static string AppClientSecret = "(クライアント シークレット)";
+        static string SpreadSheetId = "(操作対象となるシートのID)";
+
+        public static void ReadSheet(string[] args) {
+            UserCredential credential;
+            string credPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+            credPath = Path.Combine(credPath, ".credentials/sheets.googleapis.com-dotnet-quickstart.json");
+            credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+              new ClientSecrets {
+                  ClientId = AppClientId,
+                  ClientSecret = AppClientSecret
+              },
+              Scopes,
+              "user",
+              CancellationToken.None,
+              new FileDataStore(credPath, true)
+            ).Result;
+            //Console.WriteLine("Credential file saved to: " + credPath);
+
+            var service = new SheetsService(new BaseClientService.Initializer() {
+                HttpClientInitializer = credential,
+                ApplicationName = ApplicationName,
+            });
+
+            //Sheet1のセルA1の値取得
+            SpreadsheetsResource.ValuesResource.GetRequest req1 = service.Spreadsheets.Values.Get(SpreadSheetId, "Sheet1!A1");
+            IList<IList<Object>> values = req1.Execute().Values;
+            Console.WriteLine(values[0][0]);
+            Console.ReadKey(true);
+        }
         ///////////////////////
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged([CallerMemberName] String propertyName = "") {

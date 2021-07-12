@@ -268,6 +268,8 @@ namespace ProductionSchedule.Views {
             ////CalenderSV.Height = this.Height- (ContorolSP.Height + ContorolSP.Margin.Top + ContorolSP.Margin.Bottom);
             //VM.MakeCalenderBase();
         }
+
+
         ///////////////////////
         public MessageBoxResult MessageShowWPF(String titolStr, String msgStr,
                                                                         MessageBoxButton buttns,

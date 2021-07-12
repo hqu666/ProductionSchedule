@@ -16,6 +16,7 @@ namespace ProductionSchedule
 
 
         //認証情報/API キー
+        // https://console.cloud.google.com/apis/dashboard?authuser=3&project=kyokuto4
         public static string ApplicationName = "kyokuto4";                                        //	アプリケーション名
 		public static string APIKey = "AIzaSyAnJ-QXa9dqQr644u7jn_3-sxSr3XL_z60";
 		//OAuth 2.0 クライアント ID

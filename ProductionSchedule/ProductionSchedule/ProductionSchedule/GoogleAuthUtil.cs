@@ -10,6 +10,7 @@ using Google.Apis.Calendar.v3;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
+using Google.Apis.Sheets.v4;
 using Google.Apis.Util.Store;
 
 namespace ProductionSchedule
@@ -24,8 +25,9 @@ namespace ProductionSchedule
 																	DriveService.Scope.DriveAppdata,			//追加
 																	DriveService.Scope.Drive,
 																	CalendarService.Scope.Calendar,
-																	CalendarService.Scope.CalendarEvents
-															};
+																	CalendarService.Scope.CalendarEvents,
+                                                                    SheetsService.Scope.SpreadsheetsReadonly	//追加;
+                                                            };
 
 		/// <summary>
 		/// 認証情報と各サービスを作成する

@@ -81,6 +81,7 @@
     <Compile Include="Models\GAttachFile.cs" />
     <Compile Include="Models\GOAuthModel.cs" />
     <Compile Include="Models\InputDialogModel.cs" />
+    <Compile Include="Models\MyHierarchy.cs" />
     <Compile Include="Models\MyMenu.cs" />
     <Compile Include="Models\t_events.cs" />
     <Compile Include="ViewModels\DBViewModel.cs" />
@@ -159,6 +160,9 @@
     <PackageReference Include="Google.Apis.Drive.v3">
       <Version>1.52.0.2370</Version>
     </PackageReference>
+    <PackageReference Include="Google.Apis.Sheets.v4">
+      <Version>1.52.0.2371</Version>
+    </PackageReference>
     <PackageReference Include="LivetCask">
       <Version>3.2.3.2</Version>
     </PackageReference>
@@ -170,9 +174,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Windows.SDK.Contracts">
       <Version>10.0.19041.1</Version>
-    </PackageReference>
-    <PackageReference Include="sqlite-net">
-      <Version>1.6.292</Version>
     </PackageReference>
     <PackageReference Include="System.Runtime.WindowsRuntime">
       <Version>4.7.0</Version>
