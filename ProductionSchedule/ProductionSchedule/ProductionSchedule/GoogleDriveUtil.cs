@@ -546,14 +546,14 @@ namespace ProductionSchedule
 		}
 		////////////////////////////////////////////////////	Waitの使い方？
 		/// <summary>
-		/// Ariadneのイベントフォルダの作成
+		/// このアプリ用フォルダの作成
 		/// </summary>
 		/// <param name="pcFilePath"></param>
 		/// <param name="rootFolderName"></param>
 		/// <returns></returns>
-		public string MakeAriadneGoogleFolder()
+		public string MakeMyeGoogleFolder()
 		{
-			string TAG = "MakeAriadneGoogleFolder";
+			string TAG = "MakeMyeGoogleFolder";
 			string dbMsg = "[GoogleDriveUtil]";
 			string rootFolderId = "";
 			try {

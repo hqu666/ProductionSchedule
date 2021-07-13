@@ -299,14 +299,17 @@ namespace ProductionSchedule.ViewModels {
             }
         }
 
-        // ファイルの操作/////////////////////
+        // ファイルの操作////////////////////////
+        /// <summary>
+        /// シートが無ければ新規作成
+        /// </summary>
 
         // スプレットシート/////////////////////ファイルの操作
         // https://www.ka-net.org/blog/?p=7007
         static string[] Scopes = { SheetsService.Scope.SpreadsheetsReadonly };
-        static string ApplicationName = "Google Sheets API .NET Quickstart";
-        static string AppClientId = "(クライアント ID)";
-        static string AppClientSecret = "(クライアント シークレット)";
+        static string ApplicationName = Constant.ApplicationName;           //"Google Sheets API .NET Quickstart";
+        static string AppClientId = Constant.CliantId;                      //"(クライアント ID)";
+        static string AppClientSecret = Constant.CliantSeacret;           //"(クライアント シークレット)";
         static string SpreadSheetId = "(操作対象となるシートのID)";
 
         public static void ReadSheet(string[] args) {

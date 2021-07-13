@@ -113,8 +113,10 @@ namespace ProductionSchedule.ViewModels
                     _GoogleAcountStr = value;
                     if (!String.IsNullOrEmpty(_GoogleAcountStr) &&
                         !_GoogleAcountStr.Equals(Constant.GoogleAcountMSG)) {
-
-                        Connect();
+                        if (1 < AcounntList.Count) {
+                            dbMsg += "変更できる項目数がある";
+                            Connect();
+                        }
                     }
                     //変更イベントに使用
                     MyLog(TAG, dbMsg);
@@ -169,6 +171,7 @@ namespace ProductionSchedule.ViewModels
             string dbMsg = "";
             try
             {
+                CalenderNameList = new List<string>();
                 EventButtons = new ObservableCollection<EventButton>();
                 //本日日付
                 SelectedDateTime = DateTime.Today;
@@ -193,6 +196,10 @@ namespace ProductionSchedule.ViewModels
                         AcounntList = new List<string>(acounntList);
                         dbMsg += "[  " + AcounntList.Count +"件]" ;
                         NotifyPropertyChanged("AcounntList");
+                        if (0<AcounntList.Count) {
+                            Connect();
+                        }
+
                         //foreach (string lItem in AcounntList) {
                         //    // 項目を追加する
                         //    MyView.GoogleAcountCB.Items.Add(lItem);
@@ -385,6 +392,7 @@ namespace ProductionSchedule.ViewModels
                         }
                     }
                     if (isCont) {
+                        dbMsg += "、未登録アカウントを追加";
                         AcounntList.Add(GoogleAcountStr);
                         dbMsg += "[  " + AcounntList.Count + "件]";
                         string rStrs = "";
@@ -402,16 +410,17 @@ namespace ProductionSchedule.ViewModels
                 }
                 CalenderNameStr = "praimary";
                 CalenderNameList.Add(CalenderNameStr);
+                NotifyPropertyChanged();
 
-
-                //Constant.RootFolderID = GDriveUtil.MakeAriadneGoogleFolder();
-                //if (Constant.RootFolderID.Equals("")){
-                //            dbMsg += ">フォルダ作成>失敗";
-                //        }
-                //        else
-                //        {
-                //            dbMsg += "[" + Constant.RootFolderID + "]" + Constant.RootFolderName;
-                //        }
+                GoogleDriveUtil GDU = new GoogleDriveUtil();
+                Constant.RootFolderID = GDU.MakeMyeGoogleFolder();
+                if (Constant.RootFolderID.Equals("")) {
+                    dbMsg += ">フォルダ作成>失敗";
+                } else {
+                    //課題；取得したIDでフォルダを開くには？
+                    TargetURLStr = "https://drive.google.com/drive/u/3/my-drive/"+ Constant.RootFolderID;
+                    dbMsg += "[" + Constant.RootFolderID + "]" + Constant.RootFolderName;
+                }
                 NotifyPropertyChanged();
                 MyLog(TAG, dbMsg);
                 ToDaySet();
@@ -2011,6 +2020,7 @@ namespace ProductionSchedule.ViewModels
                 dbMsg += ">>" + CurrentDateStr;
                 NotifyPropertyChanged("CurrentDateStr");
                 CalenderWrite();
+                RefreshMe();
                 MyLog(TAG, dbMsg);
             } catch (Exception er){
                 MyErrorLog(TAG, dbMsg, er);
