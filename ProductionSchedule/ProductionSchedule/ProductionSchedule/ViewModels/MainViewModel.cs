@@ -413,14 +413,37 @@ namespace ProductionSchedule.ViewModels
                 NotifyPropertyChanged();
 
                 GoogleDriveUtil GDU = new GoogleDriveUtil();
-                Constant.RootFolderID = GDU.MakeMyeGoogleFolder();
+                //ルートフォルダが無ければ作成する
+                Task<string> rFI = Task.Run(() => {
+                    return GDU.FindByName(Constant.RootFolderName);
+                });
+                rFI.Wait();
+                Constant.RootFolderID = rFI.Result;
+                if (Constant.RootFolderID == null) {
+                    dbMsg += ">フォルダ作成>";
+                    Constant.RootFolderID = GDU.MakeMyeGoogleFolder();
+                } else {
+                    dbMsg += ">フォルダ有り>";
+                }
                 if (Constant.RootFolderID.Equals("")) {
                     dbMsg += ">フォルダ作成>失敗";
                 } else {
-                    //課題；取得したIDでフォルダを開くには？
-                    TargetURLStr = "https://drive.google.com/drive/u/3/my-drive/"+ Constant.RootFolderID;
+                    TargetURLStr = @"https://drive.google.com/open?id=" + Constant.RootFolderID;
                     dbMsg += "[" + Constant.RootFolderID + "]" + Constant.RootFolderName;
                 }
+                //階層管理スプレッドシートが無ければ作成する
+                Task<string> tFI = Task.Run(() => {
+                    return GDU.FindByName(Constant.HierarchyFileName);
+                });
+                tFI.Wait();
+                Constant.HierarchyFileID = tFI.Result;
+                if (Constant.HierarchyFileID == null) {
+                    dbMsg += ">作成>";
+                    Constant.RootFolderID = GDU.MakeFile(Constant.HierarchyFileName, "GOOGLE_SHEETS", Constant.RootFolderID);
+                } else {
+                    dbMsg += ">フォルダ有り>";
+                }
+
                 NotifyPropertyChanged();
                 MyLog(TAG, dbMsg);
                 ToDaySet();

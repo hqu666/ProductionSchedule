@@ -335,12 +335,57 @@ namespace ProductionSchedule
 			return retStr;
 		}
 
-		/// <summary>
-		/// 指定されたIDのファイルを削除する
-		/// </summary>
-		/// <param name="fileId"></param>
-		/// <returns></returns>
-		public async Task<string> DelteItem(string fileId)
+        /// <summary>
+        /// 新規ファイル作成
+        /// </summary>
+        /// <param name="fileName">string</param>
+        /// <param name="MimeStr">string　https://developers.google.com/apps-script/reference/base/mime-type　</param>
+        /// <param name="parentId">string</param>
+        /// <returns></returns>
+        public string MakeFile(string fileName, string MimeStr, string parentId) {
+            string TAG = "MakeFile";
+            string dbMsg = "[GoogleDriveUtil]";
+            string retStr = null;
+            try {
+                File rParent = FindById(parentId);
+                string parentName = rParent.Name;
+                dbMsg += "[" + parentName + "]" + fileName;
+                dbMsg += " ,Mime=" + MimeStr;
+                var meta = new File() {
+                    Name = System.IO.Path.GetFileName(fileName),
+                    MimeType = MimeStr,
+                    Parents = new List<string> { parentId }
+                };
+                var request = Constant.MyDriveService.Files.Create(meta);
+                request.Fields = "id, name,parents";
+                dbMsg += ",request=" + request.MethodName;
+                Task<File> rr = Task.Run(() => {
+                    return request.ExecuteAsync();
+                });
+                rr.Wait();          //
+                dbMsg += ",IsCompleted=" + rr.IsCompleted;
+                File rFile = rr.Result;
+                retStr = rFile.Id;
+                dbMsg += ">作成>[";
+                dbMsg += ">作成したファイルID>" + retStr;
+                Util.MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                Util.MyErrorLog(TAG, dbMsg, er);
+            }
+            return retStr;
+        }
+
+
+
+
+
+
+        /// <summary>
+        /// 指定されたIDのファイルを削除する
+        /// </summary>
+        /// <param name="fileId"></param>
+        /// <returns></returns>
+        public async Task<string> DelteItem(string fileId)
 		{
 			string TAG = "DelteItem";
 			string dbMsg = "[GoogleUtil]";
@@ -567,8 +612,8 @@ namespace ProductionSchedule
 				}
 				//仮処理；最初に拾えたファイルのParentsをdriveIdとする
 				Constant.DriveId = Constant.GDriveFiles.First().Parents[0];
-				dbMsg += ">>rootFolder作成";
-				Task<File> rr = Task<File>.Run(() => {
+				dbMsg += ">>" + Constant.DriveId + "にrootFolder:　"+ Constant.RootFolderName  + "　を作成";
+                Task<File> rr = Task<File>.Run(() => {
 					return CreateFolder(Constant.RootFolderName, Constant.DriveId);
 				});
 				rr.Wait();
@@ -578,7 +623,7 @@ namespace ProductionSchedule
 					return null;
 				}
 				Constant.RootFolderID = rr.Result.Id;
-				dbMsg += "[" + Constant.RootFolderID + "]" + Constant.RootFolderName;
+                dbMsg += "[" + Constant.RootFolderID + "]" + rr.Result.Name;    // + "("+ rr.Result.Parents. + ")";
 				Constant.RootFolderURL = "https://drive.google.com/drive/folders/" + Constant.RootFolderID; 
 				dbMsg +=  ". " + Constant.RootFolderURL;
 				//dbMsg += "[" + Constant.AriadneEventNames.Count() + "件";

@@ -26,7 +26,8 @@ namespace ProductionSchedule
 																	DriveService.Scope.Drive,
 																	CalendarService.Scope.Calendar,
 																	CalendarService.Scope.CalendarEvents,
-                                                                    SheetsService.Scope.SpreadsheetsReadonly	//追加;
+                                                                       SheetsService.Scope.Spreadsheets	//追加;
+//                                                                 SheetsService.Scope.SpreadsheetsReadonly	//追加;
                                                             };
 
 		/// <summary>

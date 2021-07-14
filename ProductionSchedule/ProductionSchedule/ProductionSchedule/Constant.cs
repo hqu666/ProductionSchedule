@@ -37,10 +37,11 @@ namespace ProductionSchedule
 		public static string CalenderSummary = "abcbdffghaiklnm@gmail.com";   //Googleアカウント
 		public static string CalenderOtherView = "https://calendar.google.com/calendar/r/";            //週別/日別への切替
 
-		public static string RootFolderName = "ProductionSchedule";            //保存先サーバのルートフォルダ
         public static string HierarchyFileName = "MyHierarchy";            //アイテムの階層管理スプレッドシート
+        public static string HierarchyFileID = "";                           //アイテムの階層管理スプレッドシート
+        public static string RootFolderName = "ProductionSchedule";            //保存先サーバのルートフォルダ
         public static string RootFolderID = "";
-		public static string TopFolderName = "案件";                                        //	最上位フォルダ KSクラウド
+		public static string TopFolderName = "ProductionSchedule";                                        //	最上位フォルダ KSクラウド
 		public static string TopFolderID = "";
 		public static string MakeFolderName = null;         //作成するファイルの格納フォルダ
 		public static String parentFolderId;
