@@ -439,10 +439,14 @@ namespace ProductionSchedule.ViewModels
                 Constant.HierarchyFileID = tFI.Result;
                 if (Constant.HierarchyFileID == null) {
                     dbMsg += ">作成>";
-                    Constant.RootFolderID = GDU.MakeFile(Constant.HierarchyFileName, "GOOGLE_SHEETS", Constant.RootFolderID);
+                    Constant.HierarchyFileID = GDU.MakeFile(Constant.HierarchyFileName,
+                        "application/vnd.google-apps.spreadsheet",
+                        Constant.RootFolderID);
+                    //Mimeは 
                 } else {
-                    dbMsg += ">フォルダ有り>";
+                    dbMsg += ">有り>";
                 }
+                dbMsg += "[" + Constant.HierarchyFileID + "]";
 
                 NotifyPropertyChanged();
                 MyLog(TAG, dbMsg);

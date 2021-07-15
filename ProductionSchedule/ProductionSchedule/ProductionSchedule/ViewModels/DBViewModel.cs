@@ -263,36 +263,7 @@ namespace ProductionSchedule.ViewModels {
                 //SelParentID = 888888;
                 //SelParentName = "親の名称";
                 NotifyPropertyChanged();
-                //EventButtons = new ObservableCollection<EventButton>();
-                ////本日日付
-                //SelectedDateTime = DateTime.Today;
-                //dbMsg += "今日は" + SelectedDateTime;
-                //CurrentDateStr = String.Format("{0:yyyy年MM月}", SelectedDateTime);
-                //dbMsg += ">>" + CurrentDateStr;
-                //this.TargetURLStr = Constant.WebStratUrl;
-                //dbMsg += ",遷移先URL=  " + TargetURLStr;
-                //NotifyPropertyChanged("TargetURI");
-                ////起動時は接続側のみ
-                //Cancel();
-                ////    GoogleAcountStr = "hkuwauama@gmail.com";
-                //var settings = Settings.Default;
-                //GoogleAcountStr = Constant.GoogleAcountMSG;
-                //dbMsg += " ,前回使用したアカウント=  " + settings.MyGoogleAcount;
-                //if (!String.IsNullOrEmpty(settings.MyGoogleAcount)) {
-                //    GoogleAcountStr = settings.MyGoogleAcount;
-                //    dbMsg += "、これまでに使用したアカウント=  " + settings.MyAcounts;
-                //    if (!String.IsNullOrEmpty(settings.MyAcounts)) {
-                //        string rStr = settings.MyAcounts.Replace("System.String[],", "");//誤記入対策
-                //        string[] acounntList = rStr.Split(',');
-                //        AcounntList = new List<string>(acounntList);
-                //        dbMsg += "[  " + AcounntList.Count + "件]";
-                //        NotifyPropertyChanged("AcounntList");
-                //        //foreach (string lItem in AcounntList) {
-                //        //    // 項目を追加する
-                //        //    MyView.GoogleAcountCB.Items.Add(lItem);
-                //        //}
-                //    }
-                //}
+                ReadSheet();
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
@@ -306,38 +277,57 @@ namespace ProductionSchedule.ViewModels {
 
         // スプレットシート/////////////////////ファイルの操作
         // https://www.ka-net.org/blog/?p=7007
-        static string[] Scopes = { SheetsService.Scope.SpreadsheetsReadonly };
-        static string ApplicationName = Constant.ApplicationName;           //"Google Sheets API .NET Quickstart";
+        //static string[] Scopes = { SheetsService.Scope.SpreadsheetsReadonly };
+     //   static string ApplicationName = Constant.ApplicationName;           //"Google Sheets API .NET Quickstart";
         static string AppClientId = Constant.CliantId;                      //"(クライアント ID)";
         static string AppClientSecret = Constant.CliantSeacret;           //"(クライアント シークレット)";
-        static string SpreadSheetId = "(操作対象となるシートのID)";
+       // static string SpreadSheetId = "(操作対象となるシートのID)";
 
-        public static void ReadSheet(string[] args) {
-            UserCredential credential;
-            string credPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
-            credPath = Path.Combine(credPath, ".credentials/sheets.googleapis.com-dotnet-quickstart.json");
-            credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-              new ClientSecrets {
-                  ClientId = AppClientId,
-                  ClientSecret = AppClientSecret
-              },
-              Scopes,
-              "user",
-              CancellationToken.None,
-              new FileDataStore(credPath, true)
-            ).Result;
-            //Console.WriteLine("Credential file saved to: " + credPath);
+        public static void ReadSheet() {
+            string TAG = "ReadSheet";
+            string dbMsg = "";
+            try {
+                //string[] args
+                //UserCredential credential;
+                //string credPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+                //credPath = Path.Combine(credPath, ".credentials/sheets.googleapis.com-dotnet-quickstart.json");
+                //credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
+                //  new ClientSecrets {
+                //      ClientId = AppClientId,
+                //      ClientSecret = AppClientSecret
+                //  },
+                //  Scopes,
+                //  "user",
+                //  CancellationToken.None,
+                //  new FileDataStore(credPath, true)
+                //).Result;
+                //Console.WriteLine("Credential file saved to: " + credPath);
 
-            var service = new SheetsService(new BaseClientService.Initializer() {
-                HttpClientInitializer = credential,
-                ApplicationName = ApplicationName,
-            });
-
-            //Sheet1のセルA1の値取得
-            SpreadsheetsResource.ValuesResource.GetRequest req1 = service.Spreadsheets.Values.Get(SpreadSheetId, "Sheet1!A1");
-            IList<IList<Object>> values = req1.Execute().Values;
-            Console.WriteLine(values[0][0]);
-            Console.ReadKey(true);
+                var service = new SheetsService(new BaseClientService.Initializer() {
+                    HttpClientInitializer = Constant.MyDriveCredential,
+                    ApplicationName = Constant.ApplicationName,
+                });
+                dbMsg = "[" + Constant.HierarchyFileID + "]";
+                var range = $"シート1!A1:L26";
+                SpreadsheetsResource.ValuesResource.GetRequest request = service.Spreadsheets.Values.Get(Constant.HierarchyFileID, range);
+                var response = request.Execute();
+                var values = response.Values;
+                if (values != null && values.Count > 0) {
+                    foreach (var row in values) {
+                        System.Diagnostics.Debug.WriteLine("{0} | {1} | {2}", row[0], row[1], row[2]);
+                    }
+                } else {
+                    System.Diagnostics.Debug.WriteLine("No data found.");
+                }
+                ////Sheet1のセルA1の値取得
+                //SpreadsheetsResource.ValuesResource.GetRequest req1 = service.Spreadsheets.Values.Get(Constant.HierarchyFileID, "Sheet1!A1");
+                //IList<IList<Object>> values = req1.Execute().Values;
+                //dbMsg = "," + values[0][0];
+                Console.ReadKey(true);
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
         }
         ///////////////////////
         public event PropertyChangedEventHandler PropertyChanged;
