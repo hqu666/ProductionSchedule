@@ -442,7 +442,7 @@ namespace ProductionSchedule.ViewModels
                     Constant.HierarchyFileID = GDU.MakeFile(Constant.HierarchyFileName,
                         "application/vnd.google-apps.spreadsheet",
                         Constant.RootFolderID);
-                    //Mimeは 
+                    //課題：シート名変更
                 } else {
                     dbMsg += ">有り>";
                 }

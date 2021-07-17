@@ -114,7 +114,11 @@
             MinRowHeight="18" 
             IsReadOnly="True"
             HeadersVisibility="None"
-            ItemsSource="{Binding DBItems}"
+            Width="760"
+            Height="360"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Auto"
+            ItemsSource="{Binding MyHierarchyList}"
             >
         </DataGrid>
 

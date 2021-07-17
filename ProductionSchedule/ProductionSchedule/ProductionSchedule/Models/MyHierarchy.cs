@@ -13,13 +13,13 @@ namespace ProductionSchedule.Models
         /// <summary>
         /// 自身のID
         /// </summary>
-        public int ID {
+        public int id {
             get { return _ID; }
             set {
                 if (_ID == value)
                     return;
                 _ID = value;
-                OnPropertyChanged("ID");
+                OnPropertyChanged("id");
             }
         }
 
@@ -27,26 +27,26 @@ namespace ProductionSchedule.Models
         /// 表示名称
         /// </summary>
         private string _Name = "";
-        public string Name {
+        public string name {
             get { return _Name; }
             set {
                 if (_Name == value)
                     return;
                 _Name = value;
-                OnPropertyChanged("Name"); }
+                OnPropertyChanged("name"); }
         }
 
         private int _ParentID;
         /// <summary>
         /// 直上のID
         /// </summary>
-        public int ParentID {
+        public int parent_iD {
             get { return _ParentID; }
             set {
                 if (_ParentID == value)
                     return;
                 _ParentID = value;
-                OnPropertyChanged("ParentID");
+                OnPropertyChanged("parent_iD");
             }
         }
 
@@ -55,28 +55,28 @@ namespace ProductionSchedule.Models
         /// <summary>
         /// 何階層目か
         /// </summary>
-        public int Hierarchy {
+        public int hierarchy {
             get { return _Hierarchy; }
             set {
                 if (_Hierarchy == value)
                     return;
                 _Hierarchy = value;
-                OnPropertyChanged("Hierarchy");
+                OnPropertyChanged("hierarchy");
             }
         }
 
 
         public MyHierarchy _Parent;
-        public MyHierarchy Parent {
+        public MyHierarchy parent {
             get { return _Parent; }
             set {
                 if (_Parent == value)
                     return;
                 _Parent = value;
-                OnPropertyChanged("Parent");
-                if (_ParentID == _Parent.ID)
+                OnPropertyChanged("parent");
+                if (_ParentID == parent.id)
                     return;
-                ParentID = _Parent.ID;
+                parent_iD = _Parent.id;
 
             }
         }
@@ -92,12 +92,23 @@ namespace ProductionSchedule.Models
 
         public void Add(MyHierarchy child) {
             if (null == Child) Child = new List<MyHierarchy>();
-            child.Parent = this;
+            child.parent = this;
             child.Add(child);
         }
 
+        /// <summary>
+        /// 自身のコピーを生成します。
+        /// </summary>
+        public object Clone() {
+            return new MyHierarchy() {
+                id = this.id,
+                parent_iD = this.parent_iD,
+                name = this.name,
+                hierarchy = this.hierarchy
+            };
+        }
 
-///////////////////////////////////////////////
+        ///////////////////////////////////////////////
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string name) {
             if (null == this.PropertyChanged) return;

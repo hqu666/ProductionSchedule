@@ -25,6 +25,8 @@ using Google.Apis.Sheets.v4.Data;
 using Google.Apis.Util.Store;
 using System.IO;
 //using ProductionSchedule.Controls;
+using ProductionSchedule.Views;
+using ProductionSchedule.Models;
 
 namespace ProductionSchedule.ViewModels {
     class DBViewModel : INotifyPropertyChanged {
@@ -247,6 +249,9 @@ namespace ProductionSchedule.ViewModels {
             }
         }
 
+        public ObservableCollection<MyHierarchy> MyHierarchyList { get; set; }
+        public List<string> ColList { get; set; }
+        public ObservableCollection<Object> RowList { get; set; }
 
 
         public DBViewModel() {
@@ -257,11 +262,7 @@ namespace ProductionSchedule.ViewModels {
             string TAG = "Initialize";
             string dbMsg = "";
             try {
-                //SelItemID = 999999;
-                //SelItemName = "選択しているアイテム";
-                //SelItemHierarchy = 9;
-                //SelParentID = 888888;
-                //SelParentName = "親の名称";
+                MyHierarchyList = new ObservableCollection<MyHierarchy>();
                 NotifyPropertyChanged();
                 ReadSheet();
                 MyLog(TAG, dbMsg);
@@ -283,47 +284,59 @@ namespace ProductionSchedule.ViewModels {
         static string AppClientSecret = Constant.CliantSeacret;           //"(クライアント シークレット)";
        // static string SpreadSheetId = "(操作対象となるシートのID)";
 
-        public static void ReadSheet() {
+        public void ReadSheet() {
             string TAG = "ReadSheet";
             string dbMsg = "";
             try {
-                //string[] args
-                //UserCredential credential;
-                //string credPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
-                //credPath = Path.Combine(credPath, ".credentials/sheets.googleapis.com-dotnet-quickstart.json");
-                //credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
-                //  new ClientSecrets {
-                //      ClientId = AppClientId,
-                //      ClientSecret = AppClientSecret
-                //  },
-                //  Scopes,
-                //  "user",
-                //  CancellationToken.None,
-                //  new FileDataStore(credPath, true)
-                //).Result;
-                //Console.WriteLine("Credential file saved to: " + credPath);
-
                 var service = new SheetsService(new BaseClientService.Initializer() {
                     HttpClientInitializer = Constant.MyDriveCredential,
                     ApplicationName = Constant.ApplicationName,
                 });
-                dbMsg = "[" + Constant.HierarchyFileID + "]";
+                dbMsg += "[" + Constant.HierarchyFileID + "]";
                 var range = $"シート1!A1:L26";
                 SpreadsheetsResource.ValuesResource.GetRequest request = service.Spreadsheets.Values.Get(Constant.HierarchyFileID, range);
                 var response = request.Execute();
                 var values = response.Values;
                 if (values != null && values.Count > 0) {
+                    int rCount = 0;
+                    MyHierarchyList = new ObservableCollection<MyHierarchy>();
+            //        ObservableCollection<object> RowList = new ObservableCollection<Object>();
                     foreach (var row in values) {
-                        System.Diagnostics.Debug.WriteLine("{0} | {1} | {2}", row[0], row[1], row[2]);
+                        rCount++;
+                        int cCount = 0;
+                        MyHierarchy mh = new MyHierarchy();
+                        if (!String.IsNullOrEmpty(row[0].ToString())) {
+                            mh.id = int.Parse(row[0].ToString());
+                        }
+                        if (!String.IsNullOrEmpty(row[1].ToString())) {
+                            mh.parent_iD = int.Parse(row[1].ToString());
+                        }
+                        if (!String.IsNullOrEmpty(row[2].ToString())) {
+                            mh.name = row[2].ToString();
+                        }
+                        if (!String.IsNullOrEmpty(row[3].ToString())) {
+                            mh.hierarchy = int.Parse(row[3].ToString());
+                        }
+                        MyHierarchyList.Add(mh);
+                        ////      List<string> ColList = new List<string>();
+                        //      foreach (var col in row) {
+                        //          cCount++;
+                        //          if (col != null) {
+                        //              dbMsg += "[R" + rCount+"C"+ cCount + "]" + col.ToString();
+                        //    //          ColList.Add(col.ToString());
+                        //          }
+                        //      }
+                        //  RowList.Add(ColList);
                     }
+                    NotifyPropertyChanged("MyHierarchyList");
                 } else {
-                    System.Diagnostics.Debug.WriteLine("No data found.");
+                    dbMsg += "No data found.";
                 }
                 ////Sheet1のセルA1の値取得
                 //SpreadsheetsResource.ValuesResource.GetRequest req1 = service.Spreadsheets.Values.Get(Constant.HierarchyFileID, "Sheet1!A1");
                 //IList<IList<Object>> values = req1.Execute().Values;
                 //dbMsg = "," + values[0][0];
-                Console.ReadKey(true);
+         //       Console.ReadKey(true);
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
