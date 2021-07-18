@@ -108,20 +108,40 @@
         <Label Content="階層" Grid.Row="1" Grid.Column="8"/>
         <TextBox Text="{Binding SelItemHierarchyStr}" 
                  Grid.Row="1" Grid.Column="9"/>
+        <!--<TreeView x:Name="Menu_tv"
+            Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6"
+				Margin="10,0,5,0" Padding="5,5,5,5" MinHeight="360"   MinWidth="120"   Height="Auto" Width="Auto"
+				ItemsSource="{Binding MyHierarchyList}" >
+            --><!--<i:Interaction.Triggers>
+                <i:EventTrigger EventName="MouseDoubleClick">
+                    <ei:CallMethodAction MethodName="MenuSelected" TargetObject="{Binding}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers--><!-- >
+            <TreeView.Resources>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="IsSelected" Value="{Binding Path=IsSelected,Mode=TwoWay}"/>
+                </Style>
+            </TreeView.Resources>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate DataType= "local:MyHierarchy" ItemsSource="{Binding Child}">
+                    <TextBlock Text="{Binding Name}">
+                    </TextBlock>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>-->
         <DataGrid 
             Name="DBDG"
-            Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="10"
+            Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="2"
             MinRowHeight="18" 
             IsReadOnly="True"
             HeadersVisibility="None"
-            Width="760"
+            Width="600"
             Height="360"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto"
             ItemsSource="{Binding MyHierarchyList}"
             >
         </DataGrid>
-
 
     </Grid>
 </Window>

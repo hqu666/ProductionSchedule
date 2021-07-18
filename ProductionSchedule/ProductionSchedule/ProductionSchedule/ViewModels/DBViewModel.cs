@@ -249,6 +249,7 @@ namespace ProductionSchedule.ViewModels {
             }
         }
 
+        public List<MyHierarchy> _MyHierarchyList { get; set; }
         public ObservableCollection<MyHierarchy> MyHierarchyList { get; set; }
         public List<string> ColList { get; set; }
         public ObservableCollection<Object> RowList { get; set; }
@@ -262,7 +263,8 @@ namespace ProductionSchedule.ViewModels {
             string TAG = "Initialize";
             string dbMsg = "";
             try {
-                MyHierarchyList = new ObservableCollection<MyHierarchy>();
+                //_MyHierarchyList = new List<MyHierarchy>();
+                //MyHierarchyList = new ObservableCollection<MyHierarchy>();
                 NotifyPropertyChanged();
                 ReadSheet();
                 MyLog(TAG, dbMsg);
@@ -293,32 +295,67 @@ namespace ProductionSchedule.ViewModels {
                     ApplicationName = Constant.ApplicationName,
                 });
                 dbMsg += "[" + Constant.HierarchyFileID + "]";
-                var range = $"シート1!A1:L26";
+                var range = $"シート1!A1:L100";
                 SpreadsheetsResource.ValuesResource.GetRequest request = service.Spreadsheets.Values.Get(Constant.HierarchyFileID, range);
                 var response = request.Execute();
                 var values = response.Values;
+                int rCount = 0;
+                int cCount = 0;
                 if (values != null && values.Count > 0) {
-                    int rCount = 0;
+                    rCount = 0;
+                    _MyHierarchyList = new List<MyHierarchy>();
                     MyHierarchyList = new ObservableCollection<MyHierarchy>();
-            //        ObservableCollection<object> RowList = new ObservableCollection<Object>();
                     foreach (var row in values) {
                         rCount++;
-                        int cCount = 0;
-                        MyHierarchy mh = new MyHierarchy();
-                        if (!String.IsNullOrEmpty(row[0].ToString())) {
-                            mh.id = int.Parse(row[0].ToString());
+                        if (1 < rCount) {
+                            dbMsg += "\r\n[R" + rCount;
+                            MyHierarchy mh = new MyHierarchy();
+                            cCount = 0;
+                            foreach (var col in row) {
+                                cCount++;
+                                if (col != null) {
+                                    string rStr = col.ToString();
+                                    dbMsg += ",C" + cCount + "]" ;
+                                    //          ColList.Add(col.ToString());
+                                    switch (cCount) {
+                                        case 1:
+                                            if (!String.IsNullOrEmpty(rStr)) {
+                                                mh.id = int.Parse(rStr);
+                                                dbMsg += "[" + mh.id + "]";
+                                            }
+                                            break;
+                                        case 2:
+                                            if (!String.IsNullOrEmpty(rStr)) {
+                                                mh.parent_iD = int.Parse(rStr);
+                                                dbMsg += ",親=" + mh.parent_iD;
+                                            }
+                                            break;
+                                        case 3:
+                                            if (!String.IsNullOrEmpty(rStr)) {
+                                                mh.order = int.Parse(rStr);
+                                                dbMsg += "(" + mh.order + ")";
+                                            }
+                                            break;
+                                        case 4:
+                                            if (!String.IsNullOrEmpty(rStr)) {
+                                                mh.name = rStr;
+                                                dbMsg += mh.name;
+                                            }
+                                            break;
+                                        case 5:
+                                            if (!String.IsNullOrEmpty(rStr)) {
+                                                mh.hierarchy = int.Parse(rStr);
+                                                dbMsg += "[" + mh.order + "]";
+                                            }
+                                            break;
+                                    }
+                                }
+                            }
+                            MyHierarchyList.Add(mh);
                         }
-                        if (!String.IsNullOrEmpty(row[1].ToString())) {
-                            mh.parent_iD = int.Parse(row[1].ToString());
-                        }
-                        if (!String.IsNullOrEmpty(row[2].ToString())) {
-                            mh.name = row[2].ToString();
-                        }
-                        if (!String.IsNullOrEmpty(row[3].ToString())) {
-                            mh.hierarchy = int.Parse(row[3].ToString());
-                        }
-                        MyHierarchyList.Add(mh);
-                        ////      List<string> ColList = new List<string>();
+                        dbMsg += "\r\n[R" + rCount+ ",C" + cCount + "]";
+                        //https://docs.google.com/spreadsheets/d/1M7eq9P9Gyi26vU9qVE5jak7tcLeSvZ-7NmlYwCFIPUU/edit#gid=0
+                        //      List<string> ColList = new List<string>();
                         //      foreach (var col in row) {
                         //          cCount++;
                         //          if (col != null) {

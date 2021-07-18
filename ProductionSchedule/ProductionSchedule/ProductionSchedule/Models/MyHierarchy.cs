@@ -50,6 +50,20 @@ namespace ProductionSchedule.Models
             }
         }
 
+        private int _order;
+        /// <summary>
+        /// 同階層の何番目か
+        /// </summary>
+        public int order {
+            get { return _order; }
+            set {
+                if (_order == value)
+                    return;
+                _order = value;
+                OnPropertyChanged("order");
+            }
+        }
+
 
         private int _Hierarchy;
         /// <summary>
@@ -103,6 +117,7 @@ namespace ProductionSchedule.Models
             return new MyHierarchy() {
                 id = this.id,
                 parent_iD = this.parent_iD,
+                order = this.order,
                 name = this.name,
                 hierarchy = this.hierarchy
             };
