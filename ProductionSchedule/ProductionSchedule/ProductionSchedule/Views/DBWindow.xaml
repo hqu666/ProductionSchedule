@@ -108,15 +108,15 @@
         <Label Content="階層" Grid.Row="1" Grid.Column="8"/>
         <TextBox Text="{Binding SelItemHierarchyStr}" 
                  Grid.Row="1" Grid.Column="9"/>
-        <!--<TreeView x:Name="Menu_tv"
+        <TreeView x:Name="Menu_tv"
             Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6"
 				Margin="10,0,5,0" Padding="5,5,5,5" MinHeight="360"   MinWidth="120"   Height="Auto" Width="Auto"
-				ItemsSource="{Binding MyHierarchyList}" >
-            --><!--<i:Interaction.Triggers>
+				ItemsSource="{Binding HierarchyTreeList}" >
+            <!--<i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseDoubleClick">
                     <ei:CallMethodAction MethodName="MenuSelected" TargetObject="{Binding}"/>
                 </i:EventTrigger>
-            </i:Interaction.Triggers--><!-- >
+            </i:Interaction.Triggers >-->
             <TreeView.Resources>
                 <Style TargetType="TreeViewItem">
                     <Setter Property="IsSelected" Value="{Binding Path=IsSelected,Mode=TwoWay}"/>
@@ -128,7 +128,7 @@
                     </TextBlock>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
-        </TreeView>-->
+        </TreeView>
         <DataGrid 
             Name="DBDG"
             Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="2"

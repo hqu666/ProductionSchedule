@@ -253,6 +253,7 @@ namespace ProductionSchedule.ViewModels {
         public ObservableCollection<MyHierarchy> MyHierarchyList { get; set; }
         public List<string> ColList { get; set; }
         public ObservableCollection<Object> RowList { get; set; }
+        public ObservableCollection<MyHierarchy> HierarchyTreeList { get; set; }
 
 
         public DBViewModel() {
@@ -353,7 +354,9 @@ namespace ProductionSchedule.ViewModels {
                             }
                             MyHierarchyList.Add(mh);
                         }
-                        dbMsg += "\r\n[R" + rCount+ ",C" + cCount + "]";
+
+
+
                         //https://docs.google.com/spreadsheets/d/1M7eq9P9Gyi26vU9qVE5jak7tcLeSvZ-7NmlYwCFIPUU/edit#gid=0
                         //      List<string> ColList = new List<string>();
                         //      foreach (var col in row) {
@@ -365,7 +368,58 @@ namespace ProductionSchedule.ViewModels {
                         //      }
                         //  RowList.Add(ColList);
                     }
+
+                    dbMsg += "\r\n[R" + rCount + ",C" + cCount + "]";
                     NotifyPropertyChanged("MyHierarchyList");
+                    ObservableCollection<MyHierarchy> lootList = new ObservableCollection<MyHierarchy>();
+                    foreach (MyHierarchy mh in MyHierarchyList) {
+                        if (String.IsNullOrEmpty(mh.parent_iD.ToString())) {
+                            lootList.Add(mh);
+                        }
+                    }
+                    dbMsg += ",lootList" + lootList.Count + "件";
+
+                    ObservableCollection<int> parentIdList = new ObservableCollection<int>();
+                    foreach (MyHierarchy mh in MyHierarchyList) {
+                        if (!String.IsNullOrEmpty(mh.parent_iD.ToString())) {
+                            if (0 < parentIdList.Count) {
+                                bool isAdd = true;
+                                foreach (int pId in parentIdList) {
+                                    if (pId == mh.parent_iD) {
+                                        isAdd = false;
+                                    }
+                                }
+                                if (isAdd) {
+                                    parentIdList.Add(mh.parent_iD);
+                                }
+                            } else {
+                                parentIdList.Add(mh.parent_iD);
+                            }
+                        }
+                    }
+                    dbMsg += ",parentIdList" + parentIdList.Count + "件";
+
+                    HierarchyTreeList = new ObservableCollection<MyHierarchy>();
+                    foreach (int pId in parentIdList) {
+                        dbMsg += "\r\n[pID:" + pId + "]";
+                        foreach (MyHierarchy pH in MyHierarchyList) {
+                            if (pH.id == pId) {
+                                foreach (MyHierarchy mh in MyHierarchyList) {
+                                    if (mh.parent_iD == pId) {
+                                        //            pH.Child.Add(mh);
+                                        HierarchyTreeList.Add(mh);
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    NotifyPropertyChanged("HierarchyTreeList");
+
+
+
+
+
                 } else {
                     dbMsg += "No data found.";
                 }
