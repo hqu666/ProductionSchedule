@@ -105,7 +105,7 @@ namespace ProductionSchedule.Models
         }
 
         public void Add(MyHierarchy child) {
-            if (null == Child) Child = new List<MyHierarchy>();
+            //  if (null == Child) Child = new List<MyHierarchy>();  ここだと呼出し元で オブジェクト参照がオブジェクト インスタンスに設定されていません 
             child.parent = this;
             child.Add(child);
         }

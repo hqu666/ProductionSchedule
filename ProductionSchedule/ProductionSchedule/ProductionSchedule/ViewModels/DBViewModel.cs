@@ -381,7 +381,7 @@ namespace ProductionSchedule.ViewModels {
 
                     ObservableCollection<MyHierarchy> parentList = new ObservableCollection<MyHierarchy>();
                     foreach (int pId in parentIdList) {
-                        dbMsg += "\r\n[pID:" + pId + "]";
+                        dbMsg += "[pID:" + pId + "]";
                         foreach (MyHierarchy pH in MyHierarchyList) {
                             if (pId== pH.id) {
                                 parentList.Add(pH);
@@ -397,8 +397,11 @@ namespace ProductionSchedule.ViewModels {
                    //     var dto1 = new Dto(pMH.name);
                         foreach (MyHierarchy mH in MyHierarchyList) {
                             if (mH.parent_iD == pMH.id) {
+                                if (pMH.Child == null) {
+                                    pMH.Child = new List<MyHierarchy>();
+                                }
+                                dbMsg += ":" + mH.id + "]" + mH.name;
                                 pMH.Child.Add(mH);
-                        //        dto1.Dtos.Add(new Dto(mH.name));
                             }
                         }
                         HierarchyTreeList.Add(pMH);

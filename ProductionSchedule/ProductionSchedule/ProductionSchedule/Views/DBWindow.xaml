@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ProductionSchedule.Views"
+        xmlns:local="clr-namespace:ProductionSchedule"
         mc:Ignorable="d"
         Topmost="True"
         Title="DBWindow" Height="450" Width="800">
@@ -108,11 +108,15 @@
         <Label Content="階層" Grid.Row="1" Grid.Column="8"/>
         <TextBox Text="{Binding SelItemHierarchyStr}" 
                  Grid.Row="1" Grid.Column="9"/>
-        <TreeView x:Name="Menu_tv" FontSize="20">
+        <TreeView x:Name="Menu_tv" 
+                   ItemsSource="{Binding HierarchyTreeList}"
+                  Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="7"
+                  Foreground="Black"
+            >
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="local:MyHierarchy"
-                                  ItemsSource="{Binding HierarchyTreeList}">
-                    <TextBlock Text="{Binding Name}"/>
+                                  ItemsSource="{Binding Child}">
+                    <TextBlock Text="{Binding name}"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
