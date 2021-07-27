@@ -319,7 +319,6 @@ namespace ProductionSchedule.ViewModels {
                                 if (col != null) {
                                     string rStr = col.ToString();
                                     dbMsg += ",C" + cCount + "]" ;
-                                    //          ColList.Add(col.ToString());
                                     switch (cCount) {
                                         case 1:
                                             if (!String.IsNullOrEmpty(rStr)) {
@@ -353,7 +352,9 @@ namespace ProductionSchedule.ViewModels {
                                             break;
                                     }
                                     if (!String.IsNullOrEmpty(mh.parent_iD.ToString())) {
+                                        // 親が有ればIDリストに追加
                                         if (0 < parentIdList.Count) {
+                                            //既に登録されていなければ登録
                                             bool isAdd = true;
                                             foreach (int pId in parentIdList) {
                                                 if (pId == mh.parent_iD) {
@@ -364,6 +365,7 @@ namespace ProductionSchedule.ViewModels {
                                                 parentIdList.Add(mh.parent_iD);
                                             }
                                         } else {
+                                            //最初の1件目は
                                             parentIdList.Add(mh.parent_iD);
                                         }
                                     }
@@ -374,37 +376,51 @@ namespace ProductionSchedule.ViewModels {
                         }
                         //https://docs.google.com/spreadsheets/d/1M7eq9P9Gyi26vU9qVE5jak7tcLeSvZ-7NmlYwCFIPUU/edit#gid=0
                     }
-
                     dbMsg += "\r\n[R" + rCount + ",C" + cCount + "]";
                     NotifyPropertyChanged("MyHierarchyList");
                     dbMsg += ",parentIdList" + parentIdList.Count + "件";
 
-                    ObservableCollection<MyHierarchy> parentList = new ObservableCollection<MyHierarchy>();
-                    foreach (int pId in parentIdList) {
-                        dbMsg += "[pID:" + pId + "]";
-                        foreach (MyHierarchy pH in MyHierarchyList) {
-                            if (pId== pH.id) {
-                                parentList.Add(pH);
+                    // IDのリストからMyHierarchyのリストに
+                    ObservableCollection<MyHierarchy> MHCopyList = new ObservableCollection<MyHierarchy>();
+                    foreach (MyHierarchy pH in MyHierarchyList) {
+                        foreach (int pId in parentIdList) {
+                            dbMsg += "[pID:" + pId + "]";
+                            if (pId == pH.id) {
+                                //親が無い　：　ルートだけを登録する
+                                // Model内で作成できないのでここで作成
+                                pH.Child = new List<MyHierarchy>();
                                 break;
                             }
                         }
+                        MHCopyList.Add(pH);
                     }
-                        dbMsg += ",parentList" + parentList.Count + "件";
 
+                    //　親リストに子を登録
                     HierarchyTreeList = new ObservableCollection<MyHierarchy>();
-                    foreach (MyHierarchy pMH in parentList) {
+                    foreach (MyHierarchy pMH in MHCopyList) {
                         dbMsg += "\r\n[pID:" + pMH.id + "]";
-                   //     var dto1 = new Dto(pMH.name);
-                        foreach (MyHierarchy mH in MyHierarchyList) {
-                            if (mH.parent_iD == pMH.id) {
-                                if (pMH.Child == null) {
-                                    pMH.Child = new List<MyHierarchy>();
+                        //子の入れ場が有る物に子を追加
+                        if (pMH.Child != null) {  
+                            //     親ごとの子リスト作成
+                            foreach (MyHierarchy mH in MyHierarchyList) {
+                                if (mH.parent_iD == pMH.id) {
+                                    dbMsg += ":" + mH.id + "]" + mH.name;
+                                    pMH.Child.Add(mH);
                                 }
-                                dbMsg += ":" + mH.id + "]" + mH.name;
-                                pMH.Child.Add(mH);
+                            }
+                            if (pMH.parent_iD == 0) {
+                                //ルートはそのまま追記
+                                HierarchyTreeList.Add(pMH);
+                            } else {
+                                foreach (MyHierarchy addedH in HierarchyTreeList) {
+                                    foreach (MyHierarchy child in addedH.Child) {
+                                        if (child.id == pMH.parent_iD) {
+                                            child.Child = pMH.Child;
+                                        }
+                                    }
+                                }
                             }
                         }
-                        HierarchyTreeList.Add(pMH);
                     }
                     dbMsg += ",HierarchyTreeList" + HierarchyTreeList.Count + "件";
                     NotifyPropertyChanged("HierarchyTreeList");
