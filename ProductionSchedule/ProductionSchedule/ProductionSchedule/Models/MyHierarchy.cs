@@ -9,6 +9,23 @@ namespace ProductionSchedule.Models
 {
     class MyHierarchy : INotifyPropertyChanged {
 
+        private bool _IsSelected = false;
+        public bool IsSelected {
+            get { return _IsSelected; }
+            set {
+                _IsSelected = value; OnPropertyChanged("IsSelected");
+            }
+        }
+
+        /// <summary>
+        /// 使用するパラメータ
+        /// </summary>
+        private string _Value = "";
+        public string Value {
+            get { return _Value; }
+            set { _Value = value; OnPropertyChanged("Value"); }
+        }
+
         private int _ID;
         /// <summary>
         /// 自身のID

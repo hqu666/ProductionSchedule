@@ -252,6 +252,9 @@ namespace ProductionSchedule.ViewModels {
 
         public List<MyHierarchy> _MyHierarchyList { get; set; }
         public ObservableCollection<MyHierarchy> MyHierarchyList { get; set; }
+
+        public List<MyHierarchy> MHCopyList;
+
         public List<string> ColList { get; set; }
         public ObservableCollection<Object> RowList { get; set; }
         public ObservableCollection<MyHierarchy> HierarchyTreeList { get; set; }
@@ -381,7 +384,7 @@ namespace ProductionSchedule.ViewModels {
                     dbMsg += ",parentIdList" + parentIdList.Count + "件";
 
                     // IDのリストからMyHierarchyのリストに
-                    ObservableCollection<MyHierarchy> MHCopyList = new ObservableCollection<MyHierarchy>();
+                    MHCopyList = new List<MyHierarchy>();
                     foreach (MyHierarchy pH in MyHierarchyList) {
                         foreach (int pId in parentIdList) {
                             dbMsg += "[pID:" + pId + "]";
@@ -412,6 +415,8 @@ namespace ProductionSchedule.ViewModels {
                                 //ルートはそのまま追記
                                 HierarchyTreeList.Add(pMH);
                             } else {
+                                //親が有れば検索して追記
+                                //※前提：親より先に子は作られない
                                 foreach (MyHierarchy addedH in HierarchyTreeList) {
                                     foreach (MyHierarchy child in addedH.Child) {
                                         if (child.id == pMH.parent_iD) {
@@ -437,6 +442,58 @@ namespace ProductionSchedule.ViewModels {
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
+
+
+        ////TreeView//////////////////////////////////////////////////////////////////////////////////////////////
+        public ICommand TreeLeftClick => new DelegateCommand(TreeLClick);
+        /// <summary>
+        /// 本日に指定
+        /// </summary>
+        public void TreeLClick() {
+            string TAG = "TreeLClick";
+            string dbMsg = "";
+            try {
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        /// <summary>
+        /// Treeの選択動作
+        /// </summary>
+        public void TreeSelected() {
+            string TAG = "TreeSelected";
+            string dbMsg = "";
+            try {
+                string selectedValue = MenuselectLoop(MHCopyList);
+                dbMsg += "selectedValue="+ selectedValue;
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        public string MenuselectLoop(List<MyHierarchy> tMenu) {
+            string selectedValue = "";
+            foreach (MyHierarchy sele in tMenu) {
+                string rName = sele.name;
+                bool rIsSelected = sele.IsSelected;
+                if (sele.Child != null) {
+                    selectedValue = MenuselectLoop(sele.Child);
+                    if (selectedValue != "") {
+                        break;
+                    }
+                } else if (rIsSelected) {
+                    selectedValue = sele.Value;
+                    break;
+                }
+            }
+            return selectedValue;
+        }
+
+
+
         ///////////////////////
         public event PropertyChangedEventHandler PropertyChanged;
         private void NotifyPropertyChanged([CallerMemberName] String propertyName = "") {
