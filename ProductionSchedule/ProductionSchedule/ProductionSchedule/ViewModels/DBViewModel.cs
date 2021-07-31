@@ -32,6 +32,8 @@ using System.Windows.Documents;
 namespace ProductionSchedule.ViewModels {
     class DBViewModel : INotifyPropertyChanged {
         public Views.DBWindow MyView { get; set; }
+        public TreeView MytreeView { get; set; }
+        public MyHierarchy SelectedTreeItem { get; set; }
 
         private int _SelParentID;
         /// <summary>
@@ -268,8 +270,6 @@ namespace ProductionSchedule.ViewModels {
             string TAG = "Initialize";
             string dbMsg = "";
             try {
-                //_MyHierarchyList = new List<MyHierarchy>();
-                //MyHierarchyList = new ObservableCollection<MyHierarchy>();
                 NotifyPropertyChanged();
                 ReadSheet();
                 MyLog(TAG, dbMsg);
@@ -429,6 +429,7 @@ namespace ProductionSchedule.ViewModels {
                     }
                     dbMsg += ",HierarchyTreeList" + HierarchyTreeList.Count + "件";
                     NotifyPropertyChanged("HierarchyTreeList");
+            //nullになる        MytreeView.AddHandler(TreeViewItem.MouseLeftButtonDownEvent, new MouseButtonEventHandler(TreeDoubleClick), true);
                 } else {
                     dbMsg += "No data found.";
                 }
@@ -445,52 +446,62 @@ namespace ProductionSchedule.ViewModels {
 
 
         ////TreeView//////////////////////////////////////////////////////////////////////////////////////////////
-        public ICommand TreeLeftClick => new DelegateCommand(TreeLClick);
+  //      public ICommand TreeLeftClick => new DelegateCommand(TreeLClick);
         /// <summary>
-        /// 本日に指定
+        /// アイテムクリック
         /// </summary>
-        public void TreeLClick() {
+        public void TreeLClick(object sender, MouseButtonEventArgs e) {
             string TAG = "TreeLClick";
             string dbMsg = "";
             try {
-                MyLog(TAG, dbMsg);
-            } catch (Exception er) {
-                MyErrorLog(TAG, dbMsg, er);
-            }
-        }
-
-        /// <summary>
-        /// Treeの選択動作
-        /// </summary>
-        public void TreeSelected() {
-            string TAG = "TreeSelected";
-            string dbMsg = "";
-            try {
-                string selectedValue = MenuselectLoop(MHCopyList);
-                dbMsg += "selectedValue="+ selectedValue;
-                MyLog(TAG, dbMsg);
-            } catch (Exception er) {
-                MyErrorLog(TAG, dbMsg, er);
-            }
-        }
-
-        public string MenuselectLoop(List<MyHierarchy> tMenu) {
-            string selectedValue = "";
-            foreach (MyHierarchy sele in tMenu) {
-                string rName = sele.name;
-                bool rIsSelected = sele.IsSelected;
-                if (sele.Child != null) {
-                    selectedValue = MenuselectLoop(sele.Child);
-                    if (selectedValue != "") {
-                        break;
+                //TreeView TV = sender as TreeView;
+                //List<MyHierarchy> items = new List<MyHierarchy>();
+         //       MyHierarchy selectedValue = MenuselectLoop(MHCopyList);
+                foreach (MyHierarchy item in MHCopyList) {
+                    if (item.IsSelected) {
+                        SelectedTreeItem = item;
+                        dbMsg += "selected[" + SelectedTreeItem.id + "]" + SelectedTreeItem.name + "{" + SelectedTreeItem.parent_iD + "}の"+ SelectedTreeItem.order;
+                        SelParentIDStr = item.parent_iD.ToString();
+                        SelParentName = item.order.ToString();
+                        SelItemIDStr = item.id.ToString();
+                        SelItemName = item.name;
+                        NotifyPropertyChanged("SelectedTreeItem");
                     }
-                } else if (rIsSelected) {
-                    selectedValue = sele.Value;
-                    break;
                 }
+
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
             }
-            return selectedValue;
         }
+
+        //public MyHierarchy MenuselectLoop(List<MyHierarchy> tItems) {
+        //    string TAG = "MenuselectLoop";
+        //    string dbMsg = "";
+        //    MyHierarchy selectedValue = new MyHierarchy();
+        //    try {
+        //        dbMsg += "," + tItems.Count + "件";
+        //        foreach (MyHierarchy sele in tItems) {
+        //            string rName = sele.name;
+        //            bool rIsSelected = sele.IsSelected;
+        //            if (sele.Child != null) {
+        //                selectedValue = MenuselectLoop(sele.Child);
+        //                if (selectedValue !=null) {
+        //                    dbMsg += "selectedValue[" + selectedValue.id + "]" + selectedValue.name + "{" + selectedValue.parent_iD + "}";
+        //                    break;
+        //                }
+        //            } else if (rIsSelected) {
+        //                selectedValue = sele;
+        //                dbMsg += "selectedValue[" + selectedValue.id + "]" + selectedValue.name + "{" + selectedValue.parent_iD + "}";
+        //                break;
+        //            }
+        //        }
+        //        MyLog(TAG, dbMsg);
+        //    } catch (Exception er) {
+        //        MyErrorLog(TAG, dbMsg, er);
+        //    }
+        //    return selectedValue;
+        //}
 
 
 

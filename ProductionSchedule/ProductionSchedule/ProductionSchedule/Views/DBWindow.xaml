@@ -76,56 +76,35 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition  Width="Auto"/>
             <ColumnDefinition  Width="Auto"/>
-            <ColumnDefinition  Width="Auto"/>
-            <ColumnDefinition  Width="Auto"/>
-            <ColumnDefinition  Width="Auto"/>
-            <ColumnDefinition  Width="Auto"/>
-            <ColumnDefinition  Width="Auto"/>
             <ColumnDefinition  Width="*"  />
-            <ColumnDefinition  Width="Auto"/>
-            <ColumnDefinition  Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions >
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Label Content="親[" Grid.Row="1" Grid.Column="0"/>
-        <TextBox Text="{Binding SelParentIDStr}" 
-                 Grid.Row="1" Grid.Column="1"/>
-        <Label Content="]" Grid.Row="1" Grid.Column="2"/>
-        <TextBox Text="{Binding SelParentName}" 
-                  Grid.Row="1" Grid.Column="3"/>
-        <Label Content="[" Grid.Row="1" Grid.Column="4"/>
-        <TextBox Text="{Binding _SelItemIDStr}" 
-                 Grid.Row="1" Grid.Column="5"/>
-        <Label Content="]" Grid.Row="1" Grid.Column="6"/>
-        <TextBox Text="{Binding SelItemName}" 
-                 Grid.Row="1" Grid.Column="7"/>
-        <Label Content="階層" Grid.Row="1" Grid.Column="8"/>
-        <TextBox Text="{Binding SelItemHierarchyStr}" 
-                 Grid.Row="1" Grid.Column="9"/>
-        <TreeView x:Name="Menu_tv" 
+        <TreeView x:Name="MyTree" 
                     ItemsSource="{Binding HierarchyTreeList}"
-                    Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="7"
+                    Grid.Row="0" Grid.Column="0" Grid.RowSpan="3"
 				    Margin="10,0,5,0" Padding="5,5,5,5" MinHeight="200"  
-                    MinWidth="180"  Width="Auto" Height="350" 
+                    MinWidth="180"  Width="Auto" Height="Auto" MouseDoubleClick="MyTree_MouseDoubleClick" 
+                  
           >
-            <!--
-              MouseLeftButtonUp="{Binding TreeLeftClick}"
-            -->
             <TreeView.Resources>
                 <Style TargetType="TreeViewItem">
                     <Setter Property="IsSelected" Value="{Binding Path=IsSelected,Mode=TwoWay}"/>
                 </Style>
+                <!--<Style TargetType="TreeViewItem">
+                    <Setter Property="Click" Value="{Binding TreeLClick}"/>
+                </Style>-->
             </TreeView.Resources>
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="local:MyHierarchy"
                                   ItemsSource="{Binding Child}">
-                    <TextBlock Text="{Binding name}"/>
+                    <TextBlock Text="{Binding name}" 
+                               
+                               />
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
@@ -133,11 +112,13 @@
             Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6"
 				Margin="10,0,5,0" Padding="5,5,5,5" MinHeight="360"   MinWidth="120"   Height="Auto" Width="Auto"
 				ItemsSource="{Binding HierarchyTreeList}" >
-            --><!--<i:Interaction.Triggers>
+            --><!--
+        <i:Interaction.Triggers>
                 <i:EventTrigger EventName="MouseDoubleClick">
                     <ei:CallMethodAction MethodName="MenuSelected" TargetObject="{Binding}"/>
                 </i:EventTrigger>
-            </i:Interaction.Triggers >--><!--
+            </i:Interaction.Triggers >
+        --><!--
             <TreeView.Resources>
                 <Style TargetType="TreeViewItem">
                     <Setter Property="IsSelected" Value="{Binding Path=IsSelected,Mode=TwoWay}"/>
@@ -150,14 +131,32 @@
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>-->
+        <StackPanel
+            Orientation="Horizontal"
+            Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2"
+            >
+            <Label Content="親["/>
+            <Label Content="{Binding SelectedTreeItem.parent_iD}" />
+            <Label Content="]の" />
+            <Label Content="{Binding  SelectedTreeItem.order}" />
+            <Label Content="番目["/>
+            <Label Content="{Binding SelectedTreeItem.id}" />
+            <Label Content="]"/>
+            <Label Content="階層"/>
+            <Label Content="{Binding SelItemHierarchyStr}"/>
+        </StackPanel>
+        <Label Content="表示" Grid.Row="1" Grid.Column="1"/>
+        <TextBox Text="{Binding SelectedTreeItem.name}" 
+                 Grid.Row="1" Grid.Column="2"/>
+
         <DataGrid 
             Name="DBDG"
-            Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="2"
+            Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
             MinRowHeight="18" 
             IsReadOnly="True"
             HeadersVisibility="None"
-            Width="600"
-            Height="330"
+            Width="auto"
+            Height="auto"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto"
             ItemsSource="{Binding MyHierarchyList}"

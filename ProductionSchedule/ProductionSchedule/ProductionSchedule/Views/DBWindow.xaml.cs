@@ -251,15 +251,14 @@ namespace ProductionSchedule.Views {
         /// <param name="e"></param>
         private void this_loaded(object sender, RoutedEventArgs e) {
             //ViewとViewModelの紐付け
-            VM.MyView = this;
+            //VM.MyView = this;
+            //VM.MytreeView = MyTree;
             VM.SelItemID = this.SelItemID;
             VM.SelItemName = this.SelItemName;
             VM.SelItemHierarchy = this.SelItemHierarchy;
             VM.SelParentID = this.SelParentID;
             VM.SelParentName = this.SelParentName;
 
-            //VM.CalenderGR = this.CalenderGR;
-            ////     VM.CalenderDG = this.CalenderDG;
             //// ウィンドウのサイズを復元
             //RecoverWindowBounds();
             //VM.MainWindowWidth = this.Width;
@@ -268,6 +267,11 @@ namespace ProductionSchedule.Views {
             ////CalenderSV.Height = this.Height- (ContorolSP.Height + ContorolSP.Margin.Top + ContorolSP.Margin.Bottom);
             //VM.MakeCalenderBase();
         }
+
+        private void MyTree_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            VM.TreeLClick(sender, e);
+        }
+
 
 
         ///////////////////////
@@ -291,6 +295,7 @@ namespace ProductionSchedule.Views {
             CS_Util Util = new CS_Util();
             Util.MyErrorLog(TAG, dbMsg, err);
         }
+
 
         //////////////////////////////////////
 
