@@ -446,7 +446,28 @@ namespace ProductionSchedule.ViewModels {
 
 
         ////TreeView//////////////////////////////////////////////////////////////////////////////////////////////
-  //      public ICommand TreeLeftClick => new DelegateCommand(TreeLClick);
+        public MyHierarchy FindTreeItem(int id, List<MyHierarchy> tItems) {
+            string TAG = "FindTreeItem";
+            string dbMsg = "";
+            MyHierarchy retItem = new MyHierarchy();
+            try {
+                dbMsg += "検索対象[" + id + "]";
+                foreach (MyHierarchy item in tItems) {
+                    if ( item.id == id) {
+                        retItem = item;
+                        dbMsg += retItem.name + "{親:" + retItem.parent_iD + "}の" + SelectedTreeItem.order + "番目";
+                        break;
+                    }
+                }
+
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+            return retItem;
+        }
+
+
         /// <summary>
         /// アイテムクリック
         /// </summary>
@@ -454,18 +475,35 @@ namespace ProductionSchedule.ViewModels {
             string TAG = "TreeLClick";
             string dbMsg = "";
             try {
-                //TreeView TV = sender as TreeView;
-                //List<MyHierarchy> items = new List<MyHierarchy>();
-         //       MyHierarchy selectedValue = MenuselectLoop(MHCopyList);
                 foreach (MyHierarchy item in MHCopyList) {
                     if (item.IsSelected) {
                         SelectedTreeItem = item;
-                        dbMsg += "selected[" + SelectedTreeItem.id + "]" + SelectedTreeItem.name + "{" + SelectedTreeItem.parent_iD + "}の"+ SelectedTreeItem.order;
-                        SelParentIDStr = item.parent_iD.ToString();
-                        SelParentName = item.order.ToString();
-                        SelItemIDStr = item.id.ToString();
-                        SelItemName = item.name;
+                        dbMsg += "selected[" + SelectedTreeItem.id + "]" + SelectedTreeItem.name + "{" + SelectedTreeItem.parent_iD + "}の" + SelectedTreeItem.order;
+                        int nowHierarchy = 1;
+                        if (0< SelectedTreeItem.parent_iD) {
+                            nowHierarchy++;
+                            MyHierarchy parent = FindTreeItem(SelectedTreeItem.parent_iD, MHCopyList);
+                            if (parent != null) {
+                                SelParentName = parent.name;
+                                dbMsg += ".SelParentName=" + SelParentName;
+                                NotifyPropertyChanged("SelParentName");
+                            }
+                            while (0< parent.parent_iD) {
+                                dbMsg += ".SelParentの親[" + parent.parent_iD + "]";
+                                nowHierarchy++;
+                                parent = FindTreeItem(parent.parent_iD, MHCopyList);
+                                dbMsg += ".その親[" + parent.parent_iD + "]";
+                                //if (parent.parent_iD == 0) {
+                                //    break;
+                                ////} else {
+                                ////    nowHierarchy++;
+                                //}
+                            }
+                        }
+                        SelectedTreeItem.hierarchy= nowHierarchy;
+                        dbMsg += ".hierarchy=" + SelectedTreeItem.hierarchy;
                         NotifyPropertyChanged("SelectedTreeItem");
+                        break;
                     }
                 }
 
