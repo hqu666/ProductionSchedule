@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Media;
 
 namespace ProductionSchedule.Models
 {
+    /// <summary>
+    /// 階層管理モデル
+    /// </summary>
     class MyHierarchy : INotifyPropertyChanged {
 
+        //TreeView上での状態//////////////////////////////////////////////////////////////////
         private bool _IsSelected = false;
         public bool IsSelected {
             get { return _IsSelected; }
@@ -17,6 +24,90 @@ namespace ProductionSchedule.Models
             }
         }
 
+        private bool _IsExpanded = false;
+        public bool IsExpanded {
+            get { return _IsExpanded; }
+            set {
+                _IsExpanded = value; OnPropertyChanged("IsExpanded");
+            }
+        }
+
+        private Brush _Background = Brushes.Transparent;
+        public Brush Background {
+            get { return _Background; }
+            set {
+                _Background = value; OnPropertyChanged("Background");
+            }
+        }
+
+        private Visibility _beforeSeparatorVisibility = Visibility.Hidden;
+        public Visibility BeforeSeparatorVisibility {
+            get { return _beforeSeparatorVisibility; }
+            set {
+                _beforeSeparatorVisibility = value; OnPropertyChanged("BeforeSeparatorVisibility");
+            }
+        }
+
+        private Visibility _afterSeparatorVisibility = Visibility.Hidden;
+        public Visibility AfterSeparatorVisibility {
+            get { return _afterSeparatorVisibility; }
+            set {
+                _afterSeparatorVisibility = value; OnPropertyChanged("AfterSeparatorVisibility");
+            }
+        }
+        //Drag&Drop動作////////////////////////////////////////////////////////TreeView上での状態//
+        public MyHierarchy TreeParent { get; set; }
+
+        public ObservableCollection<MyHierarchy> TreeChildren { get; set; } = new ObservableCollection<MyHierarchy>();
+
+
+        //-- 地震の親を指定されたTreeViewItemInfoオブジェクトにし、子要素の親を自身として設定します
+        public void SetParentToChildren(MyHierarchy parent = null) {
+            TreeParent = parent;
+
+            if (TreeChildren == null)
+                return;
+            foreach (var child in TreeChildren) {
+                child.SetParentToChildren(this);
+            }
+        }
+
+        //-- 既存の子要素アイテムの前に新しいアイテムを挿入します
+        public void InsertBeforeChildren(MyHierarchy from, MyHierarchy newItem) {
+            var index = TreeChildren.IndexOf(newItem);
+            if (index < 0)
+                return;
+
+            TreeChildren.Insert(index, from);
+        }
+
+        //-- 既存の子要素アイテムの後ろに新しいアイテムを挿入します
+        public void InsertAfterChildren(MyHierarchy from, MyHierarchy newItem) {
+            var index = TreeChildren.IndexOf(newItem);
+            if (index < 0)
+                return;
+
+            TreeChildren.Insert(index + 1, from);
+        }
+
+        //-- 子要素の末尾に新しいアイテムを追加します
+        public void AddChildren(MyHierarchy info) {
+            TreeChildren.Add(info);
+        }
+
+        //-- 子要素から指定されたアイテムを削除します
+        public void RemoveChildren(MyHierarchy info) {
+            TreeChildren.Remove(info);
+        }
+
+        //-- 親要素に指定されたアイテムが存在するかどうかをチェックします
+        public bool ContainsParent(MyHierarchy info) {
+            if (TreeParent == null)
+                return false;
+            return TreeParent == info || TreeParent.ContainsParent(info);
+        }
+
+        //GoogleSpredへの書き込み///////////////////////////////////////////////////Drag&Drop動作//
         /// <summary>
         /// 使用するパラメータ
         /// </summary>
