@@ -380,7 +380,8 @@ namespace ProductionSchedule.ViewModels {
                         //https://docs.google.com/spreadsheets/d/1M7eq9P9Gyi26vU9qVE5jak7tcLeSvZ-7NmlYwCFIPUU/edit#gid=0
                     }
                     dbMsg += "\r\n[R" + rCount + ",C" + cCount + "]";
-                    NotifyPropertyChanged("MyHierarchyList");
+
+                        NotifyPropertyChanged("MyHierarchyList");
                     dbMsg += ",parentIdList" + parentIdList.Count + "件";
 
                     // IDのリストからMyHierarchyのリストに
@@ -428,6 +429,17 @@ namespace ProductionSchedule.ViewModels {
                         }
                     }
                     dbMsg += ",HierarchyTreeList" + HierarchyTreeList.Count + "件";
+                    //課題；parentを設定する
+                    foreach (MyHierarchy tmh in MyHierarchyList) {
+                        if (0 < tmh.parent_iD) {
+                            foreach (MyHierarchy pMh in MyHierarchyList) {
+                                if (pMh.id == tmh.parent_iD) {
+                                    tmh.parent = pMh;
+                                }
+
+                            }
+                        }
+                    }
                     NotifyPropertyChanged("HierarchyTreeList");
             //nullになる        MytreeView.AddHandler(TreeViewItem.MouseLeftButtonDownEvent, new MouseButtonEventHandler(TreeDoubleClick), true);
                 } else {

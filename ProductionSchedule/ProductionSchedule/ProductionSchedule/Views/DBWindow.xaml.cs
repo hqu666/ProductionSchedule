@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProductionSchedule.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -236,6 +237,25 @@ namespace ProductionSchedule.Views {
             }
         }
 
+        //TreeVrew用////////////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// ドラッグ & ドロップの際にマウスカーソル上にあるアイテムの上か下に挿入するのか、あるいは子要素に追加するのかを判定するのに使う
+        /// </summary>
+        private enum InsertType {
+            After,
+            Before,
+            Children
+        }
+        /// <summary>
+        /// 背景色やセパレータの表示を変更したTreeViewItemInfoオブジェクトを記憶する
+        /// </summary>
+        private readonly HashSet<MyHierarchy> _changedBlocks = new HashSet<MyHierarchy>();
+        private InsertType _insertType;
+        /// <summary>
+        /// 開始地点を記録
+        /// </summary>
+        private Point? _startPos;
+        ////////////////////////////////////////////////////////////////////////////////TreeVrew用//
 
         public DBWindow() {
             InitializeComponent();
@@ -266,15 +286,280 @@ namespace ProductionSchedule.Views {
             ////VM.CalenderTop = ContorolSP.Height + ContorolSP.Margin.Top+ContorolSP.Margin.Bottom;
             ////CalenderSV.Height = this.Height- (ContorolSP.Height + ContorolSP.Margin.Top + ContorolSP.Margin.Bottom);
             //VM.MakeCalenderBase();
+
+            MyTree.AllowDrop = true;
+            MyTree.PreviewMouseLeftButtonDown += MyTreeOnPreviewMouseLeftButtonDown;
+            MyTree.PreviewMouseLeftButtonUp += MyTreeOnPreviewMouseLeftButtonUp;
+            MyTree.PreviewMouseMove += MyTreeOnPreviewMouseMove;
+            MyTree.Drop += MyTreeOnDrop;
+            MyTree.DragOver += MyTreeOnDragOver;
+
+        }
+
+        //Drag&Drop////////////////////////////////////////////////////////////////////////////////
+        private void MyTreeOnDragOver(object sender, DragEventArgs e) {
+            string TAG = "MyTreeOnDragOver";
+            string dbMsg = "";
+            try {
+                // 背景色やセパレータを元に戻します
+                ResetSeparator(_changedBlocks);
+
+                if (!(sender is ItemsControl itemsControl) || !e.Data.GetDataPresent(typeof(MyHierarchy)))
+                    return;
+
+                // 画面上部/下部にドラッグした際にスクロールします
+                DragScroll(itemsControl, e);
+
+                // ドラッグ中のアイテムとマウスカーソルの位置にある要素を取得します
+                // HitTestで取れる要素は大体TextBlockなので、次でTreeViewItemInfoを取得します
+                var sourceItem = (MyHierarchy)e.Data.GetData(typeof(MyHierarchy));
+                var targetElement = HitTest<FrameworkElement>(itemsControl, e.GetPosition);
+
+                // カーソル要素から直近のGridを取得します(後の範囲計算で必要)
+                // カーソル要素からTreeViewItemInfoを取得するにはDataContextを変換します
+                // カーソル要素とドラッグ要素が同じ場合は何もする必要がないのでreturnしておきます
+                var parentGrid = HierarchyGrid; // targetElement?.GetParent<Grid>();
+                if (parentGrid == null || !(targetElement.DataContext is MyHierarchy targetElementInfo) || targetElementInfo == sourceItem)
+                    return;
+
+                // カーソル要素がドラッグ中の要素の子要素にある時は何もする必要がないのでreturnします
+                // 独自の処理をするならこれは不要、今回のコードではこれがないと要素が消えます
+                if (targetElementInfo.ContainsParent(sourceItem))
+                    return;
+
+                e.Effects = DragDropEffects.Move;
+
+                // 挿入するか子要素に追加するかの判定処理
+                // 基本的には0 ~ boundaryの位置なら上部に挿入、それ以外なら子要素に追加します
+                // それだけでは末尾に追加できなくなるので子要素の最後だけ末尾に追加できるようにします
+                const int boundary = 10;
+                var pos = e.GetPosition(parentGrid);
+                var targetParentLast = GetParentLastChild(targetElementInfo);
+                if (pos.Y > 0 && pos.Y < boundary) {
+                    _insertType = InsertType.Before;
+                    targetElementInfo.BeforeSeparatorVisibility = Visibility.Visible;
+                } else if (targetParentLast == targetElementInfo
+                              && pos.Y < parentGrid.ActualHeight && pos.Y > parentGrid.ActualHeight - boundary) {
+                    _insertType = InsertType.After;
+                    targetElementInfo.AfterSeparatorVisibility = Visibility.Visible;
+                } else {
+                    _insertType = InsertType.Children;
+                    targetElementInfo.Background = Brushes.Gray;
+                }
+                dbMsg += ",_insertType=" + _insertType;
+                // 背景色などを変更したTreeViewItemInfoオブジェクトを_changedBlocksに追加しておきます
+                if (!_changedBlocks.Contains(targetElementInfo))
+                    _changedBlocks.Add(targetElementInfo); MyLog(TAG, dbMsg);
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        private void MyTreeOnDrop(object sender, DragEventArgs e) {
+            string TAG = "MyTreeOnDrop";
+            string dbMsg = "";
+            try {
+                //MyHierarchy MH = new MyHierarchy();
+                //MyHierarchy toDrop= MH.Clone((MyHierarchy)e.OriginalSource);
+                //dbMsg += "[" + toDrop.id + "]" + toDrop.name +"に";
+
+                // 背景色やセパレータを元に戻します
+                ResetSeparator(_changedBlocks);
+
+                if (!(sender is ItemsControl itemsControl))
+                    return;
+
+                // ドラッグ中の要素(source)とマウス位置の要素(target)を取得します
+                MyHierarchy sourceItem = (MyHierarchy)e.Data.GetData(typeof(MyHierarchy));
+                dbMsg += "[" + sourceItem.id + "]" + sourceItem.name + "をDrop";
+                MyHierarchy targetItem = HitTest<FrameworkElement>(itemsControl, e.GetPosition)?.DataContext as MyHierarchy;
+                dbMsg += ",(targetItem[" + targetItem.id + "]" + targetItem.name + "に)";
+                // それぞれの要素がnullならreturn
+                // もしくはsourceとtargetが同一の場合もreturn
+                if (targetItem == null || sourceItem == null || sourceItem == targetItem)
+                    return;
+
+                // カーソル要素がドラッグ中の要素の子要素にある時は何もする必要がないのでreturnします
+                if (targetItem.ContainsParent(sourceItem))
+                    return;
+
+
+                // それぞれの要素の親要素を取得しておきます
+                // Childrenの場合はtargetの子要素に追加します
+                MyHierarchy targetItemParent = targetItem.parent;
+                dbMsg += ",Drop先の親[" + targetItemParent.id + "]" + targetItemParent.name + "に";
+                MyHierarchy sourceItemParent = sourceItem.parent;
+                dbMsg += ",Dragされたアイテムの親[" + sourceItemParent.id + "]" + sourceItemParent.name + "に";
+                //var targetItemParent = targetItem.TreeParent;
+                //var sourceItemParent = sourceItem.TreeParent;
+                // 次にsourceを現在の位置から削除しておきます
+                RemoveCurrentItem(sourceItemParent, sourceItem);
+                // あとはBefore, Afterの場合はtargetの前後にsourceを挿入
+                dbMsg += ",_insertType=" + _insertType;
+                switch (_insertType) {
+                    case InsertType.Before:
+                        targetItemParent.InsertBeforeChildren(sourceItem, targetItem);
+                        sourceItem.parent = targetItemParent;
+//                        sourceItem.TreeParent = targetItemParent;
+                        sourceItem.IsSelected = true;
+                        break;
+                    case InsertType.After:
+                        targetItemParent.InsertAfterChildren(sourceItem, targetItem);
+                        sourceItem.parent = targetItemParent;
+                   //     sourceItem.TreeParent = targetItemParent;
+                        sourceItem.IsSelected = true;
+                        break;
+                    default:
+                        targetItem.AddChildren(sourceItem);
+                        targetItem.IsExpanded = true;
+                        sourceItem.IsSelected = true;
+                        sourceItem.parent = targetItem;
+                        //                       sourceItem.TreeParent = targetItem;
+                        break;
+                }
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        private void MyTreeOnPreviewMouseMove(object sender, MouseEventArgs e) {
+            string TAG = "MyTreeOnPreviewMouseMove";
+            string dbMsg = "";
+            try {
+                dbMsg += ",_startPos=" + _startPos;
+                dbMsg += ",SelectedItem=" + MyTree.SelectedItem.ToString();
+                if (!(sender is TreeView treeView) || treeView.SelectedItem == null || _startPos == null)
+                    return;
+
+                Point cursorPoint = treeView.PointToScreen(e.GetPosition(treeView));
+                dbMsg += ",cursorPoint=" + cursorPoint;
+                Vector diff = cursorPoint - (Point)_startPos;
+                dbMsg += ",移動距離=" + diff;
+                if (!CanDrag(diff))
+                    return;
+
+                DragDrop.DoDragDrop(treeView, treeView.SelectedItem, DragDropEffects.Move);
+
+                _startPos = null; MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        private void MyTreeOnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
+            string TAG = "MyTreeOnPreviewMouseLeftButtonUp";
+            string dbMsg = "";
+            try {
+                dbMsg += ",_startPos=" + _startPos;
+                _startPos = null;
+                dbMsg += ">>" + _startPos;
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
+        private void MyTreeOnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+            string TAG = "MyTreeOnPreviewMouseLeftButtonDown";
+            string dbMsg = "";
+            try {
+                if (!(sender is ItemsControl itemsControl)) {
+                    return;
+                }
+
+                Point pos = e.GetPosition(itemsControl);
+                dbMsg += ",pos=" + pos;
+                var hit = HitTest<FrameworkElement>(itemsControl, e.GetPosition);
+                if (hit.DataContext is MyHierarchy)
+                    _startPos = itemsControl.PointToScreen(pos);
+                else
+                    _startPos = null;
+                //DependencyObject hit = itemsControl.InputHitTest(pos) as DependencyObject;
+                //_startPos = null;
+                //if (hit is FrameworkElement) {
+                //    dbMsg += ",hit=" + hit;
+                //    TreeView TV = sender as TreeView;
+                //    if (TV.DataContext.Equals(VM)) {
+                //        _startPos = itemsControl.PointToScreen(pos);
+                //    }
+
+                //}
+                dbMsg += ",_startPos="+ _startPos;
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
         }
 
         private void MyTree_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            VM.TreeLClick(sender, e);
+            string TAG = "MyTree_MouseDoubleClick";
+            string dbMsg = "";
+            try {
+                VM.TreeLClick(sender, e);
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
         }
 
-
-
         ///////////////////////
+        //--- 親要素から子要素郡の末尾を取得します
+        private static MyHierarchy GetParentLastChild(MyHierarchy info) {
+            var targetParent = info.TreeParent;
+            var last = targetParent?.TreeChildren.LastOrDefault();
+            return last;
+        }
+
+        //--- 親要素から指定した要素を削除します
+        private static void RemoveCurrentItem(MyHierarchy sourceItemParent, MyHierarchy sourceItem) {
+            sourceItemParent.RemoveChildren(sourceItem);
+        }
+
+        //--- 変更されたセパレータ、背景色を元に戻します
+        private static void ResetSeparator(ICollection<MyHierarchy> collection) {
+            var list = collection.ToList();
+            foreach (var pair in list) {
+                ResetSeparator(pair);
+                collection.Remove(pair);
+            }
+        }
+
+        //--- 背景色を元に戻します
+        private static void ResetSeparator(MyHierarchy info) {
+            info.Background = Brushes.Transparent;
+            info.BeforeSeparatorVisibility = Visibility.Hidden;
+            info.AfterSeparatorVisibility = Visibility.Hidden;
+        }
+
+        //--- 上部・下部にドラッグした際にスクロールします
+        private static void DragScroll(FrameworkElement itemsControl, DragEventArgs e) {
+            //var scrollViewer = itemsControl.Descendants<ScrollViewer>().FirstOrDefault();
+            //const double tolerance = 10d;
+            //const double offset = 3d;
+            //var verticalPos = e.GetPosition(itemsControl).Y;
+            //if (verticalPos < tolerance)
+            //    scrollViewer?.ScrollToVerticalOffset(scrollViewer.VerticalOffset - offset);
+            //else if (verticalPos > itemsControl.ActualHeight - tolerance)
+            //    scrollViewer?.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset);
+        }
+
+        //--- カーソルポジションとUIElementからカーソル上の要素を取得します
+        private static T HitTest<T>(UIElement itemsControl, Func<IInputElement, Point> getPosition) where T : class {
+            Point pt = getPosition(itemsControl);
+            DependencyObject result = itemsControl.InputHitTest(pt) as DependencyObject;
+            if (result is T ret)
+                return ret;
+            return null;
+        }
+
+        //--- ドラッグ可能かどうかを判定します
+        private static bool CanDrag(Vector delta) {
+            return (SystemParameters.MinimumHorizontalDragDistance < Math.Abs(delta.X)) ||
+                    (SystemParameters.MinimumVerticalDragDistance < Math.Abs(delta.Y));
+        }
+        ////////////////////////////////////////////////////////////////////////////////Drag&Drop//
         public MessageBoxResult MessageShowWPF(String titolStr, String msgStr,
                                                                         MessageBoxButton buttns,
                                                                         MessageBoxImage icon

@@ -204,6 +204,7 @@ namespace ProductionSchedule.Models
         }
 
         public List<MyHierarchy> _Child;
+
         /// <summary>
         /// サブメニュー配列
         /// </summary>
@@ -228,6 +229,17 @@ namespace ProductionSchedule.Models
                 order = this.order,
                 name = this.name,
                 hierarchy = this.hierarchy
+            };
+        }
+        public object Clone(MyHierarchy cl) {
+            return new MyHierarchy() {
+                id = cl.id,
+                parent_iD = cl.parent_iD,
+                order = cl.order,
+                name = cl.name,
+                parent = cl.parent,
+                Child = cl.Child,
+                hierarchy = cl.hierarchy
             };
         }
 

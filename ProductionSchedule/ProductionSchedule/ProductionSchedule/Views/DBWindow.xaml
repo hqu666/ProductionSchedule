@@ -73,7 +73,7 @@
         </Style>
     </Window.Resources>
     <!--<ScrollViewer VerticalScrollBarVisibility="Auto">-->
-    <Grid Margin="8,8,8,8" >
+    <Grid x:Name="HierarchyGrid" Margin="8,8,8,8" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition  Width="Auto"/>
             <ColumnDefinition  Width="Auto"/>
