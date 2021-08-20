@@ -219,6 +219,13 @@ namespace ProductionSchedule.Models
             child.Add(child);
         }
 
+        //-- 子要素から指定されたアイテムを削除します
+        public void Remove(MyHierarchy child) {
+            child.parent = this;
+            child.Remove(child);
+        }
+
+
         /// <summary>
         /// 自身のコピーを生成します。
         /// </summary>

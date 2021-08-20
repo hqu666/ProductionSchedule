@@ -388,7 +388,9 @@ namespace ProductionSchedule.Views {
                 // それぞれの要素の親要素を取得しておきます
                 // Childrenの場合はtargetの子要素に追加します
                 MyHierarchy targetItemParent = targetItem.parent;
-                dbMsg += ",Drop先の親[" + targetItemParent.id + "]" + targetItemParent.name + "に";
+                if (targetItemParent != null) {
+                    dbMsg += ",Drop先の親[" + targetItemParent.id + "]" + targetItemParent.name + "に";
+                }
                 MyHierarchy sourceItemParent = sourceItem.parent;
                 dbMsg += ",Dragされたアイテムの親[" + sourceItemParent.id + "]" + sourceItemParent.name + "に";
                 //var targetItemParent = targetItem.TreeParent;
@@ -411,11 +413,12 @@ namespace ProductionSchedule.Views {
                         sourceItem.IsSelected = true;
                         break;
                     default:
-                        targetItem.AddChildren(sourceItem);
-                        targetItem.IsExpanded = true;
-                        sourceItem.IsSelected = true;
-                        sourceItem.parent = targetItem;
-                        //                       sourceItem.TreeParent = targetItem;
+                        VM.Drop2Tree(targetItem, sourceItem);
+                        //targetItem.AddChildren(sourceItem);
+                        //targetItem.IsExpanded = true;
+                        //sourceItem.IsSelected = true;
+                        //sourceItem.parent = targetItem;
+                        ////                       sourceItem.TreeParent = targetItem;
                         break;
                 }
                 MyLog(TAG, dbMsg);

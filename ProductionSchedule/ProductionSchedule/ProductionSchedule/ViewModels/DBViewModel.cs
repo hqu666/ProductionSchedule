@@ -434,9 +434,10 @@ namespace ProductionSchedule.ViewModels {
                         if (0 < tmh.parent_iD) {
                             foreach (MyHierarchy pMh in MyHierarchyList) {
                                 if (pMh.id == tmh.parent_iD) {
+                                    dbMsg += "\r\n[pID:" + tmh.id + "]"+ tmh.name+"の親は[" + pMh.id + "]" + pMh.name+ "の" + tmh.order +"番目";
                                     tmh.parent = pMh;
+                                    break;
                                 }
-
                             }
                         }
                     }
@@ -525,33 +526,34 @@ namespace ProductionSchedule.ViewModels {
             }
         }
 
-        //public MyHierarchy MenuselectLoop(List<MyHierarchy> tItems) {
-        //    string TAG = "MenuselectLoop";
-        //    string dbMsg = "";
-        //    MyHierarchy selectedValue = new MyHierarchy();
-        //    try {
-        //        dbMsg += "," + tItems.Count + "件";
-        //        foreach (MyHierarchy sele in tItems) {
-        //            string rName = sele.name;
-        //            bool rIsSelected = sele.IsSelected;
-        //            if (sele.Child != null) {
-        //                selectedValue = MenuselectLoop(sele.Child);
-        //                if (selectedValue !=null) {
-        //                    dbMsg += "selectedValue[" + selectedValue.id + "]" + selectedValue.name + "{" + selectedValue.parent_iD + "}";
-        //                    break;
-        //                }
-        //            } else if (rIsSelected) {
-        //                selectedValue = sele;
-        //                dbMsg += "selectedValue[" + selectedValue.id + "]" + selectedValue.name + "{" + selectedValue.parent_iD + "}";
-        //                break;
-        //            }
-        //        }
-        //        MyLog(TAG, dbMsg);
-        //    } catch (Exception er) {
-        //        MyErrorLog(TAG, dbMsg, er);
-        //    }
-        //    return selectedValue;
-        //}
+        /// <summary>
+        /// Dropされたアイテムの移動
+        /// </summary>
+        /// <param name="tItems"></param>
+        public void Drop2Tree(MyHierarchy dropTo , MyHierarchy souceItem) {
+            string TAG = "Drop2Tree";
+            string dbMsg = "";
+            try {
+                dbMsg += "[" + dropTo.id + "]" + dropTo.name +"　に["+ souceItem.id + "]"+ souceItem.name +"をDrop";
+                MyHierarchy parentMH = souceItem.parent;
+                dbMsg += ",元の親[" + parentMH.id + "]" + parentMH.name + parentMH.Child.Count + "件";
+                parentMH.Child.Remove(souceItem);
+                //            parentMH.Remove(souceItem);
+                dbMsg += "から削除して" + parentMH.Child.Count + "件";
+                souceItem.parent = dropTo;
+                dbMsg += ">>[" + souceItem.parent.id + "]" + souceItem.parent.name;
+                dbMsg += ",Child"+ dropTo.Child.Count + "件" ;
+                parentMH.Child.Add(souceItem);
+                //dropTo.Add(souceItem);
+                dbMsg += ">>" + dropTo.Child.Count + "件";
+                souceItem.order = dropTo.Child.Count;
+                dbMsg += "の" + souceItem.order + "番目に移動";
+                NotifyPropertyChanged("HierarchyTreeList");
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
 
 
 
