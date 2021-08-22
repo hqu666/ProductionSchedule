@@ -529,25 +529,29 @@ namespace ProductionSchedule.ViewModels {
         /// <summary>
         /// Dropされたアイテムの移動
         /// </summary>
-        /// <param name="tItems"></param>
-        public void Drop2Tree(MyHierarchy dropTo , MyHierarchy souceItem) {
+        /// <param name="dropTo">追加先</param>
+        /// <param name="souceItem">Dropされたアイテム</param>
+        /// <param name="souceOrder">追加先での順番</param>
+        /// <param name="treeItemsSource">TreeVeiwのItemsSource</param>
+        public void Drop2Tree(MyHierarchy dropTo , MyHierarchy souceItem,int souceOrder, ObservableCollection<MyHierarchy> treeItemsSource) {
             string TAG = "Drop2Tree";
             string dbMsg = "";
             try {
                 dbMsg += "[" + dropTo.id + "]" + dropTo.name +"　に["+ souceItem.id + "]"+ souceItem.name +"をDrop";
                 MyHierarchy parentMH = souceItem.parent;
-                dbMsg += ",元の親[" + parentMH.id + "]" + parentMH.name + parentMH.Child.Count + "件";
+                dbMsg += ",元の親[" + parentMH.id + "]" + parentMH.name + ":"+parentMH.Child.Count + "件";
                 parentMH.Child.Remove(souceItem);
-                //            parentMH.Remove(souceItem);
                 dbMsg += "から削除して" + parentMH.Child.Count + "件";
                 souceItem.parent = dropTo;
                 dbMsg += ">>[" + souceItem.parent.id + "]" + souceItem.parent.name;
-                dbMsg += ",Child"+ dropTo.Child.Count + "件" ;
-                parentMH.Child.Add(souceItem);
-                //dropTo.Add(souceItem);
+                dbMsg += ",追加先Child"+ dropTo.Child.Count + "件" ;
+                if (souceOrder==0) {
+                    dropTo.Child.Add(souceItem);
+                }
                 dbMsg += ">>" + dropTo.Child.Count + "件";
                 souceItem.order = dropTo.Child.Count;
                 dbMsg += "の" + souceItem.order + "番目に移動";
+                HierarchyTreeList = new ObservableCollection<MyHierarchy>(treeItemsSource);
                 NotifyPropertyChanged("HierarchyTreeList");
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {

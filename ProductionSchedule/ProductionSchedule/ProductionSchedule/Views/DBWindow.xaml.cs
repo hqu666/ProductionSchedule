@@ -1,6 +1,7 @@
 ﻿using ProductionSchedule.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -360,6 +361,7 @@ namespace ProductionSchedule.Views {
             string TAG = "MyTreeOnDrop";
             string dbMsg = "";
             try {
+                TreeView TV = sender as TreeView;
                 //MyHierarchy MH = new MyHierarchy();
                 //MyHierarchy toDrop= MH.Clone((MyHierarchy)e.OriginalSource);
                 //dbMsg += "[" + toDrop.id + "]" + toDrop.name +"に";
@@ -413,7 +415,7 @@ namespace ProductionSchedule.Views {
                         sourceItem.IsSelected = true;
                         break;
                     default:
-                        VM.Drop2Tree(targetItem, sourceItem);
+                        VM.Drop2Tree(targetItem, sourceItem,0, (ObservableCollection<MyHierarchy>)TV.ItemsSource);
                         //targetItem.AddChildren(sourceItem);
                         //targetItem.IsExpanded = true;
                         //sourceItem.IsSelected = true;
