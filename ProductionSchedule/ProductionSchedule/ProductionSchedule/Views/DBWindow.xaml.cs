@@ -390,11 +390,19 @@ namespace ProductionSchedule.Views {
                 // それぞれの要素の親要素を取得しておきます
                 // Childrenの場合はtargetの子要素に追加します
                 MyHierarchy targetItemParent = targetItem.parent;
+                dbMsg += ",Drop先の親";
                 if (targetItemParent != null) {
-                    dbMsg += ",Drop先の親[" + targetItemParent.id + "]" + targetItemParent.name + "に";
+                    dbMsg += "[" + targetItemParent.id + "]" + targetItemParent.name + "に";
+                } else {
+                    dbMsg += "無し";
                 }
                 MyHierarchy sourceItemParent = sourceItem.parent;
-                dbMsg += ",Dragされたアイテムの親[" + sourceItemParent.id + "]" + sourceItemParent.name + "に";
+                dbMsg += ",Dragされたアイテムの親";
+                if (sourceItemParent ==null) {
+                    dbMsg += "無し";
+                } else {
+                    dbMsg += ",Dragされたアイテムの親[" + sourceItemParent.id + "]" + sourceItemParent.name + "に";
+                }
                 //var targetItemParent = targetItem.TreeParent;
                 //var sourceItemParent = sourceItem.TreeParent;
                 // 次にsourceを現在の位置から削除しておきます

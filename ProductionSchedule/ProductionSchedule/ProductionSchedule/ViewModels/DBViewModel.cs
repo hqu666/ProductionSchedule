@@ -539,13 +539,25 @@ namespace ProductionSchedule.ViewModels {
             try {
                 dbMsg += "[" + dropTo.id + "]" + dropTo.name +"　に["+ souceItem.id + "]"+ souceItem.name +"をDrop";
                 MyHierarchy parentMH = souceItem.parent;
-                dbMsg += ",元の親[" + parentMH.id + "]" + parentMH.name + ":"+parentMH.Child.Count + "件";
-                parentMH.Child.Remove(souceItem);
+                dbMsg += ",元の親";
+                if (parentMH == null) {
+                    dbMsg += "無し";
+                } else {
+                    dbMsg += "親[" + parentMH.id + "]" + parentMH.name + ":" + parentMH.Child.Count + "件";
+                    parentMH.Child.Remove(souceItem);
+                }
                 dbMsg += "から削除して" + parentMH.Child.Count + "件";
                 souceItem.parent = dropTo;
                 dbMsg += ">>[" + souceItem.parent.id + "]" + souceItem.parent.name;
-                dbMsg += ",追加先Child"+ dropTo.Child.Count + "件" ;
+                dbMsg += ",追加先Child";
+                if (dropTo.Child == null) {
+                    dbMsg += "無し";
+                    dropTo.Child = new List<MyHierarchy>();
+                } else { 
+                    dbMsg += dropTo.Child.Count + "件";
+                }
                 if (souceOrder==0) {
+                    dbMsg += ">末尾へ>";
                     dropTo.Child.Add(souceItem);
                 }
                 dbMsg += ">>" + dropTo.Child.Count + "件";
