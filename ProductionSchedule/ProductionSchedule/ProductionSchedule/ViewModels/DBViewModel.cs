@@ -402,7 +402,7 @@ namespace ProductionSchedule.ViewModels {
                     //　親リストに子を登録
                     HierarchyTreeList = new ObservableCollection<MyHierarchy>();
                     foreach (MyHierarchy pMH in MHCopyList) {
-                        dbMsg += "\r\n[pID:" + pMH.id + "]";
+             //           dbMsg += "\r\n[pID:" + pMH.id + "]";
                         //子の入れ場が有る物に子を追加
                         if (pMH.Child != null) {  
                             //     親ごとの子リスト作成
@@ -479,6 +479,29 @@ namespace ProductionSchedule.ViewModels {
             }
             return retItem;
         }
+
+        public MyHierarchy FindTreeItem(int id, ObservableCollection<MyHierarchy> tItems) {
+            string TAG = "FindTreeItem:ObservableCollection";
+            string dbMsg = "";
+            MyHierarchy retItem = new MyHierarchy();
+            try {
+                dbMsg += "検索対象[" + id + "]";
+                foreach (MyHierarchy item in tItems) {
+                    if (item.id == id) {
+                        retItem = item;
+                        dbMsg += retItem.name + "{親:" + retItem.parent_iD + "}の" + SelectedTreeItem.order + "番目";
+                        break;
+                    }
+                }
+
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+            return retItem;
+        }
+
+
 
 
         /// <summary>
@@ -565,11 +588,40 @@ namespace ProductionSchedule.ViewModels {
                 dbMsg += "の" + souceItem.order + "番目に移動";
                 HierarchyTreeList = new ObservableCollection<MyHierarchy>(treeItemsSource);
                 NotifyPropertyChanged("HierarchyTreeList");
+                ExpandSerlect(souceItem.id, HierarchyTreeList);
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
+
+        /// <summary>
+        /// 移動後など移動した状態を見せる
+        /// </summary>
+        /// <param name="id">見せる対象</param>
+        /// <param name="tItems">ItemSouce</param>
+        /// <returns></returns>
+        public void ExpandSerlect(int id, ObservableCollection<MyHierarchy> tItems) {
+            string TAG = "ExpandSerlect";
+            string dbMsg = "";
+            MyHierarchy tItem = FindTreeItem( id,tItems);
+            try {
+                dbMsg += "検索対象[" + tItem.id + "]"+ tItem.name + ";親[" + tItem.parent_iD + "]" ;
+
+                //foreach (MyHierarchy item in tItems) {
+                //    if (item.id == id) {
+                //        retItem = item;
+                //        dbMsg += retItem.name + "{親:" + retItem.parent_iD + "}の" + SelectedTreeItem.order + "番目";
+                //        break;
+                //    }
+                //}
+
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
+
 
 
 

@@ -272,8 +272,8 @@ namespace ProductionSchedule.Views {
         /// <param name="e"></param>
         private void this_loaded(object sender, RoutedEventArgs e) {
             //ViewとViewModelの紐付け
-            //VM.MyView = this;
-            //VM.MytreeView = MyTree;
+            VM.MyView = this;                   //渡らない？
+            VM.MytreeView = MyTree;            //渡らない？
             VM.SelItemID = this.SelItemID;
             VM.SelItemName = this.SelItemName;
             VM.SelItemHierarchy = this.SelItemHierarchy;
@@ -311,36 +311,45 @@ namespace ProductionSchedule.Views {
                 // 画面上部/下部にドラッグした際にスクロールします
                 DragScroll(itemsControl, e);
 
+
                 // ドラッグ中のアイテムとマウスカーソルの位置にある要素を取得します
                 // HitTestで取れる要素は大体TextBlockなので、次でTreeViewItemInfoを取得します
-                var sourceItem = (MyHierarchy)e.Data.GetData(typeof(MyHierarchy));
-                var targetElement = HitTest<FrameworkElement>(itemsControl, e.GetPosition);
+                MyHierarchy sourceItem = (MyHierarchy)e.Data.GetData(typeof(MyHierarchy));
+                dbMsg = "ドラッグ中のアイテム[" + sourceItem.id + "]" + sourceItem.name;
+                FrameworkElement targetElement = HitTest<FrameworkElement>(itemsControl, e.GetPosition);
 
                 // カーソル要素から直近のGridを取得します(後の範囲計算で必要)
                 // カーソル要素からTreeViewItemInfoを取得するにはDataContextを変換します
                 // カーソル要素とドラッグ要素が同じ場合は何もする必要がないのでreturnしておきます
                 var parentGrid = HierarchyGrid; // targetElement?.GetParent<Grid>();
-                if (parentGrid == null || !(targetElement.DataContext is MyHierarchy targetElementInfo) || targetElementInfo == sourceItem)
+                if (parentGrid == null 
+                    || !(targetElement.DataContext is MyHierarchy targetElementInfo) 
+                    || targetElementInfo == sourceItem)
                     return;
 
                 // カーソル要素がドラッグ中の要素の子要素にある時は何もする必要がないのでreturnします
                 // 独自の処理をするならこれは不要、今回のコードではこれがないと要素が消えます
                 if (targetElementInfo.ContainsParent(sourceItem))
                     return;
-
+                dbMsg += ",Info[" + targetElementInfo.id + "]" + targetElementInfo.name;
                 e.Effects = DragDropEffects.Move;
 
                 // 挿入するか子要素に追加するかの判定処理
                 // 基本的には0 ~ boundaryの位置なら上部に挿入、それ以外なら子要素に追加します
                 // それだけでは末尾に追加できなくなるので子要素の最後だけ末尾に追加できるようにします
-                const int boundary = 10;
-                var pos = e.GetPosition(parentGrid);
-                var targetParentLast = GetParentLastChild(targetElementInfo);
+                const int boundary =  10;
+                Point pos = e.GetPosition(parentGrid);
+                dbMsg += ",グリッド上(" + pos.X + "," + pos.Y + ")ActualHeight=" + parentGrid.ActualHeight;
+                MyHierarchy targetParentLast = GetParentLastChild(targetElementInfo);
+                if (targetParentLast !=null) {
+                    dbMsg += ",targetParentLast[" + targetParentLast.id + "]" + targetParentLast.name;
+                }
                 if (pos.Y > 0 && pos.Y < boundary) {
                     _insertType = InsertType.Before;
                     targetElementInfo.BeforeSeparatorVisibility = Visibility.Visible;
-                } else if (targetParentLast == targetElementInfo
-                              && pos.Y < parentGrid.ActualHeight && pos.Y > parentGrid.ActualHeight - boundary) {
+                } else if (targetParentLast == targetElementInfo 
+                            && pos.Y < parentGrid.ActualHeight 
+                            && pos.Y > parentGrid.ActualHeight - boundary) {
                     _insertType = InsertType.After;
                     targetElementInfo.AfterSeparatorVisibility = Visibility.Visible;
                 } else {
@@ -350,21 +359,23 @@ namespace ProductionSchedule.Views {
                 dbMsg += ",_insertType=" + _insertType;
                 // 背景色などを変更したTreeViewItemInfoオブジェクトを_changedBlocksに追加しておきます
                 if (!_changedBlocks.Contains(targetElementInfo))
-                    _changedBlocks.Add(targetElementInfo); MyLog(TAG, dbMsg);
+                    _changedBlocks.Add(targetElementInfo);
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
 
+        /// <summary>
+        /// Dropした時
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MyTreeOnDrop(object sender, DragEventArgs e) {
             string TAG = "MyTreeOnDrop";
             string dbMsg = "";
             try {
                 TreeView TV = sender as TreeView;
-                //MyHierarchy MH = new MyHierarchy();
-                //MyHierarchy toDrop= MH.Clone((MyHierarchy)e.OriginalSource);
-                //dbMsg += "[" + toDrop.id + "]" + toDrop.name +"に";
 
                 // 背景色やセパレータを元に戻します
                 ResetSeparator(_changedBlocks);
@@ -403,8 +414,6 @@ namespace ProductionSchedule.Views {
                 } else {
                     dbMsg += ",Dragされたアイテムの親[" + sourceItemParent.id + "]" + sourceItemParent.name + "に";
                 }
-                //var targetItemParent = targetItem.TreeParent;
-                //var sourceItemParent = sourceItem.TreeParent;
                 // 次にsourceを現在の位置から削除しておきます
                 RemoveCurrentItem(sourceItemParent, sourceItem);
                 // あとはBefore, Afterの場合はtargetの前後にsourceを挿入
@@ -424,11 +433,6 @@ namespace ProductionSchedule.Views {
                         break;
                     default:
                         VM.Drop2Tree(targetItem, sourceItem,0, (ObservableCollection<MyHierarchy>)TV.ItemsSource);
-                        //targetItem.AddChildren(sourceItem);
-                        //targetItem.IsExpanded = true;
-                        //sourceItem.IsSelected = true;
-                        //sourceItem.parent = targetItem;
-                        ////                       sourceItem.TreeParent = targetItem;
                         break;
                 }
                 MyLog(TAG, dbMsg);
@@ -442,12 +446,12 @@ namespace ProductionSchedule.Views {
             string dbMsg = "";
             try {
                 dbMsg += ",_startPos=" + _startPos;
-                dbMsg += ",SelectedItem=" + MyTree.SelectedItem.ToString();
                 if (!(sender is TreeView treeView) || treeView.SelectedItem == null || _startPos == null)
                     return;
 
+                dbMsg += ",SelectedItem=" + MyTree.SelectedItem.ToString();
                 Point cursorPoint = treeView.PointToScreen(e.GetPosition(treeView));
-                dbMsg += ",cursorPoint=" + cursorPoint;
+                dbMsg += ",cursorPoint(" + cursorPoint.X+ "," + cursorPoint.Y + ")";
                 Vector diff = cursorPoint - (Point)_startPos;
                 dbMsg += ",移動距離=" + diff;
                 if (!CanDrag(diff))
@@ -455,12 +459,19 @@ namespace ProductionSchedule.Views {
 
                 DragDrop.DoDragDrop(treeView, treeView.SelectedItem, DragDropEffects.Move);
 
-                _startPos = null; MyLog(TAG, dbMsg);
+                _startPos = null;
+                MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
             }
         }
 
+        /// <summary>
+        /// マウス左ボタンが離された時
+        /// 開始点を破棄する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MyTreeOnPreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
             string TAG = "MyTreeOnPreviewMouseLeftButtonUp";
             string dbMsg = "";
@@ -474,6 +485,12 @@ namespace ProductionSchedule.Views {
             }
         }
 
+        /// <summary>
+        /// マウス左ボタンがクリックされた時
+        /// Tree内のアイテムなら開始点を取得し、異なれば破棄する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MyTreeOnPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
             string TAG = "MyTreeOnPreviewMouseLeftButtonDown";
             string dbMsg = "";
@@ -484,22 +501,14 @@ namespace ProductionSchedule.Views {
 
                 Point pos = e.GetPosition(itemsControl);
                 dbMsg += ",pos=" + pos;
-                var hit = HitTest<FrameworkElement>(itemsControl, e.GetPosition);
-                if (hit.DataContext is MyHierarchy)
+                FrameworkElement hit = HitTest<FrameworkElement>(itemsControl, e.GetPosition);
+                if (hit.DataContext is MyHierarchy) { 
                     _startPos = itemsControl.PointToScreen(pos);
-                else
+                    dbMsg += ",_startPos(" + _startPos.Value.X + "," + _startPos.Value.Y + ")";
+                } else {
                     _startPos = null;
-                //DependencyObject hit = itemsControl.InputHitTest(pos) as DependencyObject;
-                //_startPos = null;
-                //if (hit is FrameworkElement) {
-                //    dbMsg += ",hit=" + hit;
-                //    TreeView TV = sender as TreeView;
-                //    if (TV.DataContext.Equals(VM)) {
-                //        _startPos = itemsControl.PointToScreen(pos);
-                //    }
-
-                //}
-                dbMsg += ",_startPos="+ _startPos;
+                    dbMsg += ",_startPos破棄";
+                }
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
@@ -517,11 +526,34 @@ namespace ProductionSchedule.Views {
             }
         }
 
-        ///////////////////////
-        //--- 親要素から子要素郡の末尾を取得します
+        /// <summary>
+        /// 親要素から子要素郡の末尾を取得します
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
         private static MyHierarchy GetParentLastChild(MyHierarchy info) {
-            var targetParent = info.TreeParent;
-            var last = targetParent?.TreeChildren.LastOrDefault();
+            string TAG = "MyTreeOnPreviewMouseMove";
+            string dbMsg = "";
+            MyHierarchy last=new MyHierarchy();
+            try {
+                dbMsg += ",info[" + info.id + "]" + info.name;
+                MyHierarchy targetParent = info.parent;
+                if (targetParent == null) {
+                    dbMsg += "targetParent=null";
+                    last = null;
+                } else {
+                    dbMsg += "targetParent[" + targetParent.id + "]" + targetParent.name;
+                    if (targetParent.Child != null) {
+                        foreach (MyHierarchy child in targetParent.Child) {
+                            last = child;
+                        }
+                    }
+                }
+           //     last = targetParent?.TreeChildren.LastOrDefault();
+ //               MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
             return last;
         }
 
@@ -572,6 +604,8 @@ namespace ProductionSchedule.Views {
             return (SystemParameters.MinimumHorizontalDragDistance < Math.Abs(delta.X)) ||
                     (SystemParameters.MinimumVerticalDragDistance < Math.Abs(delta.Y));
         }
+
+
         ////////////////////////////////////////////////////////////////////////////////Drag&Drop//
         public MessageBoxResult MessageShowWPF(String titolStr, String msgStr,
                                                                         MessageBoxButton buttns,
