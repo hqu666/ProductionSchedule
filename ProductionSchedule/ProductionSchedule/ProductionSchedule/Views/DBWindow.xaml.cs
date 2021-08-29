@@ -304,62 +304,82 @@ namespace ProductionSchedule.Views {
             try {
                 // 背景色やセパレータを元に戻します
                 ResetSeparator(_changedBlocks);
-
-                if (!(sender is ItemsControl itemsControl) || !e.Data.GetDataPresent(typeof(MyHierarchy)))
-                    return;
-
-                // 画面上部/下部にドラッグした際にスクロールします
-                DragScroll(itemsControl, e);
-
-
-                // ドラッグ中のアイテムとマウスカーソルの位置にある要素を取得します
-                // HitTestで取れる要素は大体TextBlockなので、次でTreeViewItemInfoを取得します
-                MyHierarchy sourceItem = (MyHierarchy)e.Data.GetData(typeof(MyHierarchy));
-                dbMsg = "ドラッグ中のアイテム[" + sourceItem.id + "]" + sourceItem.name;
-                FrameworkElement targetElement = HitTest<FrameworkElement>(itemsControl, e.GetPosition);
-
-                // カーソル要素から直近のGridを取得します(後の範囲計算で必要)
-                // カーソル要素からTreeViewItemInfoを取得するにはDataContextを変換します
-                // カーソル要素とドラッグ要素が同じ場合は何もする必要がないのでreturnしておきます
-                var parentGrid = HierarchyGrid; // targetElement?.GetParent<Grid>();
-                if (parentGrid == null 
-                    || !(targetElement.DataContext is MyHierarchy targetElementInfo) 
-                    || targetElementInfo == sourceItem)
-                    return;
-
-                // カーソル要素がドラッグ中の要素の子要素にある時は何もする必要がないのでreturnします
-                // 独自の処理をするならこれは不要、今回のコードではこれがないと要素が消えます
-                if (targetElementInfo.ContainsParent(sourceItem))
-                    return;
-                dbMsg += ",Info[" + targetElementInfo.id + "]" + targetElementInfo.name;
-                e.Effects = DragDropEffects.Move;
-
-                // 挿入するか子要素に追加するかの判定処理
-                // 基本的には0 ~ boundaryの位置なら上部に挿入、それ以外なら子要素に追加します
-                // それだけでは末尾に追加できなくなるので子要素の最後だけ末尾に追加できるようにします
-                const int boundary =  10;
-                Point pos = e.GetPosition(parentGrid);
-                dbMsg += ",グリッド上(" + pos.X + "," + pos.Y + ")ActualHeight=" + parentGrid.ActualHeight;
-                MyHierarchy targetParentLast = GetParentLastChild(targetElementInfo);
-                if (targetParentLast !=null) {
-                    dbMsg += ",targetParentLast[" + targetParentLast.id + "]" + targetParentLast.name;
-                }
-                if (pos.Y > 0 && pos.Y < boundary) {
-                    _insertType = InsertType.Before;
-                    targetElementInfo.BeforeSeparatorVisibility = Visibility.Visible;
-                } else if (targetParentLast == targetElementInfo 
-                            && pos.Y < parentGrid.ActualHeight 
-                            && pos.Y > parentGrid.ActualHeight - boundary) {
-                    _insertType = InsertType.After;
-                    targetElementInfo.AfterSeparatorVisibility = Visibility.Visible;
+                //    if (!(sender is ItemsControl itemsControl) || !e.Data.GetDataPresent(typeof(MyHierarchy)))
+                //    return;
+                ItemsControl itemsControl = sender as ItemsControl;
+                if (itemsControl ==null){
+                    dbMsg += "itemsControl ==null";
                 } else {
-                    _insertType = InsertType.Children;
-                    targetElementInfo.Background = Brushes.Gray;
+                    if (!e.Data.GetDataPresent(typeof(MyHierarchy))) {
+                        dbMsg += "MyHierarchyではない";
+                    } else {
+                        // 画面上部/下部にドラッグした際にスクロールします
+                        DragScroll(itemsControl, e);
+                        // ドラッグ中のアイテムとマウスカーソルの位置にある要素を取得します
+                        // HitTestで取れる要素は大体TextBlockなので、次でTreeViewItemInfoを取得します
+                        MyHierarchy sourceItem = (MyHierarchy)e.Data.GetData(typeof(MyHierarchy));
+                        dbMsg += "ドラッグ中のアイテム[" + sourceItem.id + "]" + sourceItem.name;
+                        FrameworkElement targetElement = HitTest<FrameworkElement>(itemsControl, e.GetPosition);
+
+                        // カーソル要素から直近のGridを取得します(後の範囲計算で必要)
+                        // カーソル要素からTreeViewItemInfoを取得するにはDataContextを変換します
+                        // カーソル要素とドラッグ要素が同じ場合は何もする必要がないのでreturnしておきます
+                        var parentGrid = HierarchyGrid; // targetElement?.GetParent<Grid>();
+                        MyHierarchy targetElementInfo = targetElement.DataContext as MyHierarchy;
+                        if (parentGrid == null) {
+                            // || targetElementInfo == sourceItem || !(targetElement.DataContext is MyHierarchy targetElementInfo)
+                            dbMsg += "parentGrid == null";
+                        } else {
+                            if (targetElementInfo == sourceItem) {
+                                dbMsg += "targetElementInfo == sourceItem";
+                            } else {
+                                if (targetElementInfo == null) {
+                                    dbMsg += "targetElementInfo ==null";
+                                } else {
+                                    // カーソル要素がドラッグ中の要素の子要素にある時は何もする必要がないのでreturnします
+                                    // 独自の処理をするならこれは不要、今回のコードではこれがないと要素が消えます
+                                    if (targetElementInfo.ContainsParent(sourceItem)) {
+                                        dbMsg += "targetElementInfo.ContainsParent(sourceItem)";
+                                    } else {
+                                        dbMsg += ",Info[" + targetElementInfo.id + "]" + targetElementInfo.name;
+                                        e.Effects = DragDropEffects.Move;
+
+                                        // 挿入するか子要素に追加するかの判定処理
+                                        // 基本的には0 ~ boundaryの位置なら上部に挿入、それ以外なら子要素に追加します
+                                        // それだけでは末尾に追加できなくなるので子要素の最後だけ末尾に追加できるようにします
+                                        const int boundary = 10;
+                                        Point pos = e.GetPosition(parentGrid);
+                                        dbMsg += ",グリッド上(" + pos.X + "," + pos.Y + ")ActualHeight=" + parentGrid.ActualHeight;
+                                        MyHierarchy targetParentLast = GetParentLastChild(targetElementInfo);
+                                        if (targetParentLast != null) {
+                                            dbMsg += ",targetParentLast[" + targetParentLast.id + "]" + targetParentLast.name;
+                                        }
+                                        if (pos.Y > 0 && pos.Y < boundary) {
+                                            _insertType = InsertType.Before;
+                                            targetElementInfo.BeforeSeparatorVisibility = Visibility.Visible;
+                                        } else if (targetParentLast == targetElementInfo
+                                                    && pos.Y < parentGrid.ActualHeight
+                                                    && pos.Y > parentGrid.ActualHeight - boundary) {
+                                            _insertType = InsertType.After;
+                                            targetElementInfo.AfterSeparatorVisibility = Visibility.Visible;
+                                        } else {
+                                            _insertType = InsertType.Children;
+                                            targetElementInfo.Background = Brushes.Gray;
+                                        }
+                                        dbMsg += ",_insertType=" + _insertType;
+                                        // 背景色などを変更したTreeViewItemInfoオブジェクトを_changedBlocksに追加しておきます
+                                        if (!_changedBlocks.Contains(targetElementInfo))
+                                            _changedBlocks.Add(targetElementInfo);
+
+                                    }
+
+                                }
+                            }
+                        }
+                    }
                 }
-                dbMsg += ",_insertType=" + _insertType;
-                // 背景色などを変更したTreeViewItemInfoオブジェクトを_changedBlocksに追加しておきます
-                if (!_changedBlocks.Contains(targetElementInfo))
-                    _changedBlocks.Add(targetElementInfo);
+
+
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
