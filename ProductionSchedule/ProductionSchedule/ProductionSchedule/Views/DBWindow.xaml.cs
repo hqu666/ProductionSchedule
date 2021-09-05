@@ -298,6 +298,16 @@ namespace ProductionSchedule.Views {
         }
 
         //Drag&Drop////////////////////////////////////////////////////////////////////////////////
+        public double itemSpan=0;
+        public double bPosY=0;
+        public int bDropId=0;
+
+
+        /// <summary>
+        /// Drag移動中
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MyTreeOnDragOver(object sender, DragEventArgs e) {
             string TAG = "MyTreeOnDragOver";
             string dbMsg = "";
@@ -331,10 +341,10 @@ namespace ProductionSchedule.Views {
                             dbMsg += "parentGrid == null";
                         } else {
                             if (targetElementInfo == sourceItem) {
-                                dbMsg += "targetElementInfo == sourceItem";
+                                dbMsg += ",Info == sourceItem";
                             } else {
                                 if (targetElementInfo == null) {
-                                    dbMsg += "targetElementInfo ==null";
+                                    dbMsg += ",Info ==null";
                                 } else {
                                     // カーソル要素がドラッグ中の要素の子要素にある時は何もする必要がないのでreturnします
                                     // 独自の処理をするならこれは不要、今回のコードではこれがないと要素が消えます
@@ -343,7 +353,6 @@ namespace ProductionSchedule.Views {
                                     } else {
                                         dbMsg += ",Info[" + targetElementInfo.id + "]" + targetElementInfo.name;
                                         e.Effects = DragDropEffects.Move;
-
                                         // 挿入するか子要素に追加するかの判定処理
                                         // 基本的には0 ~ boundaryの位置なら上部に挿入、それ以外なら子要素に追加します
                                         // それだけでは末尾に追加できなくなるので子要素の最後だけ末尾に追加できるようにします
@@ -354,18 +363,45 @@ namespace ProductionSchedule.Views {
                                         if (targetParentLast != null) {
                                             dbMsg += ",targetParentLast[" + targetParentLast.id + "]" + targetParentLast.name;
                                         }
-                                        if (pos.Y > 0 && pos.Y < boundary) {
-                                            _insertType = InsertType.Before;
-                                            targetElementInfo.BeforeSeparatorVisibility = Visibility.Visible;
-                                        } else if (targetParentLast == targetElementInfo
-                                                    && pos.Y < parentGrid.ActualHeight
-                                                    && pos.Y > parentGrid.ActualHeight - boundary) {
-                                            _insertType = InsertType.After;
+                                        //if (0<pos.Y && pos.Y < boundary) {
+                                        //    _insertType = InsertType.Before;
+                                        //    targetElementInfo.BeforeSeparatorVisibility = Visibility.Visible;
+                                        //} else if (targetParentLast == targetElementInfo
+                                        //            && pos.Y < parentGrid.ActualHeight
+                                        //            && pos.Y > parentGrid.ActualHeight - boundary) {
+                                        //    _insertType = InsertType.After;
+                                        //    targetElementInfo.AfterSeparatorVisibility = Visibility.Visible;
+                                        //} else {
+                                        //    _insertType = InsertType.Children;
+                                        //    targetElementInfo.Background = Brushes.Gray;
+                                        //}
+
+                                        if (bDropId != targetElementInfo.id) {
+                                            dbMsg += ">>Drop先変化";
+                                            bDropId = targetElementInfo.id;
+                                            if ( bPosY != 0) {
+                                                itemSpan = bPosY - pos.Y;
+                                            }
+                                            //if (itemSpan==0 && bPosY != 0) {
+                                            //    itemSpan = Math.Abs(bPosY - pos.Y);
+                                            //    dbMsg += ",itemSpan=" + itemSpan;
+                                            //}
+                                            dbMsg += ",itemSpan=" + itemSpan;
+                                            bPosY = pos.Y;
+                                            dbMsg += ",bPosY=" + bPosY;
+                                        }
+                                        if (Math.Abs(bPosY - pos.Y) < 10) {            //間隔は仮設定
                                             targetElementInfo.AfterSeparatorVisibility = Visibility.Visible;
+                                            if (0 < (bPosY - pos.Y)) {
+                                                _insertType = InsertType.Before;
+                                            } else {
+                                                _insertType = InsertType.After;
+                                            }
                                         } else {
                                             _insertType = InsertType.Children;
                                             targetElementInfo.Background = Brushes.Gray;
                                         }
+
                                         dbMsg += ",_insertType=" + _insertType;
                                         // 背景色などを変更したTreeViewItemInfoオブジェクトを_changedBlocksに追加しておきます
                                         if (!_changedBlocks.Contains(targetElementInfo))
