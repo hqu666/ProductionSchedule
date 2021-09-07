@@ -474,23 +474,27 @@ namespace ProductionSchedule.Views {
                 RemoveCurrentItem(sourceItemParent, sourceItem);
                 // あとはBefore, Afterの場合はtargetの前後にsourceを挿入
                 dbMsg += ",_insertType=" + _insertType;
+                int dropPosition = 0;               //末尾に追加
                 switch (_insertType) {
                     case InsertType.Before:
-                        targetItemParent.InsertBeforeChildren(sourceItem, targetItem);
-                        sourceItem.parent = targetItemParent;
-//                        sourceItem.TreeParent = targetItemParent;
-                        sourceItem.IsSelected = true;
+                        dropPosition = -1;               //前に追加
+                                                        //                        targetItemParent.InsertBeforeChildren(sourceItem, targetItem);
+                                                        //                        sourceItem.parent = targetItemParent;
+                                                        ////                        sourceItem.TreeParent = targetItemParent;
+                                                        //                        sourceItem.IsSelected = true;
                         break;
                     case InsertType.After:
-                        targetItemParent.InsertAfterChildren(sourceItem, targetItem);
-                        sourceItem.parent = targetItemParent;
-                   //     sourceItem.TreeParent = targetItemParent;
-                        sourceItem.IsSelected = true;
+                        dropPosition = 1;               //後ろに追加
+                                                         //     targetItemParent.InsertAfterChildren(sourceItem, targetItem);
+                                                         //     sourceItem.parent = targetItemParent;
+                                                         ////     sourceItem.TreeParent = targetItemParent;
+                                                         //     sourceItem.IsSelected = true;
                         break;
                     default:
-                        VM.Drop2Tree(targetItem, sourceItem,0, (ObservableCollection<MyHierarchy>)TV.ItemsSource);
+              //          VM.Drop2Tree(targetItem, sourceItem, dropPosition, (ObservableCollection<MyHierarchy>)TV.ItemsSource);
                         break;
                 }
+                VM.Drop2Tree(targetItem, sourceItem, dropPosition, (ObservableCollection<MyHierarchy>)TV.ItemsSource);
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);

@@ -582,11 +582,50 @@ namespace ProductionSchedule.ViewModels {
                 if (souceOrder==0) {
                     dbMsg += ">末尾へ>";
                     dropTo.Child.Add(souceItem);
+                    HierarchyTreeList = new ObservableCollection<MyHierarchy>(treeItemsSource);
+                } else {
+                    HierarchyTreeList = new ObservableCollection<MyHierarchy>();
+                    int dropToPosiotion = 0;
+                    foreach (MyHierarchy ti in treeItemsSource) {
+                        dbMsg += "\r\n[" + dropToPosiotion+"]"+ ti.name;
+                        if (ti.Equals(dropTo.parent)) {
+                            List<MyHierarchy> childList=new List<MyHierarchy>();
+                            foreach (MyHierarchy dtc in ti.Child) {
+                                if (dtc.Equals(dropTo)) {
+                                    dbMsg += "の[" + dropToPosiotion + "]" + dtc.name;
+                                    if (0 < souceOrder) {
+                                        childList.Add(dtc);
+                                        childList.Add(souceItem);
+                                    } else {
+                                        childList.Add(souceItem);
+                                        childList.Add(dtc);
+                                    }
+                                } else {
+                                    childList.Add(dtc);
+                                }
+                                dropToPosiotion++;
+                            }
+                            souceItem.parent = ti;
+                            ti.Child = childList;
+                            HierarchyTreeList.Add(ti);
+                        } else if (ti.Equals(dropTo)) {
+                            if (0 < souceOrder) {
+                                HierarchyTreeList.Add(ti);
+                                HierarchyTreeList.Add(souceItem);
+                            } else {
+                                HierarchyTreeList.Add(souceItem);
+                                HierarchyTreeList.Add(ti);
+                            }
+                        } else {
+                            HierarchyTreeList.Add(ti);
+                        }
+                        dropToPosiotion++;
+                    }
                 }
                 dbMsg += ">>" + dropTo.Child.Count + "件";
                 souceItem.order = dropTo.Child.Count;
                 dbMsg += "の" + souceItem.order + "番目に移動";
-                HierarchyTreeList = new ObservableCollection<MyHierarchy>(treeItemsSource);
+            //    HierarchyTreeList = new ObservableCollection<MyHierarchy>(treeItemsSource);
                 NotifyPropertyChanged("HierarchyTreeList");
                 ExpandSerlect(souceItem.id, HierarchyTreeList);
                 MyLog(TAG, dbMsg);
