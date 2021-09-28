@@ -351,6 +351,9 @@ namespace ProductionSchedule.Views {
                                     if (targetElementInfo.ContainsParent(sourceItem)) {
                                         dbMsg += "targetElementInfo.ContainsParent(sourceItem)";
                                     } else {
+                                        //TreeView sendTree = sender as TreeView;
+                                        //TreeViewItem dragItem = sendTree.SelectedItem as TreeViewItem;
+
                                         dbMsg += ",Info[" + targetElementInfo.id + "]" + targetElementInfo.name;
                                         e.Effects = DragDropEffects.Move;
                                         // 挿入するか子要素に追加するかの判定処理
@@ -363,59 +366,44 @@ namespace ProductionSchedule.Views {
                                         if (targetParentLast != null) {
                                             dbMsg += ",targetParentLast[" + targetParentLast.id + "]" + targetParentLast.name;
                                         }
-                                        //if (0<pos.Y && pos.Y < boundary) {
-                                        //    _insertType = InsertType.Before;
-                                        //    targetElementInfo.BeforeSeparatorVisibility = Visibility.Visible;
-                                        //} else if (targetParentLast == targetElementInfo
-                                        //            && pos.Y < parentGrid.ActualHeight
-                                        //            && pos.Y > parentGrid.ActualHeight - boundary) {
-                                        //    _insertType = InsertType.After;
-                                        //    targetElementInfo.AfterSeparatorVisibility = Visibility.Visible;
-                                        //} else {
-                                        //    _insertType = InsertType.Children;
-                                        //    targetElementInfo.Background = Brushes.Gray;
-                                        //}
-
                                         if (bDropId != targetElementInfo.id) {
                                             dbMsg += ">>Drop先変化";
                                             bDropId = targetElementInfo.id;
                                             if ( bPosY != 0) {
                                                 itemSpan = bPosY - pos.Y;
                                             }
-                                            //if (itemSpan==0 && bPosY != 0) {
-                                            //    itemSpan = Math.Abs(bPosY - pos.Y);
-                                            //    dbMsg += ",itemSpan=" + itemSpan;
-                                            //}
                                             dbMsg += ",itemSpan=" + itemSpan;
                                             bPosY = pos.Y;
                                             dbMsg += ",bPosY=" + bPosY;
                                         }
                                         if (Math.Abs(bPosY - pos.Y) < 10) {            //間隔は仮設定
-                                            targetElementInfo.AfterSeparatorVisibility = Visibility.Visible;
                                             if (0 < (bPosY - pos.Y)) {
+                                                targetElementInfo.BeforeSeparatorVisibility = Visibility.Visible;
                                                 _insertType = InsertType.Before;
                                             } else {
+                                                targetElementInfo.AfterSeparatorVisibility = Visibility.Visible;
                                                 _insertType = InsertType.After;
                                             }
                                         } else {
+                                            targetElementInfo.AfterSeparatorVisibility = Visibility.Hidden;
+                                            targetElementInfo.BeforeSeparatorVisibility = Visibility.Hidden;
                                             _insertType = InsertType.Children;
                                             targetElementInfo.Background = Brushes.Gray;
                                         }
 
                                         dbMsg += ",_insertType=" + _insertType;
+                                        dbMsg += ",BeforeSeparator=" + targetElementInfo.BeforeSeparatorVisibility;
+                                        dbMsg += ",AfterSeparator=" + targetElementInfo.AfterSeparatorVisibility;
                                         // 背景色などを変更したTreeViewItemInfoオブジェクトを_changedBlocksに追加しておきます
                                         if (!_changedBlocks.Contains(targetElementInfo))
                                             _changedBlocks.Add(targetElementInfo);
 
                                     }
-
                                 }
                             }
                         }
                     }
                 }
-
-
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
@@ -478,23 +466,14 @@ namespace ProductionSchedule.Views {
                 switch (_insertType) {
                     case InsertType.Before:
                         dropPosition = -1;               //前に追加
-                                                        //                        targetItemParent.InsertBeforeChildren(sourceItem, targetItem);
-                                                        //                        sourceItem.parent = targetItemParent;
-                                                        ////                        sourceItem.TreeParent = targetItemParent;
-                                                        //                        sourceItem.IsSelected = true;
                         break;
                     case InsertType.After:
                         dropPosition = 1;               //後ろに追加
-                                                         //     targetItemParent.InsertAfterChildren(sourceItem, targetItem);
-                                                         //     sourceItem.parent = targetItemParent;
-                                                         ////     sourceItem.TreeParent = targetItemParent;
-                                                         //     sourceItem.IsSelected = true;
                         break;
                     default:
-              //          VM.Drop2Tree(targetItem, sourceItem, dropPosition, (ObservableCollection<MyHierarchy>)TV.ItemsSource);
                         break;
                 }
-                VM.Drop2Tree(targetItem, sourceItem, dropPosition, (ObservableCollection<MyHierarchy>)TV.ItemsSource);
+                VM.Drop2Tree(targetItem, sourceItem, dropPosition, (ObservableCollection<MyHierarchy>)TV.ItemsSource, TV);
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
@@ -558,6 +537,8 @@ namespace ProductionSchedule.Views {
                 if (!(sender is ItemsControl itemsControl)) {
                     return;
                 }
+                //TreeView TV = sender as TreeView;
+                //VM.ResetSelect((ObservableCollection<MyHierarchy>)TV.ItemsSource);
 
                 Point pos = e.GetPosition(itemsControl);
                 dbMsg += ",pos=" + pos;
@@ -622,6 +603,7 @@ namespace ProductionSchedule.Views {
             sourceItemParent.RemoveChildren(sourceItem);
         }
 
+
         //--- 変更されたセパレータ、背景色を元に戻します
         private static void ResetSeparator(ICollection<MyHierarchy> collection) {
             var list = collection.ToList();
@@ -630,7 +612,6 @@ namespace ProductionSchedule.Views {
                 collection.Remove(pair);
             }
         }
-
         //--- 背景色を元に戻します
         private static void ResetSeparator(MyHierarchy info) {
             info.Background = Brushes.Transparent;

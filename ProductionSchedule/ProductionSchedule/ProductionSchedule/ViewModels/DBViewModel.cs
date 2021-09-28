@@ -556,7 +556,7 @@ namespace ProductionSchedule.ViewModels {
         /// <param name="souceItem">Dropされたアイテム</param>
         /// <param name="souceOrder">追加先での順番</param>
         /// <param name="treeItemsSource">TreeVeiwのItemsSource</param>
-        public void Drop2Tree(MyHierarchy dropTo , MyHierarchy souceItem,int souceOrder, ObservableCollection<MyHierarchy> treeItemsSource) {
+        public void Drop2Tree(MyHierarchy dropTo , MyHierarchy souceItem,int souceOrder, ObservableCollection<MyHierarchy> treeItemsSource , TreeView tv) {
             string TAG = "Drop2Tree";
             string dbMsg = "";
             try {
@@ -587,18 +587,23 @@ namespace ProductionSchedule.ViewModels {
                     HierarchyTreeList = new ObservableCollection<MyHierarchy>();
                     int dropToPosiotion = 0;
                     foreach (MyHierarchy ti in treeItemsSource) {
-                        dbMsg += "\r\n[" + dropToPosiotion+"]"+ ti.name;
+                        dbMsg += "\r\n[" + ti .id+ "]"+ ti.name;
                         if (ti.Equals(dropTo.parent)) {
                             List<MyHierarchy> childList=new List<MyHierarchy>();
                             foreach (MyHierarchy dtc in ti.Child) {
                                 if (dtc.Equals(dropTo)) {
-                                    dbMsg += "の[" + dropToPosiotion + "]" + dtc.name;
+                                    dbMsg += "の[" + dtc.id + "]" + dtc.name;
                                     if (0 < souceOrder) {
+                                        dbMsg += "の後ろ";
                                         childList.Add(dtc);
                                         childList.Add(souceItem);
+                                        souceItem.id = dtc.id + 1;
                                     } else {
+                                        dbMsg += "の前";
                                         childList.Add(souceItem);
                                         childList.Add(dtc);
+                                        souceItem.id = dtc.id ;
+                                        dtc.id ++;
                                     }
                                 } else {
                                     childList.Add(dtc);
@@ -625,9 +630,8 @@ namespace ProductionSchedule.ViewModels {
                 dbMsg += ">>" + dropTo.Child.Count + "件";
                 souceItem.order = dropTo.Child.Count;
                 dbMsg += "の" + souceItem.order + "番目に移動";
-            //    HierarchyTreeList = new ObservableCollection<MyHierarchy>(treeItemsSource);
                 NotifyPropertyChanged("HierarchyTreeList");
-                ExpandSerlect(souceItem.id, HierarchyTreeList);
+                ExpandSerlect(souceItem.id, HierarchyTreeList, tv);
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
@@ -640,20 +644,37 @@ namespace ProductionSchedule.ViewModels {
         /// <param name="id">見せる対象</param>
         /// <param name="tItems">ItemSouce</param>
         /// <returns></returns>
-        public void ExpandSerlect(int id, ObservableCollection<MyHierarchy> tItems) {
+        public void ExpandSerlect(int id, ObservableCollection<MyHierarchy> tItems, TreeView tv) {
             string TAG = "ExpandSerlect";
             string dbMsg = "";
             MyHierarchy tItem = FindTreeItem( id,tItems);
             try {
-                dbMsg += "検索対象[" + tItem.id + "]"+ tItem.name + ";親[" + tItem.parent_iD + "]" ;
+                dbMsg += "検索対象[" + id + "]";    // + tItem.name + ";親[" + tItem.parent_iD + "]" ;
 
-                //foreach (MyHierarchy item in tItems) {
-                //    if (item.id == id) {
-                //        retItem = item;
-                //        dbMsg += retItem.name + "{親:" + retItem.parent_iD + "}の" + SelectedTreeItem.order + "番目";
-                //        break;
-                //    }
-                //}
+                foreach (MyHierarchy item in tItems) {
+                    //  if (item.IsSelected) {
+                    if (id == item.id) {
+                        dbMsg += ",選択" + item.IsSelected;
+                     //   item.IsSelected = true;
+                        dbMsg += "[parent:" + item.parent_iD + "]";
+                            int pCount = 0;
+                            foreach (MyHierarchy pItem in tv.ItemsSource) {
+                                if (pItem.id == item.parent_iD) {
+                                    dbMsg += ",ノード" + pCount + "を開く";
+                                    pItem.IsExpanded = true;
+                                    //         tv.Nodes[pCount].Expand();
+                                } else {
+                                    pItem.IsExpanded = false;
+                                }
+                                pCount++;
+                            }
+
+                        } else if (item.IsSelected) {
+                            dbMsg += "選択されていたのは[" + item.id + "]" + item.name;
+                            item.IsSelected = false;
+                        }
+                  //  }
+                }
 
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
@@ -661,8 +682,24 @@ namespace ProductionSchedule.ViewModels {
             }
         }
 
-
-
+        /// <summary>
+        /// 選択フラグをすべて解除
+        /// </summary>
+        public void ResetSelect(ObservableCollection<MyHierarchy>itemsSource) {
+            string TAG = "ResetSelect";
+            string dbMsg = "";
+            try {
+                foreach (MyHierarchy pair in itemsSource) {
+                    if (pair.IsSelected) {
+                        dbMsg = "選択されていたのは[" + pair.id + "]" + pair.name;
+                        pair.IsSelected = false;
+                    }
+                }
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
+        }
 
         ///////////////////////
         public event PropertyChangedEventHandler PropertyChanged;
