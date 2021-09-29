@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Topmost="True"
         FontSize="15"
-        Title="DBWindow" Height="450" Width="800">
+        Title="DBWindow" Height="800" Width="1200">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolVisibilityConverter" />
 
@@ -96,18 +96,20 @@
             <TreeView.Resources>
                 <Style TargetType="TreeViewItem">
                     <Setter Property="IsSelected" Value="{Binding Path=IsSelected,Mode=TwoWay}"/>
-                    <Setter Property="IsExpanded" Value="{Binding IsExpanded.Value, Mode=TwoWay}" />
+                    <Setter Property="IsExpanded" Value="{Binding Path=IsExpanded, Mode=TwoWay}" />
                 </Style>
-                <!--<Style TargetType="TreeViewItem">
-                    <Setter Property="Click" Value="{Binding TreeLClick}"/>
-                </Style>-->
             </TreeView.Resources>
             <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate DataType="local:MyHierarchy"
-                                  ItemsSource="{Binding Child}">
-                    <TextBlock Text="{Binding name}" 
-                               
-                               />
+                <HierarchicalDataTemplate DataType="local:MyHierarchy" ItemsSource="{Binding Child}">
+                    <TextBlock Text="{Binding name}" >
+                        <TextBlock.Resources>
+                        <Style TargetType="TreeViewItem">
+                            <Setter Property="Background" Value="{Binding Path=Background,Mode=TwoWay}"/>
+                                <!--<Setter Property="BeforeSeparatorVisibility" Value="{Binding Path=BeforeSeparatorVisibility, Mode=TwoWay}" />
+                                <Setter Property="AfterSeparatorVisibility" Value="{Binding Path=AfterSeparatorVisibility, Mode=TwoWay}" />-->
+                            </Style>
+                    </TextBlock.Resources>
+                    </TextBlock>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
@@ -162,13 +164,13 @@
             Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3"
             MinRowHeight="18" 
             IsReadOnly="True"
-            HeadersVisibility="None"
             Width="auto"
             Height="auto"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto"
             ItemsSource="{Binding MyHierarchyList}"
             >
+            <!--HeadersVisibility="None"-->
         </DataGrid>
 
     </Grid>

@@ -640,6 +640,7 @@ namespace ProductionSchedule.ViewModels {
 
         /// <summary>
         /// 移動後など移動した状態を見せる
+        /// XAMlのStyle.SetterにBindingした属性を修正、反映する
         /// </summary>
         /// <param name="id">見せる対象</param>
         /// <param name="tItems">ItemSouce</param>
