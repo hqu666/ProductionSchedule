@@ -61,7 +61,10 @@ namespace ProductionSchedule.Models
         public ObservableCollection<MyHierarchy> TreeChildren { get; set; } = new ObservableCollection<MyHierarchy>();
 
 
-        //-- 地震の親を指定されたTreeViewItemInfoオブジェクトにし、子要素の親を自身として設定します
+        /// <summary>
+        ///自身の親を指定されたTreeViewItemInfoオブジェクトにし、子要素の親を自身として設定します
+        /// </summary>
+        /// <param name="parent"></param>
         public void SetParentToChildren(MyHierarchy parent = null) {
             TreeParent = parent;
 
@@ -72,7 +75,11 @@ namespace ProductionSchedule.Models
             }
         }
 
-        //-- 既存の子要素アイテムの前に新しいアイテムを挿入します
+        /// <summary>
+        /// 既存の子要素アイテムの前に新しいアイテムを挿入します
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="newItem"></param>
         public void InsertBeforeChildren(MyHierarchy from, MyHierarchy newItem) {
             var index = TreeChildren.IndexOf(newItem);
             if (index < 0)
@@ -81,7 +88,11 @@ namespace ProductionSchedule.Models
             TreeChildren.Insert(index, from);
         }
 
-        //-- 既存の子要素アイテムの後ろに新しいアイテムを挿入します
+        /// <summary>
+        /// 既存の子要素アイテムの後ろに新しいアイテムを挿入します
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="newItem"></param>
         public void InsertAfterChildren(MyHierarchy from, MyHierarchy newItem) {
             var index = TreeChildren.IndexOf(newItem);
             if (index < 0)
@@ -90,17 +101,27 @@ namespace ProductionSchedule.Models
             TreeChildren.Insert(index + 1, from);
         }
 
-        //-- 子要素の末尾に新しいアイテムを追加します
+        /// <summary>
+        /// 子要素の末尾に新しいアイテムを追加します
+        /// </summary>
+        /// <param name="info"></param>
         public void AddChildren(MyHierarchy info) {
             TreeChildren.Add(info);
         }
 
-        //-- 子要素から指定されたアイテムを削除します
+        /// <summary>
+        /// 子要素から指定されたアイテムを削除します
+        /// </summary>
+        /// <param name="info"></param>
         public void RemoveChildren(MyHierarchy info) {
             TreeChildren.Remove(info);
         }
 
-        //-- 親要素に指定されたアイテムが存在するかどうかをチェックします
+        /// <summary>
+        /// 親要素に指定されたアイテムが存在するかどうかをチェックします
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns></returns>
         public bool ContainsParent(MyHierarchy info) {
             if (TreeParent == null)
                 return false;

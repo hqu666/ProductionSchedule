@@ -302,9 +302,9 @@ namespace ProductionSchedule.Views {
         public double bPosY=0;
         public int bDropId=0;
 
-
         /// <summary>
         /// Drag移動中
+        /// ※ VM.DragOverTreeに移動済み
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -312,6 +312,9 @@ namespace ProductionSchedule.Views {
             string TAG = "MyTreeOnDragOver";
             string dbMsg = "";
             try {
+                VM.DragOverTree(sender,e, HierarchyGrid);
+
+                //以降、移設済み
                 // 背景色やセパレータを元に戻します
                 ResetSeparator(_changedBlocks);
                 //    if (!(sender is ItemsControl itemsControl) || !e.Data.GetDataPresent(typeof(MyHierarchy)))
@@ -376,6 +379,7 @@ namespace ProductionSchedule.Views {
                                             bPosY = pos.Y;
                                             dbMsg += ",bPosY=" + bPosY;
                                         }
+                                        ///経過；Childrenが出ていない
                                         if (Math.Abs(bPosY - pos.Y) < 10) {            //間隔は仮設定
                                             if (0 < (bPosY - pos.Y)) {
                                                 targetElementInfo.BeforeSeparatorVisibility = Visibility.Visible;
@@ -419,6 +423,11 @@ namespace ProductionSchedule.Views {
             string TAG = "MyTreeOnDrop";
             string dbMsg = "";
             try {
+                VM.DropInTree(sender, e);
+
+
+
+
                 TreeView TV = sender as TreeView;
 
                 // 背景色やセパレータを元に戻します
@@ -598,11 +607,25 @@ namespace ProductionSchedule.Views {
             return last;
         }
 
-        //--- 親要素から指定した要素を削除します
+        /// <summary>
+        /// 親要素から指定した要素を削除します
+        /// </summary>
+        /// <param name="sourceItemParent"></param>
+        /// <param name="sourceItem"></param>
         private static void RemoveCurrentItem(MyHierarchy sourceItemParent, MyHierarchy sourceItem) {
-            sourceItemParent.RemoveChildren(sourceItem);
+            string TAG = "RemoveCurrentItem";
+            string dbMsg = "";
+            try {
+                if (sourceItemParent == null) {
+                    ///経過；Root＝親が無ければ消去されない
+                } else {
+                    sourceItemParent.RemoveChildren(sourceItem);
+                }
+                MyLog(TAG, dbMsg);
+            } catch (Exception er) {
+                MyErrorLog(TAG, dbMsg, er);
+            }
         }
-
 
         //--- 変更されたセパレータ、背景色を元に戻します
         private static void ResetSeparator(ICollection<MyHierarchy> collection) {
