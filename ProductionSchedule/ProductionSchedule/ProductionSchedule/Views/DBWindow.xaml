@@ -167,9 +167,22 @@
             Height="auto"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto"
+            AutoGenerateColumns="False"
             ItemsSource="{Binding MyHierarchyList}"
-            >
-            <!--HeadersVisibility="None"-->
+         >
+            <!--
+            HeadersVisibility="None"
+            -->
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn Header="Sel" Binding="{Binding IsSelected}"/>
+                <DataGridCheckBoxColumn Header="Exp" Binding="{Binding IsExpanded}"/>
+                <DataGridTextColumn Header="ID" Binding="{Binding id}"/>
+                <DataGridTextColumn Header="name" Binding="{Binding name}"/>
+                <DataGridTextColumn Header="parent" Binding="{Binding parent_iD}"/>
+                <DataGridCheckBoxColumn Header="Before" Binding="{Binding BeforeSeparatorVisibility}"/>
+                <DataGridCheckBoxColumn Header="After" Binding="{Binding AfterSeparatorVisibility}"/>
+                <DataGridTextColumn Header="Background" Binding="{Binding Background}"/>
+            </DataGrid.Columns>
         </DataGrid>
 
     </Grid>
