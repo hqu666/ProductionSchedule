@@ -825,7 +825,7 @@ namespace ProductionSchedule.ViewModels {
                     default:
                         break;
                 }
-        //        Drop2Tree(targetItem, sourceItem, dropPosition, (ObservableCollection<MyHierarchy>)TV.ItemsSource, TV);
+                Drop2Tree(targetItem, sourceItem, dropPosition, (ObservableCollection<MyHierarchy>)TV.ItemsSource, TV);
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);

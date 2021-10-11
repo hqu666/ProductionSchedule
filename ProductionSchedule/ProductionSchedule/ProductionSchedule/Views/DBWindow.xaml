@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Topmost="True"
         FontSize="15"
-        Title="DBWindow" Height="800" Width="1200">
+        Title="DBWindow" Height="800" Width="800">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolVisibilityConverter" />
 
@@ -170,9 +170,6 @@
             AutoGenerateColumns="False"
             ItemsSource="{Binding MyHierarchyList}"
          >
-            <!--
-            HeadersVisibility="None"
-            -->
             <DataGrid.Columns>
                 <DataGridCheckBoxColumn Header="Sel" Binding="{Binding IsSelected}"/>
                 <DataGridCheckBoxColumn Header="Exp" Binding="{Binding IsExpanded}"/>

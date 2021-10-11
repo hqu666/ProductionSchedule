@@ -313,7 +313,7 @@ namespace ProductionSchedule.Views {
             string dbMsg = "";
             try {
                 VM.DragOverTree(sender,e, HierarchyGrid);
-
+/*
                 //以降、移設済み
                 // 背景色やセパレータを元に戻します
                 ResetSeparator(_changedBlocks);
@@ -408,6 +408,8 @@ namespace ProductionSchedule.Views {
                         }
                     }
                 }
+*/
+
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
@@ -425,7 +427,7 @@ namespace ProductionSchedule.Views {
             try {
                 VM.DropInTree(sender, e);
 
-
+/*
 
 
                 TreeView TV = sender as TreeView;
@@ -483,6 +485,9 @@ namespace ProductionSchedule.Views {
                         break;
                 }
                 VM.Drop2Tree(targetItem, sourceItem, dropPosition, (ObservableCollection<MyHierarchy>)TV.ItemsSource, TV);
+
+*/
+
                 MyLog(TAG, dbMsg);
             } catch (Exception er) {
                 MyErrorLog(TAG, dbMsg, er);
